@@ -40,4 +40,8 @@ public class Labyrinthe implements Serializable {
             grid[x][y] = type;
         }
     }
+
+    public boolean isWalkable(int x, int y) {
+        return isInside(x, y) && getCell(x, y) == CellType.EMPTY;
+    }
 }
