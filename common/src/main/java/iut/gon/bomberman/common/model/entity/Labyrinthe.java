@@ -26,4 +26,18 @@ public class Labyrinthe implements Serializable {
     public int getHeight() {
         return height;
     }
+
+    public boolean isInside(int x, int y) {
+        return x >= 0 && x < width && y >= 0 && y < height;
+    }
+
+    public CellType getCell(int x, int y) {
+        return isInside(x, y) ? grid[x][y] : CellType.WALL;
+    }
+
+    public void setCell(int x, int y, CellType type) {
+        if (isInside(x, y)) {
+            grid[x][y] = type;
+        }
+    }
 }
