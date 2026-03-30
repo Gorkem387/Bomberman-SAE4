@@ -20,6 +20,7 @@ public class Joueur {
     private Bonus[] bonus;
     private float speed_multiplier;
     private String nom;
+    private int radius;
 
     ////////////////
     //CONSTRUCTEUR//
@@ -36,6 +37,7 @@ public class Joueur {
         this.nb_bombes = 3;
         this.bonus = new Bonus[3];
         this.speed_multiplier = 1.0f;
+        this.radius = 2;
     }
 
     public Joueur(int id, String nom, int cooX, int cooY, etat_Joueur etat, int pv, int nb_bombes_max, int nb_bombes, Bonus[] bonus, float speed_multiplier) {
@@ -49,6 +51,7 @@ public class Joueur {
         this.nb_bombes = nb_bombes;
         this.bonus = bonus;
         this.speed_multiplier = speed_multiplier;
+        this.radius = 2;
     }
 
     ///////////////////
@@ -132,5 +135,13 @@ public class Joueur {
 
     public void setNom(String nom) {
         this.nom = nom;
+    }
+
+    public int getRadius() {
+        return radius;
+    }
+
+    public void setRadius(int radius) {
+        this.radius = radius;
     }
 }
