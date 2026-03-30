@@ -1,7 +1,7 @@
-import iut.gon.bomberman.common.model.entity.CellType;
-import iut.gon.bomberman.common.model.entity.DFSGenerator;
-import iut.gon.bomberman.common.model.entity.Labyrinthe;
-import iut.gon.bomberman.common.model.entity.LabyrintheFactory;
+import iut.gon.bomberman.common.model.labyrinthe.CellType;
+import iut.gon.bomberman.common.model.labyrinthe.DFSGenerator;
+import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
+import iut.gon.bomberman.common.model.labyrinthe.LabyrintheFactory;
 
 public class LabyrintheTest {
     public static void main(String[] args) {

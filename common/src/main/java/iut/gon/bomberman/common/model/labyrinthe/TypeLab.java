@@ -1,4 +1,4 @@
-package iut.gon.bomberman.common.model.entity;
+package iut.gon.bomberman.common.model.labyrinthe;
 
 public enum TypeLab {
     DEEPSEARCH,
