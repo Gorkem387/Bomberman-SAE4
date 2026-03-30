@@ -1,25 +1,36 @@
 package iut.gon.bomberman.common.model.labyrinthe;
 
-public class Bomb {
+import java.io.Serializable;
+
+public class Bomb implements Serializable {
+
     private final int x;
     private final int y;
-    private double timer; // Temps avant l'explosion
-    private final int range; // La portée
+    private final int range;
+    private double timer;
+    private boolean exploded;
 
     public Bomb(int x, int y, int range) {
         this.x = x;
         this.y = y;
         this.range = range;
-        this.timer = 3.0; // 3 secondes avant explosion
+        this.timer = 3.0;
+        this.exploded = false;
     }
 
     public boolean tick(double deltaTime) {
-        this.timer -= deltaTime;
-        return this.timer <= 0;
+        if (exploded) return false;
+        timer -= deltaTime;
+        if (timer <= 0) {
+            exploded = true;
+            return true;
+        }
+        return false;
     }
 
-    // Getters
+    public boolean isExploded() { return exploded; }
     public int getX() { return x; }
     public int getY() { return y; }
     public int getRange() { return range; }
+    public double getTimer() { return timer; }
 }
