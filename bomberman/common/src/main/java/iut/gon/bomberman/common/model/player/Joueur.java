@@ -65,8 +65,16 @@ public class Joueur {
         double nextX = cooX + deplacementX;
         double nextY = cooY + deplacementY;
 
-        // Verifie si on peut marcher sur la case
-        if (laby.isWalkable((int)nextX, (int)nextY)) {
+        double size = 0.9;
+
+        // Vérifie si la case est bonne
+        boolean canMove = laby.isWalkable((int)(nextX), (int)(nextY)) &&
+                laby.isWalkable((int)(nextX + size), (int)(nextY)) &&
+                laby.isWalkable((int)(nextX), (int)(nextY + size)) &&
+                laby.isWalkable((int)(nextX + size), (int)(nextY + size));
+
+        // Si la case est bonne, alors on déplace le joueur
+        if (canMove) {
             this.cooX = nextX;
             this.cooY = nextY;
         }
