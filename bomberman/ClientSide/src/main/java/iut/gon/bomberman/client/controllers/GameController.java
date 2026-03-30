@@ -2,6 +2,7 @@ package iut.gon.bomberman.client.controllers;
 
 import iut.gon.bomberman.client.view.LabRenderer;
 import iut.gon.bomberman.common.model.labyrinthe.DFSGenerator;
+import iut.gon.bomberman.common.model.labyrinthe.KruskalGenerator;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.player.Joueur;
 import javafx.fxml.FXML;
@@ -26,7 +27,13 @@ public class GameController {
 
     @FXML
     public void initialize() {
+        // Génération du labyrinthe ( 2 méthodes différentes )
+        // Exploration exhaustive (DFSGenerator) :
         DFSGenerator generator = new DFSGenerator();
+
+        // Fusion aléatoire du chemin ( Algorithme de Kruskal ) :
+        // KruskalGenerator generator = new KruskalGenerator();
+
         this.labyrinthe = generator.createLabyrinthe(21, 21);
         this.gc = gameCanvas.getGraphicsContext2D();
 
