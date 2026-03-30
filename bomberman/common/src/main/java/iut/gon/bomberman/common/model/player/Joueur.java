@@ -173,7 +173,7 @@ public class Joueur {
         return direction;
     }
 
-    public int getRadius() {
-        return 0;
+    public void setDirection(Direction direction) {
+        this.direction = direction;
     }
 }

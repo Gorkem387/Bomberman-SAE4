@@ -67,13 +67,24 @@ public class GameController {
         double dx = 0;
         double dy = 0;
 
-        if (input.contains(KeyCode.Z) || input.contains(KeyCode.UP)) dy--;
-        if (input.contains(KeyCode.S) || input.contains(KeyCode.DOWN)) dy++;
-        if (input.contains(KeyCode.Q) || input.contains(KeyCode.LEFT)) dx--;
-        if (input.contains(KeyCode.D) || input.contains(KeyCode.RIGHT)) dx++;
+        if (input.contains(KeyCode.Z) || input.contains(KeyCode.UP)) {
+            dy--;
+        }
+        if (input.contains(KeyCode.S) || input.contains(KeyCode.DOWN)) {
+            dy++;
+        }
+        if (input.contains(KeyCode.Q) || input.contains(KeyCode.LEFT)) {
+            dx--;
+        }
+        if (input.contains(KeyCode.D) || input.contains(KeyCode.RIGHT)) {
+            dx++;
+        }
 
         if (dx != 0 || dy != 0) {
             joueur.move(dx, dy, labyrinthe);
+        } else {
+            // Pas de mouvement : mettre la direction à IDLE
+            joueur.setDirection(iut.gon.bomberman.common.model.player.Direction.IDLE);
         }
     }
 
