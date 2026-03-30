@@ -36,3 +36,17 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+**/bin/
+**/out/
+**/target/
+
+*.class
+
+**/.idea
+**/.metadata
+**/.recommenders
+.DS_Store
+**/.project
+**/.classpath
+**/.settings
