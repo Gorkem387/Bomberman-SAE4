@@ -18,14 +18,36 @@ public class AggressiveAi extends Ai {
     }
 
     public void play(){
-        this.track();
-        while(this.player.getPv() > 0 && trackedPlayer.getPv() > 0){
-            if (trackedPlayer.getPv() < 0){
-                this.track()
-            }
-            if (this.player.getX() > trackedPlayer.getX() && this.lobby.getLabyrinthe.get()){
-
-            }
+        if (trackedPlayer.getPv() < 0 || trackedPlayer == null){
+            this.track();
         }
+        // Calcule la différence de position
+        int dx = this.trackedPlayer.getX() - this.player.getX();
+        int dy = this.trackedPlayer.getY() - this.player.getY();
+            // Priorise le mouvement horizontal si dx != 0
+        if (dx > 0) {
+            // Déplace vers la droite si possible
+            if (this.lobby.getLabyrinthe().getCell(this.player.getX() + 1, this.player.getY()) == CellType.EMPTY) {
+                this.player.setX(this.player.getX() + 1);
+            }
+        } else if (dx < 0) {
+            // Déplace vers la gauche si possible
+            if (this.lobby.getLabyrinthe().getCell(this.player.getX() - 1, this.player.getY()) == CellType.EMPTY) {
+                this.player.setX(this.player.getX() - 1);
+            }
+        } else if (dy > 0) {
+            // Déplace vers le bas si possible
+            if (this.lobby.getLabyrinthe().getCell(this.player.getX(), this.player.getY() + 1) == CellType.EMPTY) {
+                this.player.setY(this.player.getY() + 1);
+            }
+        } else if (dy < 0) {
+            // Déplace vers le haut si possible
+            if (this.lobby.getLabyrinthe().getCell(this.player.getX(), this.player.getY() - 1) == CellType.EMPTY) {
+                this.player.setY(this.player.getY() - 1);
+            }
+        } else if (dy == 0 && dx == 0){
+            this.player.
+        }
+        // Si dx == 0 et dy == 0, l'IA est déjà sur le joueur (ne bouge pas)
     }
 }
