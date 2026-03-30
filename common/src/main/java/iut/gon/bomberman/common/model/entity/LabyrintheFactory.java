@@ -1,5 +1,5 @@
 package iut.gon.bomberman.common.model.entity;
 
-public class LabyrintheFactory {
-
+public interface LabyrintheFactory {
+    Labyrinthe createLabyrinthe(int width, int height);
 }
