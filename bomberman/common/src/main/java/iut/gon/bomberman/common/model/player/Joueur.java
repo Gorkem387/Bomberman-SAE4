@@ -172,4 +172,8 @@ public class Joueur {
     public Direction getDirection() {
         return direction;
     }
+
+    public int getRadius() {
+        return 0;
+    }
 }

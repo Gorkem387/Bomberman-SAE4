@@ -1,9 +1,11 @@
 package iut.gon.bomberman.client.controllers;
 
+import iut.gon.bomberman.client.ai.HeatMap;
 import iut.gon.bomberman.client.view.LabRenderer;
 import iut.gon.bomberman.common.model.labyrinthe.DFSGenerator;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.player.Joueur;
+import iut.gon.bomberman.client.ai.Ai;
 import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.animation.AnimationTimer;
@@ -23,10 +25,12 @@ public class GameController {
     private Labyrinthe labyrinthe;
     private Joueur joueur;
     private final Set<KeyCode> input = new HashSet<>();
+    private HeatMap map;
 
     @FXML
     public void initialize() {
         DFSGenerator generator = new DFSGenerator();
+        this.map = new HeatMap(21, 21);
         this.labyrinthe = generator.createLabyrinthe(21, 21);
         this.gc = gameCanvas.getGraphicsContext2D();
 

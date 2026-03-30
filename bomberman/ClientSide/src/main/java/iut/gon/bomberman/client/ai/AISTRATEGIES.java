@@ -1,6 +1,7 @@
-package iut.gon.bomberman.common.model.ai;
+package iut.gon.bomberman.client.ai;
 
 import iut.gon.bomberman.common.model.labyrinthe.CellType;
+import iut.gon.bomberman.common.model.player.Joueur;
 
 public enum AISTRATEGIES {
     AGGRESSIVE {
@@ -12,20 +13,20 @@ public enum AISTRATEGIES {
                 ia.track();
             }
             // Calcule la différence de position
-            int dx = ia.getTrackedPlayer().getX() - ia.getPlayer().getX();
-            int dy = ia.getTrackedPlayer().getY() - ia.getPlayer().getY();
+            int dx = (int) (ia.getTrackedPlayer().getX() - ia.getPlayer().getX());
+            int dy = (int) (ia.getTrackedPlayer().getY() - ia.getPlayer().getY());
             // Priorise le mouvement horizontal si dx != 0
-            if (dx > 1 && ia.getLabyrinthe().getCell(ia.getPlayer().getX() + 1, ia.getPlayer().getY()) == CellType.EMPTY) {
+            if (dx > 1 && ia.getLabyrinthe().getCell((int) (ia.getPlayer().getX() + 1), (int) ia.getPlayer().getY()) == CellType.EMPTY) {
                 // Déplace vers la droite si possible
                 ia.getPlayer().setX(ia.getPlayer().getX() + 1);
 
-            } else if (dx < -1 && ia.getLabyrinthe().getCell(ia.getPlayer().getX() - 1, ia.getPlayer().getY()) == CellType.EMPTY) {
+            } else if (dx < -1 && ia.getLabyrinthe().getCell((int) (ia.getPlayer().getX() - 1), (int) ia.getPlayer().getY()) == CellType.EMPTY) {
                 // Déplace vers la gauche si possible
                 ia.getPlayer().setX(ia.getPlayer().getX() - 1);
-            } else if (dy > 1 && ia.getLabyrinthe().getCell(ia.getPlayer().getX(), ia.getPlayer().getY() + 1) == CellType.EMPTY) {
+            } else if (dy > 1 && ia.getLabyrinthe().getCell((int) ia.getPlayer().getX(), (int) (ia.getPlayer().getY() + 1)) == CellType.EMPTY) {
                 // Déplace vers le bas si possible
                 ia.getPlayer().setY(ia.getPlayer().getY() + 1);
-            } else if (dy < -1 && ia.getLabyrinthe().getCell(ia.getPlayer().getX(), ia.getPlayer().getY() - 1) == CellType.EMPTY) {
+            } else if (dy < -1 && ia.getLabyrinthe().getCell((int) ia.getPlayer().getX(), (int) (ia.getPlayer().getY() - 1)) == CellType.EMPTY) {
                 // Déplace vers le haut si possible
                 ia.getPlayer().setY(ia.getPlayer().getY() - 1);
             } else if ((Math.abs(dx) + Math.abs(dy) <= 1) && ia.getPlayer().getNb_bombes() > 0) {

@@ -1,28 +1,31 @@
-package iut.gon.bomberman.common.model.ai;
+package iut.gon.bomberman.client.ai;
 
-import iut.gon.bomberman.common.model.Joueur;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
+import main.java.iut.gon.bomberman.common.model.ai.AISTRATEGIES;
+import iut.gon.bomberman.common.model.player.Joueur;
+import iut.gon.bomberman.client.MainApp;
 
 public class Ai {
     private Joueur player;
     private Labyrinthe labyrinth;
     private AISTRATEGIES strategy;
     private Joueur trackedPlayer;
+    private MainApp app;
 
-    public Ai(Joueur j, Labyrinthe l, AISTRATEGIES strategy){
+    public Ai(Joueur j, Labyrinthe l, AISTRATEGIES strategy, MainApp a){
         this.player = j;
         this.labyrinth = l;
         this.strategy = strategy;
+        this.app = a;
     }
 
 
     public int track(){
-        for(Joueur p : this.lobby.getPlayers())  //Mettre la classe responsable de la gestion du jeu en local {
+        for(Joueur p : this.a.getPlayers())  //Mettre la classe responsable de la gestion du jeu en local {
             if(p.getPv() > 0 && !p.equals(this.player)){
                 this.trackedPlayer = p;
                 return 0;
             }
-        }
         return -1;
     }
 

@@ -1,4 +1,4 @@
-package iut.gon.bomberman.common.model.ai;
+package iut.gon.bomberman.client.ai;
 
 public class HeatMap{
     int[][] map;
@@ -22,6 +22,7 @@ public class HeatMap{
         this.y = y;
         for(int i = 0; i < this.x; i++){
             for(int j = 0; j < this.y; j++){
+                assert false;
                 this.map[i][j] = 0;
             }
         }
