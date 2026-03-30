@@ -25,6 +25,8 @@ public class GameController {
     private Labyrinthe labyrinthe;
     private Joueur joueur;
     private BombManager bombManager;
+    private AnimationTimer gameLoop;
+    private boolean isGameOver;
 
     private final Set<KeyCode> input = new HashSet<>();
 
@@ -56,7 +58,7 @@ public class GameController {
             if (e.getCode() == KeyCode.SPACE) spaceWasPressed = false;
         });
 
-        AnimationTimer gameLoop = new AnimationTimer() {
+        this.gameLoop = new AnimationTimer() {
             @Override
             public void handle(long now) {
                 // Calcul du deltaTime en secondes
@@ -75,6 +77,8 @@ public class GameController {
     }
 
     private void update(double deltaTime) {
+        if (isGameOver) return;
+
         // Déplacements
         double dx = 0;
         double dy = 0;
@@ -92,6 +96,12 @@ public class GameController {
         if (input.contains(KeyCode.SPACE) && !spaceWasPressed) {
             spaceWasPressed = true;
             bombManager.placeBomb(joueur, 3);
+        }
+
+        if (joueur.getPv() <= 0) {
+            isGameOver = true;
+            gameLoop.stop();
+            System.out.println("GAME OVER");
         }
 
         // Mise à jour des bombes (timer, explosions, dégâts)
