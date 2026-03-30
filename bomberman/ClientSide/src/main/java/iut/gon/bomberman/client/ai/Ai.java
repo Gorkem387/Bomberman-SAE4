@@ -12,6 +12,7 @@ public class Ai {
     private Joueur trackedPlayer;
     private MainApp app;
     private BombManager bombManager;
+    private HeatMap heatMap;
 
     public Ai(Joueur j, Labyrinthe l, BombManager bm, AISTRATEGIES strategy, MainApp a){
         this.player = j;
@@ -19,7 +20,10 @@ public class Ai {
         this.bombManager = bm;
         this.strategy = strategy;
         this.app = a;
+        this.heatMap = new HeatMap(l.getWidth(), l.getHeight());
     }
+
+    public HeatMap getHeatMap() { return heatMap; }
 
     public int track(){
         return -1;
