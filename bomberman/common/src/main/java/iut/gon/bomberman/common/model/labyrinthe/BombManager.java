@@ -34,6 +34,25 @@ public class BombManager {
                 explosionCells.clear();
             }
         }
+        for (Bomb bomb : bombs) {
+            if (!bomb.isSolid()) {
+                boolean playerOverlap = false;
+                for (Joueur j : joueurs) {
+                    double pSize = 0.9;
+                    if (j.getX() < bomb.getX() + 1 &&
+                            j.getX() + pSize > bomb.getX() &&
+                            j.getY() < bomb.getY() + 1 &&
+                            j.getY() + pSize > bomb.getY()) {
+                        playerOverlap = true;
+                        break;
+                    }
+                }
+                // La bombe devient solide quand le joueur de la touche plus du tout
+                if (!playerOverlap) {
+                    bomb.setSolid(true);
+                }
+            }
+        }
 
         Iterator<Bomb> it = bombs.iterator();
         while (it.hasNext()) {
@@ -91,6 +110,15 @@ public class BombManager {
                 }
             }
         }
+    }
+
+    public boolean isBombAt(int x, int y) {
+        for (Bomb b : bombs) {
+            if (b.getX() == x && b.getY() == y && b.isSolid()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<Bomb> getBombs() { return bombs; }

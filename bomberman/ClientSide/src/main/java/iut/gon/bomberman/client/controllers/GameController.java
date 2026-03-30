@@ -87,7 +87,7 @@ public class GameController {
         if (input.contains(KeyCode.D) || input.contains(KeyCode.RIGHT)) dx++;
 
         if (dx != 0 || dy != 0) {
-            joueur.move(dx, dy, labyrinthe);
+            joueur.move(dx, dy, labyrinthe, bombManager);
         }
 
         // Pose de bombe
