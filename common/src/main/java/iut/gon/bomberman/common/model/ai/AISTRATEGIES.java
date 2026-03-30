@@ -1,6 +1,10 @@
-public enum Strategies {
+public enum AISTRATEGIES {
     AGGRESSIVE {
         public void play(Ai ia) {
+            Joueur trackedPlayer = ia.getTrackedplayer();
+            Lobby lobby = ia.getLobby();
+            Joueur player = ia.getPlayer();
+
             if (trackedPlayer.getPv() < 0 || trackedPlayer == null) {
                 ia.track();
             }
@@ -77,6 +81,16 @@ public enum Strategies {
                 }
             } else {
                 ia.setStrategy(AiStrategies.AGRESSIVE);
+            }
+        }
+    },
+    CHAOS {
+        public void play(Ai ia){
+            boolean placed = false;//Est-ce que j'ai placé une bombe pendant le tick précédent
+            if(placed) {
+
+            } else {
+                if
             }
         }
     }

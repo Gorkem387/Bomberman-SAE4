@@ -6,11 +6,14 @@ public class Labyrinthe implements Serializable {
     private final int width;
     private final int height;
     private final CellType[][] grid;
+    private HeatMap heatMap;
 
     public Labyrinthe(int width, int height) {
         this.width = width;
         this.height = height;
         this.grid = new CellType[width][height];
+        this.heatMap = new HeatMap(width, height);
+
 
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
@@ -41,6 +44,7 @@ public class Labyrinthe implements Serializable {
         TimeUnit.MINUTES.sleep(x);
         for(int i = x - 1; i < player.getRadius(); i++){
             for (int j = y -1; j < player.getRadius(); j++){
+                this.heatMap.updateMap(i,j,1);
                 this.setCell(i,j,Celltype.EXPLOSION);
             }
         }
@@ -48,6 +52,7 @@ public class Labyrinthe implements Serializable {
         for(int i = x - 1; i < player.getRadius(); i++){
             for (int j = y -1; j < player.getRadius(); j++){
                 this.setCell(i,j,Celltype.EMPTY);
+                this.heatMap.resetRisk(i,j);
             }
         }
     }
