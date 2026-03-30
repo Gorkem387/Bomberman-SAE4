@@ -35,12 +35,21 @@ public class Labyrinthe implements Serializable {
         return isInside(x, y) ? grid[x][y] : CellType.WALL;
     }
 
-    public void setBomb(int x, int y, int time){
+    public void setBomb(int x, int y, Joueur player, int time){
         this.setCell(x,y,Celltype.BOMB);
+        player.setNb_Bombes(player.getNb_bombes() - 1);
         TimeUnit.MINUTES.sleep(x);
-        this.setCell(x,y,Celltype.EXPLOSION);
+        for(int i = x - 1; i < player.getRadius(); i++){
+            for (int j = y -1; j < player.getRadius(); j++){
+                this.setCell(i,j,Celltype.EXPLOSION);
+            }
+        }
         TimeUnit.MINUTES.sleep(1);
-        this.setCell(x,y,Celltype.EMPTY);
+        for(int i = x - 1; i < player.getRadius(); i++){
+            for (int j = y -1; j < player.getRadius(); j++){
+                this.setCell(i,j,Celltype.EMPTY);
+            }
+        }
     }
 
     public void setCell(int x, int y, CellType type) {
