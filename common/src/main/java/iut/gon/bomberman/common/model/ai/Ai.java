@@ -57,4 +57,26 @@ public class Ai {
     public void setTrackedPlayer(Joueur trackedPlayer) {
         this.trackedPlayer = trackedPlayer;
     }
+
+    public void randomMove() {
+        int[][] directions = {{1,0}, {-1,0}, {0,1}, {0,-1}};
+        int bestX = this.player.getX();
+        int bestY = this.player.getY();
+        int bestRisk = this.lobby.getLabyrinthe().getHeatMap().readRisk(bestX, bestY);
+        for (int[] d : directions) {
+            int nx = bestX + d[0];
+            int ny = bestY + d[1];
+            if (this.lobby.getLabyrinthe().isWalkable(nx, ny)) {
+                int risk = this.lobby.getLabyrinthe().getHeatMap().readRisk(nx, ny);
+
+                if (risk < bestRisk || Math.random() < 0.2) { // un peu de chaos
+                    bestRisk = risk;
+                    bestX = nx;
+                    bestY = ny;
+                }
+            }
+        }
+        player.setX(bestX);
+        player.setY(bestY);
+    }
 }
