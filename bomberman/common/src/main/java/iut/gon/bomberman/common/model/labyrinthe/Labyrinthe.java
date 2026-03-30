@@ -1,6 +1,9 @@
 package iut.gon.bomberman.common.model.labyrinthe;
 
 import java.io.Serializable;
+import java.util.concurrent.TimeUnit;
+import iut.gon.bomberman.common.model.player.Joueur;
+
 
 public class Labyrinthe implements Serializable {
     private final int width;
@@ -19,6 +22,14 @@ public class Labyrinthe implements Serializable {
         }
     }
 
+    public void updateCellCross(int x, int y, int range, CellType type, Joueur player){
+        for(int i = x - 1; i < range; i++){
+            for (int j = y -1; j < player.getRadius(); j++){
+                this.setCell(i,j,type);
+            }
+        }
+    }
+
     public int getWidth() {
         return width;
     }
@@ -33,6 +44,23 @@ public class Labyrinthe implements Serializable {
 
     public CellType getCell(int x, int y) {
         return isInside(x, y) ? grid[x][y] : CellType.WALL;
+    }
+
+    public void setBomb(int x, int y, Joueur player, int time){
+        this.setCell(x,y,CellType.BOMB);
+        player.setNb_bombes(player.getNb_bombes() - 1);
+        for(int i = 0; i < 3; i++){
+            for(int j = x - 1; j < player.getRadius(); j++){
+                for (int k = y -1; k < player.getRadius(); k++){
+                    this.setCell(i,j,CellType.BOMB);
+                }
+            }
+        }
+        for(int i = x - 1; i < player.getRadius(); i++){
+            for (int j = y -1; j < player.getRadius(); j++){
+                this.setCell(i,j,CellType.EMPTY);
+            }
+        }
     }
 
     public void setCell(int x, int y, CellType type) {

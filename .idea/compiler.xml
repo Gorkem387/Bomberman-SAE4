@@ -6,9 +6,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="bomberman" />
         <module name="common" />
         <module name="ClientSide" />
-        <module name="ServerSide" />
       </profile>
     </annotationProcessing>
   </component>
