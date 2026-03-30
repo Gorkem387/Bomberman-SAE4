@@ -1,6 +1,7 @@
 package iut.gon.serverside.Player;
 
 import iut.gon.serverside.Effects.Bonus;
+import iut.gon.serverside.Threads.ClientHandler;
 
 import java.util.HashMap;
 
@@ -10,27 +11,34 @@ public class Joueur {
     //ATTRIBUTS//
     /////////////
 
+    private ClientHandler clientHandler;
     private int id;
     private int cooX;
     private int cooY;
-    private etat_Joueur etat;
+    private EtatJoueur etat;
     private int pv;
     private int nb_bombes_max;
     private int nb_bombes;
     private Bonus[] bonus;
     private float speed_multiplier;
     private String nom;
+    private int skinId;
 
     ////////////////
     //CONSTRUCTEUR//
     ////////////////
 
-    public Joueur(int id, String nom){
+    public Joueur(ClientHandler clientHandler){
+        this.clientHandler = clientHandler;
+    }
+
+    public Joueur(ClientHandler clientHandler, int id, String nom){
+        this.clientHandler = clientHandler;
         this.id = id;
         this.nom = nom;
         this.cooX = 0;
         this.cooY = 0;
-        this.etat = etat_Joueur.NOT_CONNECTED;
+        this.etat = EtatJoueur.NOT_CONNECTED;
         this.pv = 3;
         this.nb_bombes_max = 3;
         this.nb_bombes = 3;
@@ -38,7 +46,7 @@ public class Joueur {
         this.speed_multiplier = 1.0f;
     }
 
-    public Joueur(int id, String nom, int cooX, int cooY, etat_Joueur etat, int pv, int nb_bombes_max, int nb_bombes, Bonus[] bonus, float speed_multiplier) {
+    public Joueur(int id, String nom, int cooX, int cooY, EtatJoueur etat, int pv, int nb_bombes_max, int nb_bombes, Bonus[] bonus, float speed_multiplier) {
         this.id = id;
         this.nom = nom;
         this.cooX = 0;
@@ -78,11 +86,11 @@ public class Joueur {
         this.cooY = newY;
     }
 
-    public etat_Joueur getEtat() {
+    public EtatJoueur getEtat() {
         return etat;
     }
 
-    public void setEtat(etat_Joueur etat) {
+    public void setEtat(EtatJoueur etat) {
         this.etat = etat;
     }
 
@@ -132,5 +140,9 @@ public class Joueur {
 
     public void setNom(String nom) {
         this.nom = nom;
+    }
+
+    public ClientHandler getClientHandler() {
+        return clientHandler;
     }
 }
