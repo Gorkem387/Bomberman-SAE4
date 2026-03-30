@@ -46,7 +46,8 @@ public class AggressiveAi extends Ai {
                 this.player.setY(this.player.getY() - 1);
             }
         } else if (dy == 0 && dx == 0){
-            this.player.
+            this.player.setNb_bombes(this.player.getNb_bombes() + 1);
+            this.lobby.getLabyrinthe().setcell(this.player.getX(), this.player.getY(), CellType.BOMB);
         }
         // Si dx == 0 et dy == 0, l'IA est déjà sur le joueur (ne bouge pas)
     }
