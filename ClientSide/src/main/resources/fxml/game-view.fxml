@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.layout.StackPane?>
+
+<StackPane xmlns="http://javafx.com/fxml" fx:controller="iut.gon.bomberman.client.controllers.GameController">
+    <Canvas fx:id="gameCanvas" width="800.0" height="800.0" />
+</StackPane>
