@@ -1,5 +1,7 @@
 package iut.gon.serverside.Player.DTO;
 
+import iut.gon.serverside.Message.MessageType;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -35,4 +37,9 @@ public class InitGameDTO implements IDTO{
         dto.y      = in.readInt();
         return dto;
     }
+
+    public MessageType getType(){
+        return MessageType.GAME_UPDATE;
+    }
+
 }

@@ -1,21 +1,22 @@
 package iut.gon.serverside.Player.DTO;
 
+import iut.gon.serverside.Message.MessageType;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 public class JoueurMisAJourDTO implements IDTO{
 
     public static final int TYPE = 2;
 
-    public int id;
-    public int x;
-    public int y;
+    public List<MinimDTO> positionsAll = null;
 
-    public JoueurMisAJourDTO(int id, int x, int y) {
-        this.id = id;
-        this.x = x;
-        this.y = y;
+    public JoueurMisAJourDTO() {
     }
 
     public void write(DataOutputStream out) throws IOException {
@@ -26,11 +27,12 @@ public class JoueurMisAJourDTO implements IDTO{
         out.flush();
     }
 
+    /*
     public static JoueurMisAJourDTO read(DataInputStream in) throws IOException {
-        JoueurMisAJourDTO dto = new JoueurMisAJourDTO();
-        dto.id = in.readInt();
-        dto.x  = in.readInt();
-        dto.y  = in.readInt();
-        return dto;
+        return new JoueurMisAJourDTO(in.readInt(), in.readInt(), in.readInt());
+    }*/
+
+    public MessageType getType(){
+        return MessageType.GAME_UPDATE;
     }
 }
