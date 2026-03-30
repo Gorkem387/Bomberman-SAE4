@@ -8,11 +8,8 @@
         <outputRelativeToContentRoot value="true" />
         <module name="bomberman" />
         <module name="common" />
-        <module name="ServerSide" />
+        <module name="ClientSide" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="ClientSide" target="26" />
-    </bytecodeTargetLevel>
   </component>
 </project>
