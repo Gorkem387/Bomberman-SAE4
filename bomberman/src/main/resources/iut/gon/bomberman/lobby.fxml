@@ -1,33 +1,82 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="400.0" prefWidth="600.0"
+            xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1">
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
-   <children>
-      <MenuBar layoutY="2.0" prefHeight="25.0" prefWidth="600.0">
-        <menus>
-          <Menu mnemonicParsing="false" text="File">
+    <top>
+        <Label fx:id="lobbyTitre" text="Arena - 0" alignment="CENTER"
+               maxWidth="Infinity" BorderPane.alignment="CENTER">
+            <font>
+                <Font size="24.0" />
+            </font>
+            <padding>
+                <Insets top="10.0" bottom="10.0" />
+            </padding>
+        </Label>
+    </top>
+
+    <center>
+        <SplitPane dividerPositions="0.3" BorderPane.alignment="CENTER">
             <items>
-              <MenuItem mnemonicParsing="false" text="Close" />
+
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                    <children>
+                        <ListView fx:id="listeJoueurs"
+                                  AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+                                  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
+                    </children>
+                </AnchorPane>
+
+                <AnchorPane minHeight="0.0" minWidth="0.0">
+                    <children>
+                        <VBox AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                            <children>
+                                <TextArea fx:id="texteChat" editable="false"
+                                          wrapText="true" VBox.vgrow="ALWAYS" />
+                                <HBox>
+                                    <children>
+                                        <TextField fx:id="texteMessage" HBox.hgrow="ALWAYS" />
+                                        <Button fx:id="envoyerMessage" text="Envoyer"
+                                                mnemonicParsing="false" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </children>
+                </AnchorPane>
+
             </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Edit">
-            <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
-            </items>
-          </Menu>
-          <Menu mnemonicParsing="false" text="Help">
-            <items>
-              <MenuItem mnemonicParsing="false" text="About" />
-            </items>
-          </Menu>
-        </menus>
-      </MenuBar>
-      <ListView layoutY="27.0" prefHeight="374.0" prefWidth="600.0" />
-   </children>
-</Pane>
+        </SplitPane>
+    </center>
+
+    <bottom>
+        <HBox BorderPane.alignment="CENTER">
+            <padding>
+                <Insets top="8.0" bottom="8.0" left="8.0" right="8.0" />
+            </padding>
+            <children>
+                <Button fx:id="quitterLobby" text="Quitter" mnemonicParsing="false" />
+                <Pane HBox.hgrow="ALWAYS" />
+                <Button fx:id="validerLobby" text="Prêt" mnemonicParsing="false" />
+            </children>
+        </HBox>
+    </bottom>
+
+</BorderPane>
