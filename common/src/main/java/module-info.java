@@ -1,2 +1,3 @@
-module $MODULE_NAME$ {
+module common {
+    exports iut.gon.bomberman.common.model.labyrinthe;
 }
