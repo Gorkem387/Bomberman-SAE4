@@ -1,3 +1,5 @@
+package iut.gon.bomberman.common.model.ai;
+
 public class HeatMap{
     int[][] map;
     int x;
@@ -11,7 +13,7 @@ public class HeatMap{
         return this.map[x][y];
     }
 
-    public int resetRisk(int x, int y){
+    public void resetRisk(int x, int y){
         this.map[x][y] = 0;
     }
 
@@ -19,7 +21,7 @@ public class HeatMap{
         this.x = x;
         this.y = y;
         for(int i = 0; i < this.x; i++){
-            for(j = 0; j < this.y; j++){
+            for(int j = 0; j < this.y; j++){
                 this.map[i][j] = 0;
             }
         }

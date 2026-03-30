@@ -1,41 +1,47 @@
+package iut.gon.bomberman.common.model.ai;
+
+import iut.gon.bomberman.common.model.labyrinthe.CellType;
+
 public enum AISTRATEGIES {
     AGGRESSIVE {
+        @Override
         public void play(Ai ia) {
-            public final int  BOMB_COUNTDOWN = 3;
+            final int  BOMB_COUNTDOWN = 3;
 
-            if (ia.trackedPlayer == null || ia.trackedPlayer.getPv() <= 0) {
+            if (ia.getTrackedPlayer() == null || ia.getTrackedPlayer().getPv() <= 0) {
                 ia.track();
             }
             // Calcule la différence de position
-            int dx = ia.trackedPlayer.getX() - ia.player.getX();
-            int dy = ia.trackedPlayer.getY() - ia.player.getY();
+            int dx = ia.getTrackedPlayer().getX() - ia.getPlayer().getX();
+            int dy = ia.getTrackedPlayer().getY() - ia.getPlayer().getY();
             // Priorise le mouvement horizontal si dx != 0
-            if (dx > 1 && ia.lobby.getLabyrinthe().getCell(ia.player.getX() + 1, ia.player.getY()) == CellType.EMPTY) {
+            if (dx > 1 && ia.getLabyrinthe().getCell(ia.getPlayer().getX() + 1, ia.getPlayer().getY()) == CellType.EMPTY) {
                 // Déplace vers la droite si possible
-                ia.player.setX(ia.player.getX() + 1);
+                ia.getPlayer().setX(ia.getPlayer().getX() + 1);
 
-            } else if (dx < -1 && ia.lobby.getLabyrinthe().getCell(ia.player.getX() - 1, ia.player.getY()) == CellType.EMPTY) {
+            } else if (dx < -1 && ia.getLabyrinthe().getCell(ia.getPlayer().getX() - 1, ia.getPlayer().getY()) == CellType.EMPTY) {
                 // Déplace vers la gauche si possible
-                ia.player.setX(ia.player.getX() - 1);
-            } else if (dy > 1 && ia.lobby.getLabyrinthe().getCell(ia.player.getX(), ia.player.getY() + 1) == CellType.EMPTY) {
+                ia.getPlayer().setX(ia.getPlayer().getX() - 1);
+            } else if (dy > 1 && ia.getLabyrinthe().getCell(ia.getPlayer().getX(), ia.getPlayer().getY() + 1) == CellType.EMPTY) {
                 // Déplace vers le bas si possible
-                ia.player.setY(ia.player.getY() + 1);
-            } else if (dy < -1 && ia.lobby.getLabyrinthe().getCell(ia.player.getX(), ia.player.getY() - 1) == CellType.EMPTY) {
+                ia.getPlayer().setY(ia.getPlayer().getY() + 1);
+            } else if (dy < -1 && ia.getLabyrinthe().getCell(ia.getPlayer().getX(), ia.getPlayer().getY() - 1) == CellType.EMPTY) {
                 // Déplace vers le haut si possible
-                ia.player.setY(ia.player.getY() - 1);
-            } else if ((Math.abs(dx) + Math.abs(dy) <= 1) && ia.player.getNb_bombes() > 0) {
-                ia.lobby.getLabyrinthe().setBomb(ia.player.getX(), ia.player.getY(), ia.player, BOMB_COUNTDOWN);
+                ia.getPlayer().setY(ia.getPlayer().getY() - 1);
+            } else if ((Math.abs(dx) + Math.abs(dy) <= 1) && ia.getPlayer().getNb_bombes() > 0) {
+                ia.getLabyrinthe().setBomb(ia.getPlayer().getX(), ia.getPlayer().getY(), ia.getPlayer(), BOMB_COUNTDOWN);
             } else {
                 ia.randomMove();
             }
         }
     },
     SURVIVOR {
+        @Override
         public void play(Ai ia) {
-            public final int BOMB_COUNTDOWN = 3;
+            final int BOMB_COUNTDOWN = 3;
 
             int count = 0;
-            for (Joueur j : lobby.getJoueurs()) {
+            for (Joueur j : ia.lobby.getJoueurs()) {
                 if (j.getPv() > 0) {
                     count++;
                 }
@@ -44,15 +50,15 @@ public enum AISTRATEGIES {
                 for (int dx = -1; dx <= 1; dx++) {
                     for (int dy = -1; dy <= 1; dy++) {
                         if (dx == 0 && dy == 0) continue; // Ignore la position actuelle
-                        int newX = ia.player.getX() + dx;
-                        int newY = ia.player.getY() + dy;
-                        if (ia.lobby.getLabyrinthe().getCell(newX, newY) == CellType.BOMB) {
+                        int newX = ia.getPlayer().getX() + dx;
+                        int newY = ia.getPlayer().getY() + dy;
+                        if (ia.getLabyrinthe().getCell(newX, newY) == CellType.BOMB) {
                             // Si une bombe est détectée, essaie de se déplacer dans la direction opposée
-                            int oppositeX = ia.player.getX() - dx;
-                            int oppositeY = ia.player.getY() - dy;
-                            if (ia.lobby.getLabyrinthe().isWalkable(oppositeX, oppositeY)) {
-                                ia.player.setX(oppositeX);
-                                ia.player.setY(oppositeY);
+                            int oppositeX = ia.getPlayer().getX() - dx;
+                            int oppositeY = ia.getPlayer().getY() - dy;
+                            if (ia.getLabyrinthe().isWalkable(oppositeX, oppositeY)) {
+                                ia.getPlayer().setX(oppositeX);
+                                ia.getPlayer().setY(oppositeY);
                                 return;
                             }
                         }
@@ -61,8 +67,8 @@ public enum AISTRATEGIES {
                 // Si aucune bombe n'est détectée, se déplace aléatoirement
                 ia.randomMove();
 
-                if (Math.random() < 0.3 && ia.player.getNb_bombes() > 0 && ia.lobby.getLabyrinthe().getCell(ia.player.getX(), ia.player.getY()) == CellType.EMPTY) {
-                    ia.lobby.getLabyrinthe().setBomb(ia.player.getX(), ia.player.getY(), ia.player, BOMB_COUNTDOWN); // Compte à rebours de 3 tours (ajustez si nécessaire)
+                if (Math.random() < 0.3 && ia.getPlayer().getNb_bombes() > 0 && ia.getLabyrinthe().getCell(ia.getPlayer().getX(), ia.getPlayer().getY()) == CellType.EMPTY) {
+                    ia.getLabyrinthe().setBomb(ia.getPlayer().getX(), ia.getPlayer().getY(), ia.getPlayer(), BOMB_COUNTDOWN); // Compte à rebours de 3 tours (ajustez si nécessaire)
                 }
             } else {
                 ia.setStrategy(AISTRATEGIES.AGGRESSIVE);
@@ -70,17 +76,21 @@ public enum AISTRATEGIES {
         }
     },
     CHAOS {
+        @Override
         public void play(Ai ia) {
-            public final int BOMB_COUNTDOWN = 3;
+            final int BOMB_COUNTDOWN = 3;
 
-            if (ia.lobby.getLabyrinthe().getHeatMap().readRisk(ia.player.getX(), ia.player.getY()) > 0) {
+            if (ia.getLabyrinthe().getHeatMap().readRisk(ia.getPlayer().getX(), ia.getPlayer().getY()) > 0) {
                 //Si je suis dans une zone à risque, j'essaie de me déplacer aléatoirement
                 ia.randomMove();
             } else {
-                if (Math.random() < 0.5 && ia.player.getNb_bombes() > 0) {
-                    ia.lobby.getLabyrinthe().setBomb(ia.player.getX(), ia.player.getY(), ia.player, BOMB_COUNTDOWN);
+                if (Math.random() < 0.5 && ia.getPlayer().getNb_bombes() > 0) {
+                    ia.getLabyrinthe().setBomb(ia.getPlayer().getX(), ia.getPlayer().getY(), ia.getPlayer(), BOMB_COUNTDOWN);
                 }
             }
         }
+    };
+
+    public void play(Ai ai) {
     }
 }

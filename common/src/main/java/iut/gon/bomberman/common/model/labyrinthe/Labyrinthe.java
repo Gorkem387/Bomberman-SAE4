@@ -1,7 +1,9 @@
 package iut.gon.bomberman.common.model.labyrinthe;
 
 import java.io.Serializable;
-import java.io.TimeUnit;
+import iut.gon.bomberman.common.model.ai.Ai;
+import iut.gon.bomberman.common.model.ai.HeatMap;
+
 
 public class Labyrinthe implements Serializable {
     private final int width;

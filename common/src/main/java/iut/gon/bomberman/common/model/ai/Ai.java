@@ -1,17 +1,23 @@
+package iut.gon.bomberman.common.model.ai;
+
+import iut.gon.bomberman.common.model.Joueur;
+import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
+
 public class Ai {
     private Joueur player;
-    private Lobby lobby;
-    private AiStrategies strategy;
+    private Labyrinthe labyrinth;
+    private AISTRATEGIES strategy;
     private Joueur trackedPlayer;
 
-    public Ai(Joueur j, Lobby l, AiStrategies strategy){
+    public Ai(Joueur j, Labyrinthe l, AISTRATEGIES strategy){
         this.player = j;
-        this.lobby = l;
+        this.labyrinth = l;
         this.strategy = strategy;
     }
 
+
     public int track(){
-        for(Joueur p : this.lobby.getPlayers()){
+        for(Joueur p : this.lobby.getPlayers())  //Mettre la classe responsable de la gestion du jeu en local {
             if(p.getPv() > 0 && !p.equals(this.player)){
                 this.trackedPlayer = p;
                 return 0;
@@ -19,6 +25,7 @@ public class Ai {
         }
         return -1;
     }
+
 
     public void play(){
         while(this.player.getPv() > 0){
@@ -34,19 +41,19 @@ public class Ai {
         this.player = player;
     }
 
-    public Lobby getLobby() {
-        return lobby;
+    public Labyrinthe getLabyrinthe() {
+        return this.labyrinth;
     }
 
-    public void setLobby(Lobby lobby) {
-        this.lobby = lobby;
+    public void setLobby(Labyrinthe labyrinth) {
+        this.labyrinth = labyrinth;
     }
 
-    public AiStrategies getStrategy() {
+    public AISTRATEGIES getStrategy() {
         return strategy;
     }
 
-    public void setStrategy(AiStrategies strategy) {
+    public void setStrategy(AISTRATEGIES strategy) {
         this.strategy = strategy;
     }
 
@@ -62,12 +69,12 @@ public class Ai {
         int[][] directions = {{1,0}, {-1,0}, {0,1}, {0,-1}};
         int bestX = this.player.getX();
         int bestY = this.player.getY();
-        int bestRisk = this.lobby.getLabyrinthe().getHeatMap().readRisk(bestX, bestY);
+        int bestRisk = this.getLabyrinthe().getHeatMap().readRisk(bestX, bestY);
         for (int[] d : directions) {
             int nx = bestX + d[0];
             int ny = bestY + d[1];
-            if (this.lobby.getLabyrinthe().isWalkable(nx, ny)) {
-                int risk = this.lobby.getLabyrinthe().getHeatMap().readRisk(nx, ny);
+            if (this.getLabyrinthe().isWalkable(nx, ny)) {
+                int risk = this.getLabyrinthe().getHeatMap().readRisk(nx, ny);
 
                 if (risk < bestRisk || Math.random() < 0.2) { // un peu de chaos
                     bestRisk = risk;
