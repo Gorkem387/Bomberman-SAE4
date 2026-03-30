@@ -21,6 +21,8 @@ public class Joueur {
     private float speed_multiplier;
     private String nom;
 
+    private boolean alive = true;
+
     // Directions
     private Direction direction = Direction.DOWN;
 
@@ -172,4 +174,7 @@ public class Joueur {
     public Direction getDirection() {
         return direction;
     }
+
+    public boolean isAlive() { return alive; }
+    public void setAlive(boolean alive) { this.alive = alive; }
 }

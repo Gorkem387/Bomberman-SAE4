@@ -76,9 +76,7 @@ public class GameController {
         gameLoop.start();
     }
 
-    private void update(double deltaTime) {
-        if (isGameOver) return;
-
+    private void handleInputs() {
         // Déplacements
         double dx = 0;
         double dy = 0;
@@ -92,19 +90,22 @@ public class GameController {
             joueur.move(dx, dy, labyrinthe);
         }
 
-        // Pose de bombe sur ESPACE (une seule fois par appui)
+        // Pose de bombe
         if (input.contains(KeyCode.SPACE) && !spaceWasPressed) {
             spaceWasPressed = true;
             bombManager.placeBomb(joueur, 3);
         }
+    }
 
-        if (joueur.getPv() <= 0) {
-            isGameOver = true;
-            gameLoop.stop();
-            System.out.println("GAME OVER");
+    private void update(double deltaTime) {
+        if (joueur.isAlive()) {
+            handleInputs();
+
+            if (joueur.getPv() <= 0) {
+                joueur.setAlive(false);
+                this.isGameOver = true;
+            }
         }
-
-        // Mise à jour des bombes (timer, explosions, dégâts)
         bombManager.update(deltaTime, labyrinthe, List.of(joueur));
     }
 
@@ -114,5 +115,22 @@ public class GameController {
         renderer.drawBombs(gc, bombManager.getBombs());
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
         renderer.drawPlayer(gc, joueur);
+
+        if (joueur.isAlive()) {
+            renderer.drawPlayer(gc, joueur);
+        }
+
+        if (isGameOver) {
+            drawGameOverScreen();
+        }
+    }
+
+    private void drawGameOverScreen() {
+        gc.setFill(javafx.scene.paint.Color.rgb(0, 0, 0, 0.7));
+        gc.fillRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
+
+        gc.setFill(javafx.scene.paint.Color.RED);
+        gc.setFont(javafx.scene.text.Font.font("Arial", 50));
+        gc.fillText("GAME OVER", gameCanvas.getWidth()/2 - 140, gameCanvas.getHeight()/2);
     }
 }
