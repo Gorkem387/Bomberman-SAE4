@@ -1,5 +1,6 @@
 package iut.gon.bomberman.common.model.player;
 
+import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.player.Effects.Bonus;
 import iut.gon.bomberman.common.model.player.EtatJoueur;
@@ -20,6 +21,8 @@ public class Joueur {
     private Bonus[] bonus;
     private float speed_multiplier;
     private String nom;
+
+    private boolean alive = true;
 
     // Directions
     private Direction direction = Direction.DOWN;
@@ -55,35 +58,32 @@ public class Joueur {
     }
 
     // Méthode move
-    public void move(double deltaX, double deltaY, Labyrinthe laby) {
-        // Vitesse de base
+    public void move(double deltaX, double deltaY, Labyrinthe laby, BombManager bombManager) {
         double vitesseBase = 0.05;
-        double deplacementX = deltaX * vitesseBase * speed_multiplier;
-        double deplacementY = deltaY * vitesseBase * speed_multiplier;
-
-        // Calcul de la future position
-        double nextX = cooX + deplacementX;
-        double nextY = cooY + deplacementY;
-
+        double nextX = cooX + (deltaX * vitesseBase * speed_multiplier);
+        double nextY = cooY + (deltaY * vitesseBase * speed_multiplier);
         double size = 0.9;
 
-        // Vérifie si la case est bonne
-        boolean canMove = laby.isWalkable((int)(nextX), (int)(nextY)) &&
-                laby.isWalkable((int)(nextX + size), (int)(nextY)) &&
-                laby.isWalkable((int)(nextX), (int)(nextY + size)) &&
-                laby.isWalkable((int)(nextX + size), (int)(nextY + size));
-
-        // Si la case est bonne, alors on déplace le joueur
-        if (canMove) {
+        // On vérifie les collisions
+        if (canMoveTo(nextX, nextY, size, laby, bombManager)) {
             this.cooX = nextX;
             this.cooY = nextY;
         }
+    }
 
-        // Mise à jour de la direction
-        if (deltaX > 0) direction = Direction.RIGHT;
-        else if (deltaX < 0) direction = Direction.LEFT;
-        else if (deltaY > 0) direction = Direction.DOWN;
-        else if (deltaY < 0) direction = Direction.UP;
+    private boolean canMoveTo(double x, double y, double size, Labyrinthe laby, BombManager bm) {
+        int[][] points = {
+                {(int)x, (int)y},
+                {(int)(x + size), (int)y},
+                {(int)x, (int)(y + size)},
+                {(int)(x + size), (int)(y + size)}
+        };
+
+        for (int[] p : points) {
+            if (!laby.isWalkable(p[0], p[1])) return false;
+            if (bm.isBombAt(p[0], p[1])) return false;
+        }
+        return true;
     }
 
     ///////////////////
@@ -176,4 +176,6 @@ public class Joueur {
     public void setDirection(Direction direction) {
         this.direction = direction;
     }
+    public boolean isAlive() { return alive; }
+    public void setAlive(boolean alive) { this.alive = alive; }
 }
