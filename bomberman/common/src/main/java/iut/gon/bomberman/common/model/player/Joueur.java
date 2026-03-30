@@ -1,5 +1,6 @@
 package iut.gon.bomberman.common.model.player;
 
+import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.player.Effects.Bonus;
 import iut.gon.bomberman.common.model.player.EtatJoueur;
 
@@ -10,8 +11,8 @@ public class Joueur {
     /////////////
 
     private int id;
-    private int cooX;
-    private int cooY;
+    private double cooX;
+    private double cooY;
     private EtatJoueur etat;
     private int pv;
     private int nb_bombes_max;
@@ -19,6 +20,9 @@ public class Joueur {
     private Bonus[] bonus;
     private float speed_multiplier;
     private String nom;
+
+    // Directions
+    private Direction direction = Direction.DOWN;
 
     ////////////////
     //CONSTRUCTEUR//
@@ -37,17 +41,41 @@ public class Joueur {
         this.speed_multiplier = 1.0f;
     }
 
-    public Joueur(int id, String nom, int cooX, int cooY, EtatJoueur etat, int pv, int nb_bombes_max, int nb_bombes, Bonus[] bonus, float speed_multiplier) {
+    public Joueur(int id, String nom, double cooX, double cooY, EtatJoueur etat, int pv, int nb_bombes_max, int nb_bombes, Bonus[] bonus, float speed_multiplier) {
         this.id = id;
         this.nom = nom;
-        this.cooX = 0;
-        this.cooY = 0;
+        this.cooX = cooX;
+        this.cooY = cooY;
         this.etat = etat;
         this.pv = pv;
         this.nb_bombes_max = nb_bombes_max;
         this.nb_bombes = nb_bombes;
         this.bonus = bonus;
         this.speed_multiplier = speed_multiplier;
+    }
+
+    // Méthode move
+    public void move(double deltaX, double deltaY, Labyrinthe laby) {
+        // Vitesse de base
+        double vitesseBase = 0.05;
+        double deplacementX = deltaX * vitesseBase * speed_multiplier;
+        double deplacementY = deltaY * vitesseBase * speed_multiplier;
+
+        // Calcul de la future position
+        double nextX = cooX + deplacementX;
+        double nextY = cooY + deplacementY;
+
+        // Verifie si on peut marcher sur la case
+        if (laby.isWalkable((int)nextX, (int)nextY)) {
+            this.cooX = nextX;
+            this.cooY = nextY;
+        }
+
+        // Mise à jour de la direction
+        if (deltaX > 0) direction = Direction.RIGHT;
+        else if (deltaX < 0) direction = Direction.LEFT;
+        else if (deltaY > 0) direction = Direction.DOWN;
+        else if (deltaY < 0) direction = Direction.UP;
     }
 
     ///////////////////
@@ -62,18 +90,18 @@ public class Joueur {
         this.id = id;
     }
 
-    public int getX() {
+    public double getX() {
         return cooX;
     }
-    public int getY(){
+    public double getY(){
         return cooY;
     }
 
-    public void setX(int newX) {
+    public void setX(double newX) {
         this.cooX = newX;
     }
 
-    public void setY(int newY) {
+    public void setY(double newY) {
         this.cooY = newY;
     }
 
@@ -131,5 +159,9 @@ public class Joueur {
 
     public void setNom(String nom) {
         this.nom = nom;
+    }
+
+    public Direction getDirection() {
+        return direction;
     }
 }
