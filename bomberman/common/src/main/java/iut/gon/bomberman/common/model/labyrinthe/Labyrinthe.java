@@ -1,11 +1,7 @@
 package iut.gon.bomberman.common.model.labyrinthe;
 
 import java.io.Serializable;
-<<<<<<< HEAD
 import iut.gon.bomberman.common.model.player.Joueur;
-
-=======
->>>>>>> dev
 
 public class Labyrinthe implements Serializable {
     private final int width;

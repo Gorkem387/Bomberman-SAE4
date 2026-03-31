@@ -13,13 +13,4 @@
     <artifactId>common</artifactId>
     <name>Common</name>
 
-    <dependencies>
-        <!-- Common dependencies if any -->
-        <dependency>
-            <groupId>iut.gon</groupId>
-            <artifactId>ServerSide</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
 </project>

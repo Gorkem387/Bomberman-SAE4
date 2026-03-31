@@ -102,7 +102,7 @@ public class Lobby {
             if (!joueursInvites.isEmpty()) {
                 logger.log(LogTypes.SUCCESS,"Démarrage de la partie avec " + joueursInvites.size() + " joueurs.");
                 etatLobby = EtatLobby.COMPLET;
-                this.thread = new Thread_Jeu( this);
+                this.thread = new Thread_Jeu(this);
 
             } else {
                 logger.log(LogTypes.WARNING, "Pas assez de joueurs pour démarrer la partie.");
