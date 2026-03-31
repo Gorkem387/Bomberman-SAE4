@@ -1,5 +1,8 @@
 package iut.gon.serverside.Logger;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -20,7 +23,7 @@ public class Logger {
     private static final String RESET = "\u001B[37m";
 
     // Instance unique de Logger
-    static Logger log = new Logger();
+    private static Logger log = new Logger();
 
     /**
      *  Constructeur privé pour empêcher l'instanciation de la classe depuis l'extérieur.
@@ -32,7 +35,7 @@ public class Logger {
      *  Méthode statique pour obtenir l'instance unique de Logger.
      *  @return Logger l'instance unique de Logger
      * */
-    public static Logger getInstance() {
+    public static synchronized Logger getInstance() {
         if(log == null) {
             log = new Logger();
         }
@@ -45,7 +48,15 @@ public class Logger {
     public void log(LogTypes type, String message) {
         switch (type) {
             case INFO -> System.out.println(CYAN + createLogMessage(type, message) + RESET);
-            case ERROR -> System.out.println(RED + createLogMessage(type, message) + RESET);
+            case ERROR -> {
+                String msg = createLogMessage(type, message);
+                System.out.println(RED + msg + RESET);
+                try(FileWriter writer= new FileWriter("logs.txt", true)){
+                    writer.write(msg + "\n");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
             case WARNING -> System.out.println(ORANGE + createLogMessage(type, message) + RESET);
             case SUCCESS -> System.out.println(GREEN + createLogMessage(type, message) + RESET);
             default ->  System.out.println(RESET + createLogMessage(type, message) + RESET);

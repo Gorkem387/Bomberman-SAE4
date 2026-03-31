@@ -1,6 +1,6 @@
 package iut.gon.serverside.Player;
 
-public enum etat_Joueur {
+public enum EtatJoueur {
     PRET,
     CONNECTING,
     PAS_PRET,
