@@ -1,7 +1,7 @@
 package iut.gon.serverside.Threads.PlayerInputHandling;
 
-import iut.gon.bomberman.common.model.message.Message;
-import iut.gon.bomberman.common.model.message.MessageType;
+import iut.gon.bomberman.common.model.Mess.Message;
+import iut.gon.bomberman.common.model.Mess.MessageType;
 import iut.gon.serverside.Threads.ClientHandler;
 
 import java.util.EnumMap;
@@ -21,9 +21,8 @@ public class MessageDispatcher {
         handlers.put(MessageType.MOVE_REQUEST, new MoveHandler());
         handlers.put(MessageType.CHAT_MESSAGE, new ChatMessageHandler());
         handlers.put(MessageType.READY_STATUS, new ReadyStatusHandler());
-        
-        // GAME_UPDATE est normalement envoyé du serveur vers le client, 
-        // donc pas besoin de handler côté serveur pour cela (sauf si ACK attendu).
+        handlers.put(MessageType.LOBBY_LIST_REQUEST, new LobbyListHandler());
+        handlers.put(MessageType.LOBBY_DETAILS_REQUEST, new LobbyDetailsHandler());
     }
 
     /**

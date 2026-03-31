@@ -85,11 +85,15 @@ public class Lobby {
             return id;
         }
 
-        public void broadcastInit(InitGameDTO dto) {
+        public Joueur getProprietaire() {
+            return proprietaire;
+        }
+
+       /* public void broadcastInit(InitGameDTO dto) {
             for (Joueur tj : joueursInvites) {
                 tj.sendInitDTO(dto);
             }
-        }
+        }*/
 
         private boolean peuCommencer(){
             for(Joueur j : joueursInvites){
@@ -115,7 +119,7 @@ public class Lobby {
 
         public void setReadyStatus(ClientHandler client, Boolean isReady){
             EtatJoueur etat = isReady ? EtatJoueur.PRET : EtatJoueur.PAS_PRET;
-            joueursInvites.get(client.playerId).setEtat(etat);
+            joueursInvites.get(client.getPlayerId()).setEtat(etat);
         }
 
         public Joueur getJoueur(int id){
@@ -128,7 +132,7 @@ public class Lobby {
                 logger.log(LogTypes.WARNING, "Le lobby est plein. Impossible de rejoindre.");
                 return false;
             }
-            else joueursInvites.add(client.joueur);
+            else joueursInvites.add(client.getJoueur());
             return true;
         }
 

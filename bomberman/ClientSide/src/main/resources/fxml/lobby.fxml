@@ -17,13 +17,14 @@
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
             prefHeight="400.0" prefWidth="600.0"
             xmlns="http://javafx.com/javafx/25"
-            xmlns:fx="http://javafx.com/fxml/1">
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="iut.gon.bomberman.client.controllers.LobbyController">
 
     <top>
         <Label fx:id="lobbyTitre" text="Arena - 0" alignment="CENTER"
                maxWidth="Infinity" BorderPane.alignment="CENTER">
             <font>
-                <Font size="24.0" />
+                <Font name="System Bold" size="24.0" />
             </font>
             <padding>
                 <Insets top="10.0" bottom="10.0" />
@@ -46,11 +47,14 @@
                 <AnchorPane minHeight="0.0" minWidth="0.0">
                     <children>
                         <VBox AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
-                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" spacing="5.0">
                             <children>
                                 <TextArea fx:id="texteChat" editable="false"
                                           wrapText="true" VBox.vgrow="ALWAYS" />
-                                <HBox>
+                                <HBox spacing="5.0">
+                                    <padding>
+                                        <Insets bottom="5.0" left="5.0" right="5.0" />
+                                    </padding>
                                     <children>
                                         <TextField fx:id="texteMessage" HBox.hgrow="ALWAYS" />
                                         <Button fx:id="envoyerMessage" text="Envoyer"
@@ -67,14 +71,15 @@
     </center>
 
     <bottom>
-        <HBox BorderPane.alignment="CENTER">
+        <HBox BorderPane.alignment="CENTER" spacing="10.0">
             <padding>
-                <Insets top="8.0" bottom="8.0" left="8.0" right="8.0" />
+                <Insets top="10.0" bottom="10.0" left="10.0" right="10.0" />
             </padding>
             <children>
                 <Button fx:id="quitterLobby" text="Quitter" mnemonicParsing="false" />
                 <Pane HBox.hgrow="ALWAYS" />
-                <Button fx:id="validerLobby" text="Prêt" mnemonicParsing="false" />
+                <Button fx:id="validerLobby" text="Prêt" mnemonicParsing="false"
+                        style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;" />
             </children>
         </HBox>
     </bottom>

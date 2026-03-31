@@ -1,9 +1,9 @@
 package iut.gon.bomberman.client.controllers;
 
 import iut.gon.bomberman.client.network.NetworkManager;
-import iut.gon.bomberman.common.model.message.ChatMessage;
-import iut.gon.bomberman.common.model.message.MessageType;
-import iut.gon.bomberman.common.model.message.ReadyStatus;
+import iut.gon.bomberman.common.model.Mess.ChatMessage;
+import iut.gon.bomberman.common.model.Mess.MessageType;
+import iut.gon.bomberman.common.model.Mess.ReadyStatus;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
@@ -27,6 +27,8 @@ public class LobbyControlleur {
 
     @FXML
     public void initialize() {
+
+
         NetworkManager.getInstance().addServerMessageListener(
                 MessageType.CHAT_MESSAGE, msg -> {
                     ChatMessage chat = (ChatMessage) msg;

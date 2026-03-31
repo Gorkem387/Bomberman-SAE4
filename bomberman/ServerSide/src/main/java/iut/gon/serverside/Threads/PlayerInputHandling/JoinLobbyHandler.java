@@ -1,8 +1,9 @@
 package iut.gon.serverside.Threads.PlayerInputHandling;
 
+import iut.gon.bomberman.common.model.player.Joueur;
 import iut.gon.serverside.LobbyManager;
-import iut.gon.bomberman.common.model.message.JoinLobbyRequest;
-import iut.gon.bomberman.common.model.message.JoinLobbyResponse;
+import iut.gon.bomberman.common.model.Mess.JoinLobbyRequest;
+import iut.gon.bomberman.common.model.Mess.JoinLobbyResponse;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.Lob.Lobby;
 
@@ -16,26 +17,25 @@ public class JoinLobbyHandler implements MessageHandler<JoinLobbyRequest> {
         Lobby lobby = LobbyManager.getInstance().getLobby(message.getLobbyId());
 
         if (lobby != null) {
-            // Mise à jour de l'ID du joueur dans le handler
-            client.playerId = message.getLobbyId(); // Ou un ID unique global si nécessaire
-            
-            // On délègue au lobby l'ajout du joueur (pour gérer le nombre max, l'état, etc.)
+            // Initialisation du joueur si nécessaire
+            if (client.getJoueur() == null) {
+                client.setJoueur(new Joueur(client.hashCode(), message.getPlayerName()));
+            }
+
+            // On délègue au lobby l'ajout du joueur
             boolean succes = lobby.rejoindreLobby(client);
 
-
-            //reponse
-            String text_message = "";
-            if(succes) text_message = "Vous avez rejoint le lobby" + lobby.getNom();
-            else text_message = "Probleme avec lobby " + lobby.getNom();
-
-            JoinLobbyResponse response = new JoinLobbyResponse(succes, text_message, lobby.getId());
-
-
-            client.send(response);
-            // Broadcast : On pourrait ici prévenir les autres joueurs qu'un nouveau est arrivé
+            if (succes) {
+                client.setLobbyId(lobby.getId());
+                client.send(new JoinLobbyResponse(true, "Lobby rejoint : " + lobby.getNom(), lobby.getId()));
+                
+                // On notifie tout le monde dans le lobby qu'un joueur a rejoint
+                // LobbyDetailsHandler sera appelé par le client pour rafraîchir la vue
+            } else {
+                client.send(new JoinLobbyResponse(false, "Lobby plein ou inaccessible", -1));
+            }
         } else {
-            // Réponse négative (Lobby plein ou inexistant)
-            client.send(new JoinLobbyResponse(false, "Lobby non trouvé ou plein", -1));
+            client.send(new JoinLobbyResponse(false, "Lobby non trouvé", -1));
         }
     }
 }

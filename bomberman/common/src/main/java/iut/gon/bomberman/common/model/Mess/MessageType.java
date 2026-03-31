@@ -1,10 +1,14 @@
-package iut.gon.bomberman.common.model.message;
+package iut.gon.bomberman.common.model.Mess;
 
 public enum MessageType {
     CREATE_LOBBY_REQUEST,
     CREATE_LOBBY_RESPONSE,
     JOIN_LOBBY_REQUEST,
     JOIN_LOBBY_RESPONSE,
+    LOBBY_LIST_REQUEST,
+    LOBBY_LIST_RESPONSE,
+    LOBBY_DETAILS_REQUEST, // Nouveau
+    LOBBY_DETAILS_RESPONSE, // Nouveau
     MOVE_REQUEST,
     CHAT_MESSAGE,
     READY_STATUS,

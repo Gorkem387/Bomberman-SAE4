@@ -1,7 +1,9 @@
 package iut.gon.bomberman.client.controllers;
 
+import iut.gon.bomberman.client.MainApp;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -12,34 +14,34 @@ import java.io.IOException;
 
 public class LauncherController {
 
-    // Pour l'instant handleLocalGame et handleOnlineGame lance directement la partie
-
+    @FXML
     public void handleLocalGame(ActionEvent actionEvent) {
-        //TODO A compléter
-        // Renvoie vers les paramètres de la partie ( taille de carte, difficulté des bots, ... )
-        System.out.println("Lancement du mode Local...");
-        loadGameView(actionEvent);
+            loadGameView(actionEvent);
+            System.out.println("Mode Local lancé.");
     }
 
+    @FXML
     public void handleOnlineGame(ActionEvent actionEvent) {
-        //TODO A compléter
-        // Renvoie vers la liste des parties disponibles ou en cours
-        System.out.println("Lancement du mode Online...");
-        loadGameView(actionEvent);
+        try {
+            // Redirige vers la saisie du pseudo avant toute connexion
+            MainApp.setRoot("fxml/connexion");
+        } catch (IOException e) {
+            System.err.println("Erreur : Impossible de charger l'écran de connexion !");
+            e.printStackTrace();
+        }
     }
 
+    @FXML
     public void handleExit(ActionEvent actionEvent) {
         Platform.exit();
     }
 
+    @FXML
     public void handleCustomize(ActionEvent actionEvent) {
-        //TODO A compléter
-        // Renvoie vers la personnalisation du personnage
+        System.out.println("Ouverture de la personnalisation...");
+        // MainApp.setRoot("iut/gon/bomberman/client/ui"); // Exemple si ui.fxml est la personnalisation
     }
 
-    /**
-     * Méthode pour charger la vue du labyrinthe
-     */
     private void loadGameView(ActionEvent event) {
         try {
             String fxmlPath = "/iut/gon/bomberman/client/game-view.fxml";
@@ -60,4 +62,5 @@ public class LauncherController {
             e.printStackTrace();
         }
     }
+
 }

@@ -6,7 +6,7 @@ import iut.gon.serverside.Lob.EtatLobby;
 import iut.gon.serverside.Lob.Lobby;
 import iut.gon.serverside.Logger.LogTypes;
 import iut.gon.serverside.Logger.Logger;
-import iut.gon.bomberman.common.model.message.ReadyStatus;
+import iut.gon.bomberman.common.model.Mess.ReadyStatus;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.LobbyManager;
 

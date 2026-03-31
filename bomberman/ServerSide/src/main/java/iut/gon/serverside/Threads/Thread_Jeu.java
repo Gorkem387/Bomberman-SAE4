@@ -30,11 +30,11 @@ public class Thread_Jeu extends Thread {
 
         broadcastUpdate(initGameDTO);
         while (running) {
-            joueurMisAJourDTO = new JoueurMisAJourDTO(
+            /*joueurMisAJourDTO = new JoueurMisAJourDTO(
                     lobby.getJoueur(0).getId(),
                     lobby.getJoueur(0).getX(),
                     lobby.getJoueur(0).getY()
-            );
+            );*/
 
             broadcastUpdate(joueurMisAJourDTO);
             try { Thread.sleep(16); }
@@ -45,7 +45,7 @@ public class Thread_Jeu extends Thread {
     private void broadcastUpdate(IDTO DTO) {
         // Pour chaque Joueur dans le lobby, on récupère son ClientHandler pour envoyer
         for (int i = 0; i < lobby.getJoueurs().size(); i++) {
-            lobby.getJoueur(i).getClientHandler().send(DTO);
+            /*lobby.getJoueur(i).getClientHandler().send(DTO);*/
         }
     }
 }
