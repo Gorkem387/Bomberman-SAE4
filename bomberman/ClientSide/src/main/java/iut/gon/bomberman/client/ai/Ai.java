@@ -1,13 +1,10 @@
 package iut.gon.bomberman.client.ai;
 
 import iut.gon.bomberman.client.controllers.GameController;
-import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
-<<<<<<< HEAD
-=======
-import iut.gon.bomberman.client.ai.AISTRATEGIES;
->>>>>>> dev
-import iut.gon.bomberman.common.model.player.Joueur;
+
 import iut.gon.bomberman.client.MainApp;
+import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
+import iut.gon.bomberman.common.model.player.Joueur;
 
 public class Ai {
     private Joueur player;
@@ -23,34 +20,21 @@ public class Ai {
         this.hM = hM;
     }
 
-<<<<<<< HEAD
 
     public int track(Joueur[] players){
         for(Joueur p : players)  //Mettre la classe responsable de la gestion du jeu en local {
-=======
-/*
-    public int track(){
-        for(Joueur p : this.app.getPlayers())  //Mettre la classe responsable de la gestion du jeu en local {
->>>>>>> dev
             if(p.getPv() > 0 && !p.equals(this.player)){
                 this.trackedPlayer = p;
                 return 0;
             }
         return -1;
     }
-*/
 
-<<<<<<< HEAD
+
     public void play(Joueur[] players){
         while(this.player.getPv() > 0){
             this.strategy.play(this, players, this.hM);
         }
-=======
-    public void play(){
-        /*while(this.player.getPv() > 0){
-            this.strategy.play(this);
-        }*/
->>>>>>> dev
     }
 
     public Joueur getPlayer() {
@@ -85,19 +69,11 @@ public class Ai {
         this.trackedPlayer = trackedPlayer;
     }
 
-<<<<<<< HEAD
     public void randomMove(HeatMap hM) {
         int[][] directions = {{1,0}, {-1,0}, {0,1}, {0,-1}};
         int bestX = (int) this.player.getX();
         int bestY = (int) this.player.getY();
         int bestRisk = hM.readRisk(bestX, bestY);
-=======
-    /*   public void randomMove() {
-        int[][] directions = {{1,0}, {-1,0}, {0,1}, {0,-1}};
-        double bestX = this.player.getX();
-        double bestY = this.player.getY();
-        int bestRisk = this.getLabyrinthe().getHeatMap().readRisk(bestX, bestY);
->>>>>>> dev
         for (int[] d : directions) {
             int nx = bestX + d[0];
             int ny = bestY + d[1];
@@ -113,5 +89,5 @@ public class Ai {
         }
         player.setX(bestX);
         player.setY(bestY);
-    }*/
+    }
 }
