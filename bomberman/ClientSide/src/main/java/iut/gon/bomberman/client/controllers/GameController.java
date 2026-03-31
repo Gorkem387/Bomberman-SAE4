@@ -139,7 +139,7 @@ public class GameController {
         // Pose de bombe (Verrouillage par spaceWasPressed pour éviter le spam)
         if (input.contains(KeyCode.SPACE) && !spaceWasPressed) {
             spaceWasPressed = true;
-            bombManager.placeBomb(joueur, 3, labyrinthe);
+            bombManager.placeBomb(joueur, joueur.getExplosionRange(), labyrinthe);
         }
     }
 
@@ -171,7 +171,7 @@ public class GameController {
         if (joueur.isAlive()) {
             renderer.drawPlayer(gc, joueur);
         }
-        drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv());
+        drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
         
         if (isGameOver) {
             drawGameOverScreen();
@@ -214,12 +214,55 @@ public class GameController {
         double elementY = barY + (barHeight - 25) / 2;
         
         double bombX = barX + 8;
-        drawStatItem(gc, bombImage, bombs, bombX, elementY);
+        drawStatItem(gc, bombImage, bombs, bombX, elementY, "x");
         
         double heartX = barX + 62;
-        drawStatItem(gc, heartImage, hearts, heartX, elementY);
+        drawStatItem(gc, heartImage, hearts, heartX, elementY, "x");
     }
-    
+
+    /**
+     * Affiche une barre bleu foncé arrondie en bas avec les bombes et les cœurs centrés
+     *
+     * @param gc              GraphicsContext pour dessiner
+     * @param bombs           Nombre de bombes disponibles
+     * @param hearts          Nombre de cœurs disponibles
+     */
+    private void drawStatsBar(GraphicsContext gc, int bombs, int hearts, int range, float speed) {
+        double barHeight = 35;
+        double barY = gameCanvas.getHeight() - barHeight - 5;
+
+        double barWidth = 300;
+        double barX = (gameCanvas.getWidth() - barWidth) / 2.0;
+
+        gc.setFill(javafx.scene.paint.Color.rgb(25, 50, 100));
+        gc.fillRoundRect(barX, barY, barWidth, barHeight, 15, 15);
+
+        gc.setFill(javafx.scene.paint.Color.ORANGERED);
+        gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 14));
+        gc.fillText("RANGE: " + range, barX + 220, barY + 23);
+
+        gc.setStroke(javafx.scene.paint.Color.rgb(50, 100, 200));
+        gc.setLineWidth(2);
+        gc.strokeRoundRect(barX, barY, barWidth, barHeight, 15, 15);
+
+        double elementY = barY + (barHeight - 25) / 2;
+
+        drawStatItem(gc, bombImage, bombs, barX + 8, elementY, "x");
+        drawStatItem(gc, heartImage, hearts, barX + 68, elementY, "x");
+
+        if (speed > 1.0f) {
+            gc.setFill(javafx.scene.paint.Color.GOLD);
+            gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 14));
+            String speedTxt = String.format("SPEED x%.1f", speed);
+            gc.fillText(speedTxt, barX + 130, barY + 23);
+        } else {
+            gc.setFill(javafx.scene.paint.Color.LIGHTGRAY);
+            gc.setFont(javafx.scene.text.Font.font("Arial", 14));
+            gc.fillText("SPEED x1.0", barX + 130, barY + 23);
+        }
+    }
+
+
     /**
      * Affiche un élément de statistique (image + compteur)
      * @param gc GraphicsContext
@@ -228,7 +271,7 @@ public class GameController {
      * @param x Position X
      * @param y Position Y
      */
-    private void drawStatItem(GraphicsContext gc, Image image, int count, double x, double y) {
+    private void drawStatItem(GraphicsContext gc, Image image, int count, double x, double y, String label) {
         if (image == null) return;
 
         gc.drawImage(image, x, y, 25, 25);

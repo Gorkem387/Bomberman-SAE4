@@ -1,5 +1,6 @@
 package iut.gon.bomberman.client.controllers;
 
+import iut.gon.bomberman.common.model.player.Joueur;
 import javafx.fxml.FXML;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -10,6 +11,14 @@ public class UiController {
     
     @FXML
     private Pane heartImageBox;
+
+    @FXML
+
+    private javafx.scene.control.Label rangeLabel;
+
+    @FXML
+
+    private javafx.scene.control.Label speedLabel;
     
     private Image heartImage;
     
@@ -23,6 +32,17 @@ public class UiController {
             heartImage = new Image(resourcePath, 40, 40, true, true);
         } catch (NullPointerException e) {
             System.err.println("Impossible de charger l'image du cœur : " + e.getMessage());
+        }
+    }
+
+    public void updatePlayerStats(Joueur j) {
+        if (j == null) return;
+        displayHearts(j.getPv());
+        if (rangeLabel != null) {
+            rangeLabel.setText("PORTÉE : " + j.getExplosionRange());
+        }
+        if (speedLabel != null) {
+            speedLabel.setText(String.format("VITESSE : x%.1f", j.getSpeed_multiplier()));
         }
     }
     

@@ -92,11 +92,25 @@ public class BombManager {
                 explosionCells.add(new int[]{cx, cy});
 
                 if (cell == CellType.DESTRUCTIBLE) {
-                    labyrinthe.setCell(cx, cy, CellType.EMPTY);
+                    double rand = Math.random();
+
+                    if (rand < 0.10) {
+                        // 10% fire
+                        labyrinthe.setCell(cx, cy, CellType.FIRE_BONUS);
+                    }
+                    else if (rand < 0.30) {
+                        // 20% speed
+                        labyrinthe.setCell(cx, cy, CellType.SPEED_BONUS);
+                    }
+                    else {
+                        // 70% rien
+                        labyrinthe.setCell(cx, cy, CellType.EMPTY);
+                    }
                     break;
                 }
             }
         }
+
 
         for (Joueur joueur : joueurs) {
             int jx = (int) joueur.getX();
