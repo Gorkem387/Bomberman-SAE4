@@ -49,6 +49,14 @@ public class LabRenderer {
                     gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 18));
                     gc.fillText("S", x * TILE_SIZE + 10, y * TILE_SIZE + 22);
                 }
+                else if (type == CellType.FIRE_BONUS) {
+                    gc.setFill(javafx.scene.paint.Color.RED);
+                    gc.fillOval(x * TILE_SIZE + 4, y * TILE_SIZE + 4, TILE_SIZE - 8, TILE_SIZE - 8);
+
+                    gc.setFill(javafx.scene.paint.Color.WHITE);
+                    gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 18));
+                    gc.fillText("F", x * TILE_SIZE + 10, y * TILE_SIZE + 22);
+                }
             }
         }
     }

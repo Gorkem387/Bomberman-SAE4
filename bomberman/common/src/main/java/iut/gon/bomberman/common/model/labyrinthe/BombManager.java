@@ -92,10 +92,13 @@ public class BombManager {
                 explosionCells.add(new int[]{cx, cy});
 
                 if (cell == CellType.DESTRUCTIBLE) {
-                    if (Math.random() < 0.3) {
+                    double rand = Math.random();
+                    if (rand < 0.10) {
+                        // 10% speed bonus
                         labyrinthe.setCell(cx, cy, CellType.SPEED_BONUS);
                     } else {
-                        labyrinthe.setCell(cx, cy, CellType.EMPTY);
+                        // 90% bomb range bonus
+                        labyrinthe.setCell(cx, cy, CellType.FIRE_BONUS);
                     }
                     break;
                 }

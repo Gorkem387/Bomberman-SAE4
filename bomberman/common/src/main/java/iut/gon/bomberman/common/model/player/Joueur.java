@@ -33,6 +33,8 @@ public class Joueur {
     // Directions
     private Direction direction = Direction.DOWN;
 
+    private int explosionRange = 2;
+
     ////////////////
     //CONSTRUCTEUR//
     ////////////////
@@ -91,10 +93,17 @@ public class Joueur {
         int centerY = (int) Math.round(cooY);
 
         if (laby.isInside(centerX, centerY)) {
-            if (laby.getCell(centerX, centerY) == CellType.SPEED_BONUS) {
+            CellType typeCase = laby.getCell(centerX, centerY);
+
+            if (typeCase == CellType.SPEED_BONUS) {
                 this.speed_multiplier += 0.2f;
                 laby.setCell(centerX, centerY, CellType.EMPTY);
-                System.out.println("[BONUS] " + nom + " a ramassé un boost, Vitesse actuelle : " + speed_multiplier);
+                System.out.println("[BONUS] Vitesse : " + speed_multiplier);
+            }
+            else if (typeCase == CellType.FIRE_BONUS) {
+                this.addExplosionRange();
+                laby.setCell(centerX, centerY, CellType.EMPTY);
+                System.out.println("[BONUS] Portée explosion : " + explosionRange);
             }
         }
         if (deltaX == 0 && deltaY == 0) direction = Direction.IDLE;
@@ -215,4 +224,12 @@ public class Joueur {
 
     public boolean isAlive() { return alive; }
     public void setAlive(boolean alive) { this.alive = alive; }
+
+    public int getExplosionRange() {
+        return explosionRange;
+    }
+
+    public void addExplosionRange() {
+        this.explosionRange++;
+    }
 }

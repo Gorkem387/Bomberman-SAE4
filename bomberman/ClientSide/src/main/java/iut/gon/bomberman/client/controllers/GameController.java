@@ -128,7 +128,7 @@ public class GameController {
         // Pose de bombe (Verrouillage par spaceWasPressed pour éviter le spam)
         if (input.contains(KeyCode.SPACE) && !spaceWasPressed) {
             spaceWasPressed = true;
-            bombManager.placeBomb(joueur, 3, labyrinthe);
+            bombManager.placeBomb(joueur, joueur.getExplosionRange(), labyrinthe);
         }
     }
 
