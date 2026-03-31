@@ -152,11 +152,8 @@ public class GameController {
             renderer.drawPlayer(gc, joueur);
         }
         
-        // Dessine les cœurs sur le canvas
-        drawHearts(gc, joueur.getPv());
-        
-        // Dessine les bombes sur le canvas
-        drawBombs(gc, joueur.getNb_bombes());
+        // Dessine la barre de statistiques en bas
+        drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv());
         
         if (isGameOver) {
             drawGameOverScreen();
@@ -173,6 +170,62 @@ public class GameController {
     }
     
     /**
+     * Affiche une barre bleu foncé arrondie en bas avec les bombes et les cœurs centrés
+     * @param gc GraphicsContext pour dessiner
+     * @param bombs Nombre de bombes disponibles
+     * @param hearts Nombre de cœurs disponibles
+     */
+    private void drawStatsBar(GraphicsContext gc, int bombs, int hearts) {
+        double barHeight = 35;
+        double barY = gameCanvas.getHeight() - barHeight - 5; // Fixée au bas
+        
+        // Largeur compacte
+        double barWidth = 120;
+        double barX = (gameCanvas.getWidth() - barWidth) / 2.0; // Centré horizontalement
+        
+        // Fond bleu foncé avec coins arrondis
+        gc.setFill(javafx.scene.paint.Color.rgb(25, 50, 100)); // Bleu foncé
+        gc.fillRoundRect(barX, barY, barWidth, barHeight, 15, 15);
+        
+        // Bordure avec coins arrondis
+        gc.setStroke(javafx.scene.paint.Color.rgb(50, 100, 200)); // Bleu plus clair
+        gc.setLineWidth(2);
+        gc.strokeRoundRect(barX, barY, barWidth, barHeight, 15, 15);
+        
+        // Positionnement des éléments centrés verticalement
+        double elementY = barY + (barHeight - 25) / 2;
+        
+        // Affiche les bombes (à gauche de la barre)
+        double bombX = barX + 8;
+        drawStatItem(gc, bombImage, bombs, bombX, elementY, "x");
+        
+        // Affiche les cœurs (à droite de la barre)
+        double heartX = barX + 62;
+        drawStatItem(gc, heartImage, hearts, heartX, elementY, "x");
+    }
+    
+    /**
+     * Affiche un élément de statistique (image + compteur)
+     * @param gc GraphicsContext
+     * @param image Image à afficher
+     * @param count Nombre à afficher
+     * @param x Position X
+     * @param y Position Y
+     * @param separator Séparateur (par exemple "x")
+     */
+    private void drawStatItem(GraphicsContext gc, Image image, int count, double x, double y, String separator) {
+        if (image == null) return;
+        
+        // Affiche l'image (réduite à 25x25)
+        gc.drawImage(image, x, y, 25, 25);
+        
+        // Affiche le séparateur et le compteur
+        gc.setFill(javafx.scene.paint.Color.WHITE);
+        gc.setFont(javafx.scene.text.Font.font("Arial", 16));
+        gc.fillText(separator + " " + count, x + 30, y + 18);
+    }
+    
+    /**
      * Affiche les cœurs et les bombes côte à côte au centre du canvas
      * @param gc GraphicsContext pour dessiner
      * @param hearts Nombre de cœurs à afficher
@@ -182,13 +235,13 @@ public class GameController {
         
         // Calcule le centre du canvas
         double centerX = gameCanvas.getWidth() / 2.0;
-        double centerY = 0;
+        double centerY = 15;
         
         // Calcule la largeur totale des cœurs
         int heartsWidth = hearts * 35;
         
         // Position de départ des cœurs (alignés à droite du centre)
-        double xStart = centerX - heartsWidth - 10; // -10 pour l'espace entre cœurs et bombes
+        double xStart = centerX - heartsWidth - 20; // -20 pour l'espace entre cœurs et bombes
         
         for (int i = 0; i < hearts; i++) {
             gc.drawImage(heartImage, xStart + (i * 35), centerY);
@@ -196,7 +249,7 @@ public class GameController {
     }
     
     /**
-     * Affiche les bombes disponibles du joueur
+     * Affiche les bombes disponibles du joueur avec un style amélioré
      * @param gc GraphicsContext pour dessiner
      * @param bombs Nombre de bombes à afficher
      */
@@ -205,13 +258,41 @@ public class GameController {
         
         // Calcule le centre du canvas
         double centerX = gameCanvas.getWidth() / 2.0;
-        double centerY = 0;
+        double centerY = 15;
         
         // Position de départ des bombes (alignées à gauche du centre)
-        double xStart = centerX + 10; // +10 pour l'espace entre cœurs et bombes
+        double xStart = centerX + 20; // +20 pour l'espace entre cœurs et bombes
         
         for (int i = 0; i < bombs; i++) {
             gc.drawImage(bombImage, xStart + (i * 35), centerY);
         }
+    }
+    
+    /**
+     * Dessine un fond semi-transparent avec bordure pour les statistiques
+     * @param gc GraphicsContext pour dessiner
+     * @param hearts Nombre de cœurs
+     * @param bombs Nombre de bombes
+     */
+    private void drawStatsBackground(GraphicsContext gc, int hearts, int bombs) {
+        double centerX = gameCanvas.getWidth() / 2.0;
+        
+        // Calcule les dimensions du conteneur
+        int heartsWidth = hearts * 35;
+        int bombsWidth = bombs * 35;
+        int totalWidth = heartsWidth + bombsWidth + 60; // +60 pour l'espace entre et les padding
+        int height = 60;
+        
+        double bgX = centerX - (totalWidth / 2.0);
+        double bgY = 5;
+        
+        // Fond semi-transparent
+        gc.setFill(javafx.scene.paint.Color.rgb(0, 0, 0, 0.3));
+        gc.fillRoundRect(bgX, bgY, totalWidth, height, 10, 10);
+        
+        // Bordure
+        gc.setStroke(javafx.scene.paint.Color.rgb(255, 255, 255, 0.6));
+        gc.setLineWidth(2);
+        gc.strokeRoundRect(bgX, bgY, totalWidth, height, 10, 10);
     }
 }
