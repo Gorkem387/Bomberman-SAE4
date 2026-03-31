@@ -1,4 +1,4 @@
-package iut.gon.serverside.Message;
+package iut.gon.bomberman.common.model.Message;
 
 public class ChatMessage implements Message {
     private final String senderName;

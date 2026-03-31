@@ -1,7 +1,7 @@
 package iut.gon.serverside.Threads.PlayerInputHandling;
 
-import iut.gon.serverside.Message.Message;
-import iut.gon.serverside.Message.MessageType;
+import iut.gon.bomberman.common.model.Message.Message;
+import iut.gon.bomberman.common.model.Message.MessageType;
 import iut.gon.serverside.Threads.ClientHandler;
 
 import java.util.EnumMap;

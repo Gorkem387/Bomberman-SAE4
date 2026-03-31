@@ -1,6 +1,6 @@
 package iut.gon.serverside.Player.DTO;
 
-import iut.gon.serverside.Message.MessageType;
+import iut.gon.bomberman.common.model.Message.MessageType;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

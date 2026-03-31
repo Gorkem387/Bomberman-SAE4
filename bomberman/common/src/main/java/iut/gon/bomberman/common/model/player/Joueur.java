@@ -1,9 +1,16 @@
 package iut.gon.bomberman.common.model.player;
 
+<<<<<<< HEAD
 import iut.gon.bomberman.common.model.player.Effects.Bonus;
 import iut.gon.bomberman.common.model.player.EtatJoueur;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
+=======
+import iut.gon.bomberman.common.model.labyrinthe.BombManager;
+import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
+import iut.gon.bomberman.common.model.player.Effects.Bonus;
+import iut.gon.bomberman.common.model.player.EtatJoueur;
+>>>>>>> dev
 
 public class Joueur {
 
@@ -11,7 +18,6 @@ public class Joueur {
     //ATTRIBUTS//
     /////////////
 
-    private ClientHandler clientHandler;
     private int id;
     private double cooX;
     private double cooY;
@@ -24,16 +30,14 @@ public class Joueur {
     private String nom;
     private int skinId;
 
+    private boolean alive = true;
+
     // Directions
     private Direction direction = Direction.DOWN;
 
     ////////////////
     //CONSTRUCTEUR//
     ////////////////
-
-    public Joueur(ClientHandler clientHandler){
-        this.clientHandler = clientHandler;
-    }
 
     public Joueur(int id, String nom){
         this.id = id;
@@ -48,19 +52,6 @@ public class Joueur {
         this.speed_multiplier = 1.0f;
     }
 
-    public Joueur(ClientHandler clientHandler, int id, String nom){
-        this.clientHandler = clientHandler;
-        this.id = id;
-        this.nom = nom;
-        this.cooX = 0;
-        this.cooY = 0;
-        this.etat = EtatJoueur.NOT_CONNECTED;
-        this.pv = 3;
-        this.nb_bombes_max = 3;
-        this.nb_bombes = 3;
-        this.bonus = new Bonus[3];
-        this.speed_multiplier = 1.0f;
-    }
 
     public Joueur(int id, String nom, double cooX, double cooY, EtatJoueur etat, int pv, int nb_bombes_max, int nb_bombes, Bonus[] bonus, float speed_multiplier) {
         this.id = id;
@@ -76,35 +67,33 @@ public class Joueur {
     }
 
     // Méthode move
-    public void move(double deltaX, double deltaY, Labyrinthe laby) {
-        // Vitesse de base
+    // Méthode move
+    public void move(double deltaX, double deltaY, Labyrinthe laby, BombManager bombManager) {
         double vitesseBase = 0.05;
-        double deplacementX = deltaX * vitesseBase * speed_multiplier;
-        double deplacementY = deltaY * vitesseBase * speed_multiplier;
-
-        // Calcul de la future position
-        double nextX = cooX + deplacementX;
-        double nextY = cooY + deplacementY;
-
+        double nextX = cooX + (deltaX * vitesseBase * speed_multiplier);
+        double nextY = cooY + (deltaY * vitesseBase * speed_multiplier);
         double size = 0.9;
 
-        // Vérifie si la case est bonne
-        boolean canMove = laby.isWalkable((int)(nextX), (int)(nextY)) &&
-                laby.isWalkable((int)(nextX + size), (int)(nextY)) &&
-                laby.isWalkable((int)(nextX), (int)(nextY + size)) &&
-                laby.isWalkable((int)(nextX + size), (int)(nextY + size));
-
-        // Si la case est bonne, alors on déplace le joueur
-        if (canMove) {
+        // On vérifie les collisions
+        if (canMoveTo(nextX, nextY, size, laby, bombManager)) {
             this.cooX = nextX;
             this.cooY = nextY;
         }
+    }
 
-        // Mise à jour de la direction
-        if (deltaX > 0) direction = Direction.RIGHT;
-        else if (deltaX < 0) direction = Direction.LEFT;
-        else if (deltaY > 0) direction = Direction.DOWN;
-        else if (deltaY < 0) direction = Direction.UP;
+    private boolean canMoveTo(double x, double y, double size, Labyrinthe laby, BombManager bm) {
+        int[][] points = {
+                {(int)x, (int)y},
+                {(int)(x + size), (int)y},
+                {(int)x, (int)(y + size)},
+                {(int)(x + size), (int)(y + size)}
+        };
+
+        for (int[] p : points) {
+            if (!laby.isWalkable(p[0], p[1])) return false;
+            if (bm.isBombAt(p[0], p[1])) return false;
+        }
+        return true;
     }
 
     ///////////////////
@@ -198,7 +187,10 @@ public class Joueur {
         this.direction = direction;
     }
 
-    public ClientHandler getClientHandler() {
-        return clientHandler;
+    public int getRadius() {
+        return 1;
     }
+
+    public boolean isAlive() { return alive; }
+    public void setAlive(boolean alive) { this.alive = alive; }
 }

@@ -1,5 +1,6 @@
 package iut.gon.bomberman.client.view;
 
+import iut.gon.bomberman.common.model.labyrinthe.Bomb;
 import iut.gon.bomberman.common.model.labyrinthe.CellType;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.player.Direction;
@@ -9,24 +10,30 @@ import javafx.scene.image.Image;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.List;
 
 public class LabRenderer {
+
     private static final int TILE_SIZE = 32;
-    private static final int ANIMATION_SPEED = 10; // frames before changing sprite
+    private static final int ANIMATION_SPEED = 10;
 
-    private final Image wallImg = new Image(getClass().getResourceAsStream("/iut/gon/bomberman/client/assets/block_04.png"));
-    private final Image destructibleImg = new Image(getClass().getResourceAsStream("/iut/gon/bomberman/client/assets/block_06.png"));
-    private final Image groundImg = new Image(getClass().getResourceAsStream("/iut/gon/bomberman/client/assets/ground_01.png"));
+    private final Image wallImg         = load("/iut/gon/bomberman/client/assets/block_04.png");
+    private final Image destructibleImg = load("/iut/gon/bomberman/client/assets/block_06.png");
+    private final Image groundImg       = load("/iut/gon/bomberman/client/assets/ground_01.png");
+    private final Image bombImg         = load("/iut/gon/bomberman/client/assets/B_0.png");
+    private final Image explosionImg    = load("/iut/gon/bomberman/client/assets/explosion_0_4.png");
 
-    // Cache des sprites pour chaque direction
     private final Map<String, Image[]> spriteCache = new HashMap<>();
     private int animationCounter = 0;
+
+    private Image load(String path) {
+        return new Image(Objects.requireNonNull(getClass().getResourceAsStream(path)));
+    }
 
     public void draw(GraphicsContext gc, Labyrinthe lab) {
         for (int x = 0; x < lab.getWidth(); x++) {
             for (int y = 0; y < lab.getHeight(); y++) {
-                CellType type = lab.getCell(x,y);
-
+                CellType type = lab.getCell(x, y);
                 gc.drawImage(groundImg, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                 if (type == CellType.WALL) {
                     gc.drawImage(wallImg, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
@@ -37,53 +44,57 @@ public class LabRenderer {
         }
     }
 
-    public void drawPlayer(GraphicsContext gc, Joueur joueur) {
-        if (joueur == null) {
-            return;
+    public void drawBombs(GraphicsContext gc, List<Bomb> bombs) {
+        for (Bomb bomb : bombs) {
+            double sx = bomb.getX() * TILE_SIZE;
+            double sy = bomb.getY() * TILE_SIZE;
+            gc.drawImage(bombImg, sx, sy, TILE_SIZE, TILE_SIZE);
         }
-        
-        // Déterminer la direction à partir de l'objet joueur
-        String direction = updateDirection(joueur.getDirection());
+    }
+
+    public void drawExplosions(GraphicsContext gc, List<int[]> cells) {
+        for (int[] cell : cells) {
+            gc.drawImage(explosionImg, cell[0] * TILE_SIZE, cell[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+        }
+    }
+
+    public void drawPlayer(GraphicsContext gc, Joueur joueur) {
+        if (joueur == null || !joueur.isAlive()) return;
+
+        // Déterminer la direction et l'état
+        String dirSuffix = updateDirection(joueur.getDirection());
         boolean isIdle = joueur.getDirection() == Direction.IDLE;
-        
-        // Incrémenter le compteur d'animation seulement si en mouvement
+
+        // Gérer le compteur d'animation
         if (!isIdle) {
             animationCounter++;
         } else {
-            // Réinitialiser le compteur en mode IDLE
             animationCounter = 0;
         }
-        
-        // Calculer l'index du frame actuel (0, 1, 2)
+
+        // Calculer l'index du frame (0, 1, 2)
         int frameIndex = isIdle ? 0 : (animationCounter / ANIMATION_SPEED) % 3;
-        
-        // Charger les sprites de cette direction si nécessaire
-        if (!spriteCache.containsKey(direction)) {
-            if(Objects.equals(direction, "R")) {
-                Image[] sprite = new Image[3];
-                for (int i = 0; i < 3; i++) {
-                    sprite[i] = new Image(Objects.requireNonNull(getClass().getResourceAsStream(
-                            "/iut/gon/bomberman/client/assets/8/R" + "_" + 0 + ".png"
-                    )));
-                }
-                spriteCache.put(direction, sprite);
-            } else {
-                Image[] frames = new Image[3];
-                for (int i = 0; i < 3; i++) {
-                    frames[i] = new Image(Objects.requireNonNull(getClass().getResourceAsStream(
-                            "/iut/gon/bomberman/client/assets/8/" + direction + "_" + i + ".png"
-                    )));
-                }
-                spriteCache.put(direction, frames);
-            }
+
+        // Charger/Récupérer les sprites depuis le cache
+        if (!spriteCache.containsKey(dirSuffix)) {
+            loadSpritesIntoCache(dirSuffix);
         }
-        
-        // Obtenir l'image du frame actuel
-        Image currentSprite = spriteCache.get(direction)[frameIndex];
-        
+
+        Image currentSprite = spriteCache.get(dirSuffix)[frameIndex];
+
+        // Dessiner
         double screenX = joueur.getX() * TILE_SIZE;
         double screenY = joueur.getY() * TILE_SIZE;
         gc.drawImage(currentSprite, screenX, screenY, TILE_SIZE, TILE_SIZE);
+    }
+
+    private void loadSpritesIntoCache(String direction) {
+        Image[] frames = new Image[3];
+        for (int i = 0; i < 3; i++) {
+            String path = "/iut/gon/bomberman/client/assets/8/" + direction + "_" + i + ".png";
+            frames[i] = load(path);
+        }
+        spriteCache.put(direction, frames);
     }
 
     public String updateDirection(Direction direction) {
@@ -92,7 +103,7 @@ public class LabRenderer {
             case DOWN -> "S";
             case LEFT -> "W";
             case RIGHT -> "E";
-            case IDLE -> "R"; // Par défaut
+            case IDLE -> "S";
         };
     }
 

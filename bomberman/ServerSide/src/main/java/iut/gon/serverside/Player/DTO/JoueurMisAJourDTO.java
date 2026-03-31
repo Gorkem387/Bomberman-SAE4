@@ -1,14 +1,10 @@
 package iut.gon.serverside.Player.DTO;
 
-import iut.gon.serverside.Message.MessageType;
+import iut.gon.bomberman.common.model.Message.MessageType;
 
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 public class JoueurMisAJourDTO implements IDTO{
 

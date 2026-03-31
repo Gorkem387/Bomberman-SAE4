@@ -1,4 +1,4 @@
-package iut.gon.serverside.Message;
+package iut.gon.bomberman.common.model.Message;
 
 import java.io.Serializable;
 import java.util.Map;

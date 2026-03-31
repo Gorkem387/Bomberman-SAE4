@@ -4,7 +4,7 @@ import iut.gon.bomberman.common.model.labyrinthe.CellType;
 import iut.gon.bomberman.common.model.player.Joueur;
 
 public enum AISTRATEGIES {
-    AGGRESSIVE {
+    /*AGGRESSIVE {
         @Override
         public void play(Ai ia, Joueur[] players, HeatMap hM) {
             final int  BOMB_COUNTDOWN = 3;
@@ -92,6 +92,11 @@ public enum AISTRATEGIES {
         }
     };
 
+<<<<<<< HEAD
     public void play(Ai ia, Joueur[] players, HeatMap hM) {
     }
+=======
+    public void play(Ai ai) {
+    }*/
+>>>>>>> dev
 }

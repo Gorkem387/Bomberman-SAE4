@@ -3,7 +3,7 @@ package iut.gon.serverside.Threads;
 import iut.gon.bomberman.common.model.player.Joueur;
 import iut.gon.serverside.Logger.LogTypes;
 import iut.gon.serverside.Logger.Logger;
-import iut.gon.serverside.Message.Message;
+import iut.gon.bomberman.common.model.Message.Message;
 import iut.gon.serverside.Threads.PlayerInputHandling.MessageDispatcher;
 
 import java.io.*;
@@ -22,13 +22,20 @@ public class ClientHandler extends Thread {
     private final Logger logger = Logger.getInstance();
     public int playerId;
     public Joueur joueur;
-
+    private int lobbyId;
 
     public ClientHandler(Socket socket, MessageDispatcher dispatcher) {
         this.socket = socket;
         this.dispatcher = dispatcher;
         this.joueur = new Joueur(this);
+    }
 
+    public ClientHandler(Socket socket, MessageDispatcher dispatcher, int lobbyId) {
+        this.socket = socket;
+        this.dispatcher = dispatcher;
+        this.joueur = new Joueur(this);
+        //todo : donner l'id du lobby qlq part au constructeur
+        this.lobbyId = lobbyId;
     }
 
     @Override
@@ -83,5 +90,13 @@ public class ClientHandler extends Thread {
 
     private int getPlayerId(){
         return playerId;
+    }
+
+    public void setLobbyId(int lobbyId) {
+        this.lobbyId = lobbyId;
+    }
+
+    public int getLobbyId() {
+        return lobbyId;
     }
 }
