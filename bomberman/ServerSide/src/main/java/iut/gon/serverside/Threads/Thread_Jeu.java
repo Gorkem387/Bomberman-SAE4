@@ -1,15 +1,10 @@
 package iut.gon.serverside.Threads;
 
 import iut.gon.serverside.Lob.Lobby;
-import iut.gon.serverside.Logger.LogTypes;
 import iut.gon.serverside.Logger.Logger;
-import iut.gon.serverside.Message.Message;
 import iut.gon.serverside.Player.DTO.IDTO;
 import iut.gon.serverside.Player.DTO.InitGameDTO;
 import iut.gon.serverside.Player.DTO.JoueurMisAJourDTO;
-
-import java.io.*;
-import java.net.Socket;
 
 public class Thread_Jeu extends Thread {
 

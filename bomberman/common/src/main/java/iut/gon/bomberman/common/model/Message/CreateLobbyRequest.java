@@ -1,4 +1,4 @@
-package iut.gon.serverside.Message;
+package iut.gon.bomberman.common.model.Message;
 
 import iut.gon.bomberman.common.model.labyrinthe.TypeLab;
 

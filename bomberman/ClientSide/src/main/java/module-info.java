@@ -7,5 +7,4 @@ module iut.gon.bomberman.client {
 
     opens iut.gon.bomberman.client.controllers to javafx.fxml;
 
-    exports iut.gon.bomberman.client;
 }

@@ -1,6 +1,6 @@
 package iut.gon.serverside.Threads.PlayerInputHandling;
 
-import iut.gon.serverside.Message.MoveRequest;
+import iut.gon.bomberman.common.model.Message.MoveRequest;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.Lob.Lobby;
 import iut.gon.serverside.LobbyManager;
@@ -18,7 +18,7 @@ public class MoveHandler implements MessageHandler<MoveRequest> {
         
         // Simuler la recherche du lobby (à adapter dans votre LobbyManager pour obtenir le lobby par ID)
         //todo : donner l'id du lobby au clientHandler
-        Lobby lobby = LobbyManager.getInstance().getLobby(client.lobbyId);
+        Lobby lobby = LobbyManager.getInstance().getLobby(client.getLobbyId());
 
 
         if (client.joueur != null) {

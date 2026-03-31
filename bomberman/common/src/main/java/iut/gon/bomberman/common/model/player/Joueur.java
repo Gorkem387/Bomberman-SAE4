@@ -3,7 +3,6 @@ package iut.gon.bomberman.common.model.player;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.player.Effects.Bonus;
 import iut.gon.bomberman.common.model.player.EtatJoueur;
-import iut.gon.serverside.Threads.ClientHandler;
 
 public class Joueur {
 
@@ -11,7 +10,6 @@ public class Joueur {
     //ATTRIBUTS//
     /////////////
 
-    private ClientHandler clientHandler;
     private int id;
     private double cooX;
     private double cooY;
@@ -31,10 +29,6 @@ public class Joueur {
     //CONSTRUCTEUR//
     ////////////////
 
-    public Joueur(ClientHandler clientHandler){
-        this.clientHandler = clientHandler;
-    }
-
     public Joueur(int id, String nom){
         this.id = id;
         this.nom = nom;
@@ -48,19 +42,6 @@ public class Joueur {
         this.speed_multiplier = 1.0f;
     }
 
-    public Joueur(ClientHandler clientHandler, int id, String nom){
-        this.clientHandler = clientHandler;
-        this.id = id;
-        this.nom = nom;
-        this.cooX = 0;
-        this.cooY = 0;
-        this.etat = EtatJoueur.NOT_CONNECTED;
-        this.pv = 3;
-        this.nb_bombes_max = 3;
-        this.nb_bombes = 3;
-        this.bonus = new Bonus[3];
-        this.speed_multiplier = 1.0f;
-    }
 
     public Joueur(int id, String nom, double cooX, double cooY, EtatJoueur etat, int pv, int nb_bombes_max, int nb_bombes, Bonus[] bonus, float speed_multiplier) {
         this.id = id;
@@ -197,7 +178,7 @@ public class Joueur {
         this.direction = direction;
     }
 
-    public ClientHandler getClientHandler() {
-        return clientHandler;
+    public int getRadius() {
+        return 1;
     }
 }
