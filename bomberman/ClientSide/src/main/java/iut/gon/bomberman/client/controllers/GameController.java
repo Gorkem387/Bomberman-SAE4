@@ -52,14 +52,15 @@ public class GameController {
         
         // Charge l'image de la bombe
         try {
+            String bombPath = iut.gon.bomberman.client.GameSettings.getSelectedBombPath();
             String resourcePath = Objects.requireNonNull(
-                getClass().getResource("/iut/gon/bomberman/client/assets/B_0.png")
+                    getClass().getResource(bombPath)
             ).toExternalForm();
             bombImage = new Image(resourcePath, 30, 30, true, true);
         } catch (NullPointerException e) {
-            System.err.println("Impossible de charger l'image de la bombe : " + e.getMessage());
+            System.err.println("Impossible de charger l'image de la bombe personnalisée");
         }
-        
+
         // ...existing code...
         DFSGenerator generator = new DFSGenerator();
         this.labyrinthe = generator.createLabyrinthe(21, 21);
@@ -68,6 +69,12 @@ public class GameController {
         this.bombManager = new BombManager();
 
         this.joueur = new Joueur(1, "Gorke");
+
+        String savedSkin = iut.gon.bomberman.client.GameSettings.getSelectedSkinPath();
+        this.joueur.setSkinPath(savedSkin);
+
+        renderer.updateAssets();
+
         this.joueur.setX(1);
         this.joueur.setY(1);
 
