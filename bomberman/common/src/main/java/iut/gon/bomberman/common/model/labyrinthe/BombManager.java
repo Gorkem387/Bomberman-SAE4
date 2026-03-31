@@ -12,17 +12,15 @@ public class BombManager {
     private static final double EXPLOSION_DURATION = 0.8;
     private double explosionTimer = 0;
 
-    public boolean placeBomb(Joueur joueur, int range) {
+    public boolean placeBomb(Joueur joueur, int range, Labyrinthe labyrinthe) {
         if (joueur.getNb_bombes() <= 0) return false;
-
-        int bx = (int) joueur.getX();
-        int by = (int) joueur.getY();
-
+        int bx = (int) Math.round(joueur.getX());
+        int by = (int) Math.round(joueur.getY());
+        if (!labyrinthe.isWalkable(bx, by)) return false;
         for (Bomb b : bombs) {
             if (b.getX() == bx && b.getY() == by) return false;
         }
-
-        bombs.add(new Bomb(bx, by, range));
+        bombs.add(new Bomb(bx, by, range, joueur));
         joueur.setNb_bombes(joueur.getNb_bombes() - 1);
         return true;
     }

@@ -1,5 +1,7 @@
 package iut.gon.bomberman.common.model.labyrinthe;
 
+import iut.gon.bomberman.common.model.player.Joueur;
+
 import java.io.Serializable;
 
 public class Bomb implements Serializable {
@@ -10,13 +12,15 @@ public class Bomb implements Serializable {
     private double timer;
     private boolean exploded;
     private boolean solid = false;
+    Joueur joueur;
 
-    public Bomb(int x, int y, int range) {
+    public Bomb(int x, int y, int range, Joueur joueur) {
         this.x = x;
         this.y = y;
         this.range = range;
         this.timer = 3.0;
         this.exploded = false;
+        this.joueur = joueur;
     }
 
     public boolean tick(double deltaTime) {

@@ -61,31 +61,29 @@ public class LabRenderer {
     public void drawPlayer(GraphicsContext gc, Joueur joueur) {
         if (joueur == null || !joueur.isAlive()) return;
 
-        // Déterminer la direction et l'état
         String dirSuffix = updateDirection(joueur.getDirection());
         boolean isIdle = joueur.getDirection() == Direction.IDLE;
 
-        // Gérer le compteur d'animation
-        if (!isIdle) {
-            animationCounter++;
-        } else {
-            animationCounter = 0;
-        }
+        if (!isIdle) animationCounter++;
+        else animationCounter = 0;
 
-        // Calculer l'index du frame (0, 1, 2)
         int frameIndex = isIdle ? 0 : (animationCounter / ANIMATION_SPEED) % 3;
 
-        // Charger/Récupérer les sprites depuis le cache
-        if (!spriteCache.containsKey(dirSuffix)) {
-            loadSpritesIntoCache(dirSuffix);
-        }
-
+        if (!spriteCache.containsKey(dirSuffix)) loadSpritesIntoCache(dirSuffix);
         Image currentSprite = spriteCache.get(dirSuffix)[frameIndex];
+        double visualOffsetY = -0.25;
 
-        // Dessiner
-        double screenX = joueur.getX() * TILE_SIZE;
-        double screenY = joueur.getY() * TILE_SIZE;
-        gc.drawImage(currentSprite, screenX, screenY, TILE_SIZE, TILE_SIZE);
+        gc.drawImage(currentSprite,
+                joueur.getX() * TILE_SIZE,
+                (joueur.getY() + visualOffsetY) * TILE_SIZE,
+                TILE_SIZE, TILE_SIZE);
+        gc.setStroke(javafx.scene.paint.Color.RED);
+        double hSize = 0.7;
+        double off = 0.15;
+        // Hitbox
+        gc.strokeRect((joueur.getX() + off) * TILE_SIZE,
+                (joueur.getY() + off) * TILE_SIZE,
+                hSize * TILE_SIZE, hSize * TILE_SIZE);
     }
 
     private void loadSpritesIntoCache(String direction) {
