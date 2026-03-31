@@ -2,17 +2,19 @@ package iut.gon.serverside.Threads;
 
 import iut.gon.serverside.Lob.Lobby;
 import iut.gon.serverside.Logger.Logger;
-import iut.gon.serverside.Player.DTO.IDTO;
-import iut.gon.serverside.Player.DTO.InitGameDTO;
-import iut.gon.serverside.Player.DTO.JoueurMisAJourDTO;
+import iut.gon.bomberman.common.model.Message.Message;
+import iut.gon.bomberman.common.model.Message.InitGame;
+import iut.gon.bomberman.common.model.Message.GameUpdate;
+import iut.gon.bomberman.common.model.player.Joueur;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Thread_Jeu extends Thread {
 
     private boolean running = true;
     private Lobby lobby;
     private Logger logger = Logger.getInstance();
-    private InitGameDTO initGameDTO;
-    private JoueurMisAJourDTO joueurMisAJourDTO;
 
     public Thread_Jeu(Lobby lobby) {
         this.lobby = lobby;
@@ -21,31 +23,46 @@ public class Thread_Jeu extends Thread {
 
     @Override
     public void run() {
-        initGameDTO = new InitGameDTO();
-        initGameDTO.id = lobby.getId();
-        initGameDTO.pseudo = lobby.getNom();
-        initGameDTO.skin = 0;
-        initGameDTO.x = 0;
-        initGameDTO.y = 0;
+        // Construire et envoyer un message d'initialisation global
+        Map<Integer, InitGame.PlayerInitDTO> playersMap = new HashMap<>();
+        for (Joueur j : lobby.getJoueurs()) {
+            int id = j.getId();
+            String pseudo = j.getNom();
+            int skin = 0; // valeur par défaut, à adapter si vous avez un skin côté joueur
+            int x = (int) j.getX();
+            int y = (int) j.getY();
+            playersMap.put(id, new InitGame.PlayerInitDTO(id, pseudo, skin, x, y));
+        }
 
-        broadcastUpdate(initGameDTO);
+        // Note : les champs pseudoLocal/idLocal étaient initialement pris du lobby dans le code existant;
+        // on conserve ce comportement pour rester compatible, mais idéalement ce serait les infos du joueur local.
+        InitGame init = new InitGame(lobby.getNom(), lobby.getId(), 0, 0, 0, playersMap);
+        broadcastUpdate(init);
+
         while (running) {
-            joueurMisAJourDTO = new JoueurMisAJourDTO(
-                    lobby.getJoueur(0).getId(),
-                    lobby.getJoueur(0).getX(),
-                    lobby.getJoueur(0).getY()
-            );
+            // Construire une mise à jour légère (GameUpdate) et l'envoyer
+            Map<Integer, GameUpdate.PlayerPositionDTO> posMap = new HashMap<>();
+            for (Joueur j : lobby.getJoueurs()) {
+                int id = j.getId();
+                int x = (int) j.getX();
+                int y = (int) j.getY();
+                String dir = j.getDirection() != null ? j.getDirection().toString() : null;
+                posMap.put(id, new GameUpdate.PlayerPositionDTO(x, y, dir));
+            }
 
-            broadcastUpdate(joueurMisAJourDTO);
-            try { Thread.sleep(16); }
-            catch (InterruptedException e) {} // ~60 FPS
+            GameUpdate update = new GameUpdate(posMap);
+            broadcastUpdate(update);
+
+            try {
+                Thread.sleep(16); // ~60 FPS
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
-    private void broadcastUpdate(IDTO DTO) {
-        // Pour chaque Joueur dans le lobby, on récupère son ClientHandler pour envoyer
-        for (int i = 0; i < lobby.getJoueurs().size(); i++) {
-            lobby.getJoueur(i).getClientHandler().send(DTO);
-        }
+    private void broadcastUpdate(Message message) {
+        // Envoie uniquement aux clients du lobby associé à ce Thread_Jeu
+        ThreadPrincipal.broadcastToLobby(lobby, message);
     }
 }

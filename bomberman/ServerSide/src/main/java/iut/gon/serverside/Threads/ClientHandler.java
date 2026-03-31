@@ -27,13 +27,15 @@ public class ClientHandler extends Thread {
     public ClientHandler(Socket socket, MessageDispatcher dispatcher) {
         this.socket = socket;
         this.dispatcher = dispatcher;
-        this.joueur = new Joueur(this);
+        // Initialisation temporaire du Joueur avec un constructeur valide du module common
+        this.joueur = new Joueur(-1, "");
     }
 
     public ClientHandler(Socket socket, MessageDispatcher dispatcher, int lobbyId) {
         this.socket = socket;
         this.dispatcher = dispatcher;
-        this.joueur = new Joueur(this);
+        // Initialisation temporaire du Joueur avec un constructeur valide du module common
+        this.joueur = new Joueur(-1, "");
         //todo : donner l'id du lobby qlq part au constructeur
         this.lobbyId = lobbyId;
     }

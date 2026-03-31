@@ -5,6 +5,8 @@ import iut.gon.serverside.Logger.LogTypes;
 import iut.gon.serverside.Logger.Logger;
 import iut.gon.bomberman.common.model.Message.Message;
 import iut.gon.serverside.Threads.PlayerInputHandling.MessageDispatcher;
+import iut.gon.serverside.Lob.Lobby;
+import iut.gon.bomberman.common.model.player.Joueur;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -12,6 +14,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Thread principal qui attend et accepte les connexions des clients.
@@ -56,6 +60,25 @@ public class ThreadPrincipal {
         synchronized (clients) {
             for (ClientHandler client : clients) {
                 client.send(message);
+            }
+        }
+    }
+
+    /**
+     * Envoie un message uniquement aux clients dont le joueur est présent dans le lobby donné.
+     */
+    public static void broadcastToLobby(Lobby lobby, Message message) {
+        // Copie la liste des joueurs du lobby dans un Set pour éviter les problèmes de concurrence
+        Set<Joueur> lobbyPlayers = new HashSet<>(lobby.getJoueurs());
+        synchronized (clients) {
+            for (ClientHandler client : clients) {
+                try {
+                    if (client != null && client.joueur != null && lobbyPlayers.contains(client.joueur)) {
+                        client.send(message);
+                    }
+                } catch (Exception e) {
+                    logger.log(LogTypes.ERROR, "Erreur lors de l'envoi du message au client du lobby: " + e.getMessage());
+                }
             }
         }
     }

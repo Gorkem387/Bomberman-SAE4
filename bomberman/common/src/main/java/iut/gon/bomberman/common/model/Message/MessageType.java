@@ -9,4 +9,5 @@ public enum MessageType {
     CHAT_MESSAGE,
     READY_STATUS,
     GAME_UPDATE,
+    INIT_GAME
 }

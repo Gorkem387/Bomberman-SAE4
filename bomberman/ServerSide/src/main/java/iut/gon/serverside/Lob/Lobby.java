@@ -4,7 +4,8 @@ import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.player.EtatJoueur;
 import iut.gon.serverside.Logger.LogTypes;
 import iut.gon.serverside.Logger.Logger;
-import iut.gon.serverside.Player.DTO.InitGameDTO;
+import iut.gon.serverside.Threads.ThreadPrincipal;
+import iut.gon.bomberman.common.model.Message.InitGame;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.Threads.Thread_Jeu;
 
@@ -85,10 +86,9 @@ public class Lobby {
             return id;
         }
 
-        public void broadcastInit(InitGameDTO dto) {
-            for (Joueur tj : joueursInvites) {
-                tj.sendInitDTO(dto);
-            }
+        public void broadcastInit(InitGame init) {
+            // envoie l'objet InitGame à tous les clients connectés via ThreadPrincipal
+            ThreadPrincipal.broadcast(init);
         }
 
         private boolean peuCommencer(){
@@ -103,6 +103,8 @@ public class Lobby {
                 logger.log(LogTypes.SUCCESS,"Démarrage de la partie avec " + joueursInvites.size() + " joueurs.");
                 etatLobby = EtatLobby.COMPLET;
                 this.thread = new Thread_Jeu( this);
+                // Démarrage du thread de jeu
+                this.thread.start();
 
             } else {
                 logger.log(LogTypes.WARNING, "Pas assez de joueurs pour démarrer la partie.");
