@@ -20,9 +20,9 @@ public class HeatMap{
     public HeatMap(int x, int y){
         this.x = x;
         this.y = y;
+        this.map = new int[this.x][this.y];
         for(int i = 0; i < this.x; i++){
             for(int j = 0; j < this.y; j++){
-                assert  false;
                 this.map[i][j] = 0;
             }
         }

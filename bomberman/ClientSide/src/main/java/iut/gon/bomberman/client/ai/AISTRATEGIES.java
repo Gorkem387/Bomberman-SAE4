@@ -6,11 +6,11 @@ import iut.gon.bomberman.common.model.player.Joueur;
 public enum AISTRATEGIES {
     AGGRESSIVE {
         @Override
-        public void play(Ai ia) {
+        public void play(Ai ia, Joueur[] players, HeatMap hM) {
             final int  BOMB_COUNTDOWN = 3;
 
             if (ia.getTrackedPlayer() == null || ia.getTrackedPlayer().getPv() <= 0) {
-                ia.track();
+                ia.track(players);
             }
             // Calcule la différence de position
             int dx = (int) (ia.getTrackedPlayer().getX() - ia.getPlayer().getX());
@@ -32,17 +32,17 @@ public enum AISTRATEGIES {
             } else if ((Math.abs(dx) + Math.abs(dy) <= 1) && ia.getPlayer().getNb_bombes() > 0) {
                 ia.getLabyrinthe().setBomb((int) ia.getPlayer().getX(), (int) ia.getPlayer().getY(), ia.getPlayer(), BOMB_COUNTDOWN);
             } else {
-                ia.randomMove();
+                ia.randomMove(hM);
             }
         }
     },
     SURVIVOR {
         @Override
-        public void play(Ai ia) {
+        public void play(Ai ia, Joueur[] players, HeatMap hM) {
             final int BOMB_COUNTDOWN = 3;
 
             int count = 0;
-            for (Joueur j : ia.lobby.getJoueurs()) {
+            for (Joueur j : players) {
                 if (j.getPv() > 0) {
                     count++;
                 }
@@ -66,7 +66,7 @@ public enum AISTRATEGIES {
                     }
                 }
                 // Si aucune bombe n'est détectée, se déplace aléatoirement
-                ia.randomMove();
+                ia.randomMove(hM);
 
                 if (Math.random() < 0.3 && ia.getPlayer().getNb_bombes() > 0 && ia.getLabyrinthe().getCell((int) ia.getPlayer().getX(), (int) ia.getPlayer().getY()) == CellType.EMPTY) {
                     ia.getLabyrinthe().setBomb((int) ia.getPlayer().getX(), (int) ia.getPlayer().getY(), ia.getPlayer(), BOMB_COUNTDOWN); // Compte à rebours de 3 tours (ajustez si nécessaire)
@@ -78,20 +78,20 @@ public enum AISTRATEGIES {
     },
     CHAOS {
         @Override
-        public void play(Ai ia) {
+        public void play(Ai ia, Joueur[] players, HeatMap hM) {
             final int BOMB_COUNTDOWN = 3;
 
-            if (ia.getLabyrinthe().getHeatMap().readRisk(ia.getPlayer().getX(), ia.getPlayer().getY()) > 0) {
+            if (hM.readRisk((int) ia.getPlayer().getX(), (int) ia.getPlayer().getY()) > 0) {
                 //Si je suis dans une zone à risque, j'essaie de me déplacer aléatoirement
-                ia.randomMove();
+                ia.randomMove(hM);
             } else {
                 if (Math.random() < 0.5 && ia.getPlayer().getNb_bombes() > 0) {
-                    ia.getLabyrinthe().setBomb(ia.getPlayer().getX(), ia.getPlayer().getY(), ia.getPlayer(), BOMB_COUNTDOWN);
+                    ia.getLabyrinthe().setBomb((int) ia.getPlayer().getX(), (int) ia.getPlayer().getY(), ia.getPlayer(), BOMB_COUNTDOWN);
                 }
             }
         }
     };
 
-    public void play(Ai ai) {
+    public void play(Ai ia, Joueur[] players, HeatMap hM) {
     }
 }

@@ -1,7 +1,6 @@
 package iut.gon.bomberman.common.model.labyrinthe;
 
 import java.io.Serializable;
-import java.util.concurrent.TimeUnit;
 import iut.gon.bomberman.common.model.player.Joueur;
 
 

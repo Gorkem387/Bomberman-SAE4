@@ -1,5 +1,7 @@
 package iut.gon.serverside.Lob;
 
+import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
+import iut.gon.bomberman.common.model.labyrinthe.TypeLab;
 import iut.gon.serverside.Player.Joueur;
 
 import java.util.ArrayList;
@@ -10,7 +12,7 @@ public class Lobby {
         private String nomLobby;
         private Joueur proprietaire;
         private final ArrayList<Joueur> joueursInvites = new ArrayList<>();
-        private final Labyrinthe labyrinthe = new Labyrinthe();
+        private final Labyrinthe labyrinthe = new Labyrinthe(21,21);
         private int nbJMax;
         private TypeLab typeLab;
 
@@ -35,11 +37,11 @@ public class Lobby {
         }
 
         public String getNom() {
-            return nom;
+            return nomLobby;
         }
 
         public void setNom(String nom) {
-            this.nom = nom;
+            this.nomLobby = nom;
         }
 
         public Labyrinthe getLabyrinthe() {

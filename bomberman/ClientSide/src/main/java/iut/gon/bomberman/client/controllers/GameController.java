@@ -1,8 +1,11 @@
 package iut.gon.bomberman.client.controllers;
 
+import iut.gon.bomberman.client.ai.AISTRATEGIES;
+import iut.gon.bomberman.client.ai.Ai;
+import iut.gon.bomberman.client.ai.HeatMap;
 import iut.gon.bomberman.client.view.LabRenderer;
+
 import iut.gon.bomberman.common.model.labyrinthe.DFSGenerator;
-import iut.gon.bomberman.common.model.labyrinthe.KruskalGenerator;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.player.Joueur;
 import javafx.fxml.FXML;
@@ -10,6 +13,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
+
 
 import javax.swing.*;
 import java.util.HashSet;
@@ -24,6 +28,9 @@ public class GameController {
     private Labyrinthe labyrinthe;
     private Joueur joueur;
     private final Set<KeyCode> input = new HashSet<>();
+    private HeatMap heatMap;
+    private Ai ai;
+    private Joueur[] players = new Joueur[2];
 
     @FXML
     public void initialize() {
@@ -34,12 +41,18 @@ public class GameController {
         // Fusion aléatoire du chemin ( Algorithme de Kruskal ) :
         // KruskalGenerator generator = new KruskalGenerator();
 
+        this.heatMap = new HeatMap(21, 21);
         this.labyrinthe = generator.createLabyrinthe(21, 21);
         this.gc = gameCanvas.getGraphicsContext2D();
+
+        this.ai = new Ai(new Joueur(2, "IA"), this.labyrinthe, AISTRATEGIES.AGGRESSIVE, this, this.heatMap);
 
         this.joueur = new Joueur(1, "Gorke");
         this.joueur.setX(1);
         this.joueur.setY(1);
+
+        this.players[0] = this.joueur;
+        this.players[1] = this.ai.getPlayer();
 
         gameCanvas.setWidth(labyrinthe.getWidth() * 32);
         gameCanvas.setHeight(labyrinthe.getHeight() * 32);
@@ -75,6 +88,8 @@ public class GameController {
         if (dx != 0 || dy != 0) {
             joueur.move(dx, dy, labyrinthe);
         }
+
+        this.ai.play(players);
     }
 
     private void render() {

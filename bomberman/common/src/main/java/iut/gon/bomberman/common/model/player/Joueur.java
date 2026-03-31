@@ -1,8 +1,7 @@
 package iut.gon.bomberman.common.model.player;
 
-import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.player.Effects.Bonus;
-import iut.gon.bomberman.common.model.player.EtatJoueur;
+import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 
 public class Joueur {
 

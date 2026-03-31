@@ -10,18 +10,18 @@ public class Ai {
     private Labyrinthe labyrinth;
     private AISTRATEGIES strategy;
     private Joueur trackedPlayer;
-    private GameController gC;
+    private HeatMap hM;
 
-    public Ai(Joueur j, Labyrinthe l, AISTRATEGIES strategy, GameController gC){
+    public Ai(Joueur j, Labyrinthe l, AISTRATEGIES strategy, GameController gC, HeatMap hM){
         this.player = j;
         this.labyrinth = l;
         this.strategy = strategy;
-        this.gC = gC;
+        this.hM = hM;
     }
 
 
-    public int track(){
-        for(Joueur p : this.[aremplacer].getPlayers())  //Mettre la classe responsable de la gestion du jeu en local {
+    public int track(Joueur[] players){
+        for(Joueur p : players)  //Mettre la classe responsable de la gestion du jeu en local {
             if(p.getPv() > 0 && !p.equals(this.player)){
                 this.trackedPlayer = p;
                 return 0;
@@ -30,9 +30,9 @@ public class Ai {
     }
 
 
-    public void play(){
+    public void play(Joueur[] players){
         while(this.player.getPv() > 0){
-            this.strategy.play(this);
+            this.strategy.play(this, players, this.hM);
         }
     }
 
@@ -48,7 +48,7 @@ public class Ai {
         return this.labyrinth;
     }
 
-    public void setLobby(Labyrinthe labyrinth) {
+    public void setLabyrinth(Labyrinthe labyrinth) {
         this.labyrinth = labyrinth;
     }
 
@@ -68,16 +68,16 @@ public class Ai {
         this.trackedPlayer = trackedPlayer;
     }
 
-    public void randomMove() {
+    public void randomMove(HeatMap hM) {
         int[][] directions = {{1,0}, {-1,0}, {0,1}, {0,-1}};
         int bestX = (int) this.player.getX();
         int bestY = (int) this.player.getY();
-        int bestRisk = this.getLabyrinthe().getHeatMap().readRisk(bestX, bestY);
+        int bestRisk = hM.readRisk(bestX, bestY);
         for (int[] d : directions) {
             int nx = bestX + d[0];
             int ny = bestY + d[1];
             if (this.getLabyrinthe().isWalkable(nx, ny)) {
-                int risk = this.getLabyrinthe().getHeatMap().readRisk(nx, ny);
+                int risk = hM.readRisk(nx, ny);
 
                 if (risk < bestRisk || Math.random() < 0.2) { // un peu de chaos
                     bestRisk = risk;
