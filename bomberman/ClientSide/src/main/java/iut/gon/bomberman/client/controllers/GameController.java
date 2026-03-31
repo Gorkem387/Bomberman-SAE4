@@ -73,6 +73,8 @@ public class GameController {
         String savedSkin = iut.gon.bomberman.client.GameSettings.getSelectedSkinPath();
         this.joueur.setSkinPath(savedSkin);
 
+        renderer.updateAssets();
+
         this.joueur.setX(1);
         this.joueur.setY(1);
 
