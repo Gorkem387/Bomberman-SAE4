@@ -25,7 +25,7 @@ public class MoveHandler implements MessageHandler<MoveRequest> {
             // Mise à jour de la position dans le modèle métier Joueur
             // Le serveur fait ici de la "Vérification de mouvement"
 
-            //todo : double check si les mouvement sont check pour les collisions
+            //todo : double check si les mouvement sont ok, check pour les collisions
             client.joueur.setX(message.getX());
             client.joueur.setY(message.getY());
             

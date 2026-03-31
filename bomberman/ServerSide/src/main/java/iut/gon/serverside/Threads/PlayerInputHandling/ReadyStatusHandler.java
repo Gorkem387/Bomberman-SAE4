@@ -1,12 +1,12 @@
 package iut.gon.serverside.Threads.PlayerInputHandling;
 
+import iut.gon.bomberman.common.model.player.EtatJoueur;
+import iut.gon.bomberman.common.model.player.Joueur;
 import iut.gon.serverside.Lob.EtatLobby;
 import iut.gon.serverside.Lob.Lobby;
 import iut.gon.serverside.Logger.LogTypes;
 import iut.gon.serverside.Logger.Logger;
 import iut.gon.serverside.Message.ReadyStatus;
-import iut.gon.serverside.Player.EtatJoueur;
-import iut.gon.serverside.Player.Joueur;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.LobbyManager;
 

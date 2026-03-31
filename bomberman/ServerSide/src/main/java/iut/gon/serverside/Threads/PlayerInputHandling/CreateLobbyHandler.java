@@ -21,7 +21,9 @@ public class CreateLobbyHandler implements MessageHandler<CreateLobbyRequest> {
                 client.joueur, //owner du lobby (celui qui créé le lobby)
                 message.getLobbyName(),
                 message.getMaxPlayers(),
-                message.getLabyrintheType()
+                message.getLabyrintheType(),
+                message.getSizeX(),
+                message.getSizeY()
         );
 
         Logger logger = Logger.getInstance();

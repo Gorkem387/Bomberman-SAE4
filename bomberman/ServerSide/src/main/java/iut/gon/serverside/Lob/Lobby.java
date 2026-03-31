@@ -1,12 +1,15 @@
 package iut.gon.serverside.Lob;
 
+import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
+import iut.gon.bomberman.common.model.player.EtatJoueur;
 import iut.gon.serverside.Logger.LogTypes;
 import iut.gon.serverside.Logger.Logger;
 import iut.gon.serverside.Player.DTO.InitGameDTO;
-import iut.gon.serverside.Player.EtatJoueur;
-import iut.gon.serverside.Player.Joueur;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.Threads.Thread_Jeu;
+
+import iut.gon.bomberman.common.model.labyrinthe.TypeLab;
+import iut.gon.bomberman.common.model.player.Joueur;
 
 import java.util.ArrayList;
 
@@ -17,7 +20,7 @@ public class Lobby {
         private String nomLobby;
         private Joueur proprietaire;
         private final ArrayList<Joueur> joueursInvites = new ArrayList<>();
-        private final Labyrinthe labyrinthe = new Labyrinthe();
+        private final Labyrinthe labyrinthe;
         private int nbJMax;
         private TypeLab typeLab;
         private EtatLobby etatLobby = EtatLobby.EN_ATTENTE;
@@ -30,15 +33,17 @@ public class Lobby {
             this.proprietaire = owner;
             this.nbJMax = nbJMax;
             this.typeLab = typeLab;
+            this.labyrinthe = new Labyrinthe(20, 20); // Taille par défaut, peut être modifiée selon le type de labyrinthe
         }
 
-    public Lobby(int id, String nom, Joueur owner, int nbJMax, TypeLab typeLab) {
-        this.id = id;
-        this.nomLobby = nom;
-        this.proprietaire = owner;
-        this.nbJMax = nbJMax;
-        this.typeLab = typeLab;
-    }
+        public Lobby(int id, String nom, Joueur owner, int nbJMax, TypeLab typeLab, int lab_size_x, int lab_size_y) {
+            this.id = id;
+            this.nomLobby = nom;
+            this.proprietaire = owner;
+            this.nbJMax = nbJMax;
+            this.typeLab = typeLab;
+            this.labyrinthe = new Labyrinthe(lab_size_x, lab_size_y);
+        }
 
         public void addJoueur(Joueur joueur) {
             joueursInvites.add(joueur);
@@ -97,7 +102,7 @@ public class Lobby {
             if (!joueursInvites.isEmpty()) {
                 logger.log(LogTypes.SUCCESS,"Démarrage de la partie avec " + joueursInvites.size() + " joueurs.");
                 etatLobby = EtatLobby.COMPLET;
-                this.thread = new Thread_Jeu(null, this);
+                this.thread = new Thread_Jeu( this);
 
             } else {
                 logger.log(LogTypes.WARNING, "Pas assez de joueurs pour démarrer la partie.");
@@ -118,8 +123,13 @@ public class Lobby {
         }
 
         public boolean rejoindreLobby(ClientHandler client){
-            //todo : faire logique , check si trpo de joueurs etc
-            joueursInvites.add());
+
+            if (joueursInvites.size()+1 > nbJMax) {
+                logger.log(LogTypes.WARNING, "Le lobby est plein. Impossible de rejoindre.");
+                return false;
+            }
+            else joueursInvites.add(client.joueur);
+            return true;
         }
 
     public void setThread(Thread_Jeu threadJeu) {

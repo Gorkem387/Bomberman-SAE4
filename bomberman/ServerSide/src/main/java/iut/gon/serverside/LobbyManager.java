@@ -1,8 +1,8 @@
 package iut.gon.serverside;
 
+import iut.gon.bomberman.common.model.labyrinthe.TypeLab;
+import iut.gon.bomberman.common.model.player.Joueur;
 import iut.gon.serverside.Lob.Lobby;
-import iut.gon.serverside.Player.Joueur;
-import iut.gon.serverside.Threads.ClientHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,9 +33,9 @@ public class LobbyManager {
         return instance;
     }
 
-    public synchronized Lobby createLobby(Joueur owner, String nom_lobby, int nbJMax, LabyrintheType labyrinthe_type) {
+    public synchronized Lobby createLobby(Joueur owner, String nom_lobby, int nbJMax, TypeLab labyrinthe_type, int lab_size_x, int lab_size_y) {
         int id = nextLobbyId++;
-        Lobby lobby = new Lobby(id, nom_lobby, owner, nbJMax, labyrinthe_type);
+        Lobby lobby = new Lobby(id, nom_lobby, owner, nbJMax, labyrinthe_type, lab_size_x, lab_size_y);
         lobbies.put(id, lobby);
         return lobby;
     }

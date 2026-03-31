@@ -38,7 +38,8 @@ public class Thread_Jeu extends Thread {
             joueurMisAJourDTO = new JoueurMisAJourDTO(
                     lobby.getJoueur(0).getId(),
                     lobby.getJoueur(0).getX(),
-                    lobby.getJoueur(0).getY())
+                    lobby.getJoueur(0).getY()
+            );
 
             broadcastUpdate(joueurMisAJourDTO);
             try { Thread.sleep(16); }

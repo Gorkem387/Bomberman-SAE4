@@ -1,9 +1,9 @@
 package iut.gon.serverside.Threads;
 
+import iut.gon.bomberman.common.model.player.Joueur;
 import iut.gon.serverside.Logger.LogTypes;
 import iut.gon.serverside.Logger.Logger;
 import iut.gon.serverside.Message.Message;
-import iut.gon.serverside.Player.Joueur;
 import iut.gon.serverside.Threads.PlayerInputHandling.MessageDispatcher;
 
 import java.io.*;
