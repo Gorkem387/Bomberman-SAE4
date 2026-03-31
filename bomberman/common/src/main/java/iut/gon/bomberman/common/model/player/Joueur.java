@@ -1,16 +1,13 @@
 package iut.gon.bomberman.common.model.player;
 
-<<<<<<< HEAD
+
 import iut.gon.bomberman.common.model.player.Effects.Bonus;
 import iut.gon.bomberman.common.model.player.EtatJoueur;
-import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
-=======
 import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.player.Effects.Bonus;
 import iut.gon.bomberman.common.model.player.EtatJoueur;
->>>>>>> dev
 
 public class Joueur {
 

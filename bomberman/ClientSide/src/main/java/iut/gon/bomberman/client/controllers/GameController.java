@@ -1,14 +1,7 @@
 package iut.gon.bomberman.client.controllers;
 
-import iut.gon.bomberman.client.ai.AISTRATEGIES;
-import iut.gon.bomberman.client.ai.Ai;
-import iut.gon.bomberman.client.ai.HeatMap;
 import iut.gon.bomberman.client.view.LabRenderer;
-<<<<<<< HEAD
-
-=======
 import iut.gon.bomberman.common.model.labyrinthe.BombManager;
->>>>>>> dev
 import iut.gon.bomberman.common.model.labyrinthe.DFSGenerator;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.player.Direction;
@@ -19,11 +12,6 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
 
-<<<<<<< HEAD
-
-import javax.swing.*;
-=======
->>>>>>> dev
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -42,40 +30,21 @@ public class GameController {
     private boolean isGameOver = false;
 
     private final Set<KeyCode> input = new HashSet<>();
-<<<<<<< HEAD
-    private HeatMap heatMap;
-    private Ai ai;
-    private Joueur[] players = new Joueur[2];
-=======
     private long lastNanoTime = -1;
     private boolean spaceWasPressed = false;
->>>>>>> dev
 
     @FXML
     public void initialize() {
         // Choix du générateur (DFS par défaut)
         DFSGenerator generator = new DFSGenerator();
-<<<<<<< HEAD
-
-        // Fusion aléatoire du chemin ( Algorithme de Kruskal ) :
-        // KruskalGenerator generator = new KruskalGenerator();
-
-        this.heatMap = new HeatMap(21, 21);
-=======
->>>>>>> dev
         this.labyrinthe = generator.createLabyrinthe(21, 21);
 
         this.gc = gameCanvas.getGraphicsContext2D();
         this.bombManager = new BombManager();
 
-        this.ai = new Ai(new Joueur(2, "IA"), this.labyrinthe, AISTRATEGIES.AGGRESSIVE, this, this.heatMap);
-
         this.joueur = new Joueur(1, "Gorke");
         this.joueur.setX(1);
         this.joueur.setY(1);
-
-        this.players[0] = this.joueur;
-        this.players[1] = this.ai.getPlayer();
 
         gameCanvas.setWidth(labyrinthe.getWidth() * 32);
         gameCanvas.setHeight(labyrinthe.getHeight() * 32);
@@ -125,10 +94,6 @@ public class GameController {
             // Aucun mouvement
             joueur.setDirection(Direction.IDLE);
         }
-<<<<<<< HEAD
-
-        this.ai.play(players);
-=======
         if (dx != 0 || dy != 0) {
             joueur.move(dx, dy, labyrinthe, bombManager);
         }
@@ -149,7 +114,6 @@ public class GameController {
         }
         // Mise à jour de la physique (bombes, explosions, dégâts)
         bombManager.update(deltaTime, labyrinthe, List.of(joueur));
->>>>>>> dev
     }
 
     private void render() {
