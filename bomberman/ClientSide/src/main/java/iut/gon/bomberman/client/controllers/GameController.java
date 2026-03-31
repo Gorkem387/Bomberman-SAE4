@@ -23,6 +23,9 @@ public class GameController {
     @FXML
     private Canvas gameCanvas;
 
+    @FXML
+    private UiController uiController;
+
     private GraphicsContext gc;
     private final LabRenderer renderer = new LabRenderer();
     private Labyrinthe labyrinthe;
@@ -140,6 +143,10 @@ public class GameController {
         }
         // Mise à jour de la physique (bombes, explosions, dégâts)
         bombManager.update(deltaTime, labyrinthe, List.of(joueur));
+
+        if (uiController != null) {
+            uiController.updatePlayerStats(joueur);
+        }
     }
 
     private void render() {

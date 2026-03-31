@@ -35,10 +35,19 @@ public class LabRenderer {
             for (int y = 0; y < lab.getHeight(); y++) {
                 CellType type = lab.getCell(x, y);
                 gc.drawImage(groundImg, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+
                 if (type == CellType.WALL) {
                     gc.drawImage(wallImg, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                 } else if (type == CellType.DESTRUCTIBLE) {
                     gc.drawImage(destructibleImg, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                }
+                else if (type == CellType.SPEED_BONUS) {
+                    // Un petit socle jaune
+                    gc.setFill(javafx.scene.paint.Color.YELLOW);
+                    gc.fillOval(x * TILE_SIZE + 4, y * TILE_SIZE + 4, TILE_SIZE - 8, TILE_SIZE - 8);
+                    gc.setFill(javafx.scene.paint.Color.BLACK);
+                    gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 18));
+                    gc.fillText("S", x * TILE_SIZE + 10, y * TILE_SIZE + 22);
                 }
             }
         }

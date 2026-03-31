@@ -5,5 +5,6 @@ public enum CellType {
     EMPTY,
     DESTRUCTIBLE,
     BOMB,
-    EXPLOSION
+    EXPLOSION,
+    SPEED_BONUS
 }

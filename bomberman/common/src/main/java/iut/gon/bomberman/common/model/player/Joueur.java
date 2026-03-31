@@ -1,6 +1,7 @@
 package iut.gon.bomberman.common.model.player;
 
 
+import iut.gon.bomberman.common.model.labyrinthe.CellType;
 import iut.gon.bomberman.common.model.player.Effects.Bonus;
 import iut.gon.bomberman.common.model.player.EtatJoueur;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
@@ -86,6 +87,16 @@ public class Joueur {
             this.cooY = nextY;
         }
 
+        int centerX = (int) Math.round(cooX);
+        int centerY = (int) Math.round(cooY);
+
+        if (laby.isInside(centerX, centerY)) {
+            if (laby.getCell(centerX, centerY) == CellType.SPEED_BONUS) {
+                this.speed_multiplier += 0.2f;
+                laby.setCell(centerX, centerY, CellType.EMPTY);
+                System.out.println("[BONUS] " + nom + " a ramassé un boost, Vitesse actuelle : " + speed_multiplier);
+            }
+        }
         if (deltaX == 0 && deltaY == 0) direction = Direction.IDLE;
     }
 
