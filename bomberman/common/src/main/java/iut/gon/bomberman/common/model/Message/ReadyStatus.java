@@ -1,4 +1,4 @@
-package iut.gon.bomberman.common.model.Message;
+package iut.gon.bomberman.common.model.message;
 
 public class ReadyStatus implements Message {
     private final boolean ready;

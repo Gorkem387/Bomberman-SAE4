@@ -1,8 +1,8 @@
 package iut.gon.serverside.Threads.PlayerInputHandling;
 
 import iut.gon.serverside.LobbyManager;
-import iut.gon.bomberman.common.model.Message.JoinLobbyRequest;
-import iut.gon.bomberman.common.model.Message.JoinLobbyResponse;
+import iut.gon.bomberman.common.model.message.JoinLobbyRequest;
+import iut.gon.bomberman.common.model.message.JoinLobbyResponse;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.Lob.Lobby;
 

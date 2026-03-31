@@ -1,6 +1,6 @@
 module common {
     // Exportation des packages pour que les autres modules (ClientSide et ServerSide) y aient accès
-    exports iut.gon.bomberman.common.model.Message;
+    exports iut.gon.bomberman.common.model.message;
     exports iut.gon.bomberman.common.model.labyrinthe;
     exports iut.gon.bomberman.common.model.player;
 

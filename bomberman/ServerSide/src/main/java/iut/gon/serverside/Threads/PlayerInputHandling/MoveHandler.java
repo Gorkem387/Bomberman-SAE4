@@ -1,6 +1,6 @@
 package iut.gon.serverside.Threads.PlayerInputHandling;
 
-import iut.gon.bomberman.common.model.Message.MoveRequest;
+import iut.gon.bomberman.common.model.message.MoveRequest;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.Lob.Lobby;
 import iut.gon.serverside.LobbyManager;
