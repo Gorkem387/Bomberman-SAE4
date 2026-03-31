@@ -33,8 +33,22 @@ public class LauncherController {
     }
 
     public void handleCustomize(ActionEvent actionEvent) {
-        //TODO A compléter
-        // Renvoie vers la personnalisation du personnage
+        // Renvoie vers la personnalisation du personnage, ...
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/customize.fxml"));
+            Parent customizeRoot = loader.load();
+
+            Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+
+            Scene scene = new Scene(customizeRoot);
+            stage.setScene(scene);
+            stage.setTitle("Bomberman - Personnalisation");
+            stage.show();
+
+        } catch (IOException e) {
+            System.err.println("Erreur : Impossible de charger la vue de personnalisation.");
+            e.printStackTrace();
+        }
     }
 
     /**

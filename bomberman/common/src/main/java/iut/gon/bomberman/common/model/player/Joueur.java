@@ -25,6 +25,8 @@ public class Joueur {
 
     private boolean alive = true;
 
+    private String skinPath = "/iut/gon.bomberman/client/assets/8/S_0.png";
+
     // Directions
     private Direction direction = Direction.DOWN;
 
@@ -185,4 +187,12 @@ public class Joueur {
 
     public boolean isAlive() { return alive; }
     public void setAlive(boolean alive) { this.alive = alive; }
+
+    public String getSkinPath() {
+        return skinPath;
+    }
+
+    public void setSkinPath(String skinPath) {
+        this.skinPath = skinPath;
+    }
 }

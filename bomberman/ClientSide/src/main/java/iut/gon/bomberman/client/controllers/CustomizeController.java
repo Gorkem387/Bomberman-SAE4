@@ -1,0 +1,150 @@
+package iut.gon.bomberman.client.controllers;
+
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
+import javafx.stage.Stage;
+import javafx.geometry.Pos;
+
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class CustomizeController {
+
+    @FXML private Button btnSkin;
+    @FXML private Button btnBombe;
+    @FXML private Label categoryLabel;
+    @FXML private FlowPane skinGrid;
+
+    @FXML private ImageView equippedSkinView;
+    @FXML private Label equippedSkinLabel;
+    @FXML private ImageView equippedBombeView;
+    @FXML private Label equippedBombeLabel;
+
+    private final Map<String, SkinData> skinRegistry  = new LinkedHashMap<>();
+    private final Map<String, SkinData> bombeRegistry = new LinkedHashMap<>();
+
+    private String equippedSkin  = "Classique";
+    private String equippedBombe = "Classique";
+    private String currentCategory = "skin";
+
+    @FXML
+    public void initialize() {
+        // Initialisation des données ( Apparence du personnage )
+        skinRegistry.put("Classique", new SkinData("/iut/gon/bomberman/client/assets/8/S_0.png", "Skin classique"));
+        skinRegistry.put("Chien", new SkinData("/iut/gon/bomberman/client/assets/4/S_0.png", "Skin chien"));
+        skinRegistry.put("Style animé", new SkinData("/iut/gon/bomberman/client/assets/32/S_0.png", "Skin style animé"));
+        skinRegistry.put("Variante marron", new SkinData("/iut/gon/bomberman/client/assets/3/S_0.png", "Skin marron"));
+        skinRegistry.put("Variante verte", new SkinData("/iut/gon/bomberman/client/assets/33/S_0.png", "Skin vert"));
+        skinRegistry.put("Variante jaune", new SkinData("/iut/gon/bomberman/client/assets/34/S_0.png", "Skin jaune"));
+
+        // ( Apparence de la bombe )
+        bombeRegistry.put("Classique", new SkinData("/iut/gon/bomberman/client/assets/B_0.png", "Bombe d'origine"));
+        bombeRegistry.put("Retro", new SkinData("/iut/gon/bomberman/client/assets/B2_0.png", "Bombe retro"));
+
+        // Affichage par défaut
+        showCategory("skin");
+        updateEquippedDisplay();
+    }
+
+    @FXML
+    public void handleSelectCategory(ActionEvent event) {
+        if (event.getSource() == btnSkin) {
+            showCategory("skin");
+        } else {
+            showCategory("bombe");
+        }
+    }
+
+    private void showCategory(String category) {
+        currentCategory = category;
+        skinGrid.getChildren().clear();
+        Map<String, SkinData> registry = category.equals("skin") ? skinRegistry : bombeRegistry;
+        categoryLabel.setText(category.equals("skin") ? "Skins disponibles" : "Bombes disponibles");
+
+        String activeStyle = "-fx-background-color: #2980b9; -fx-text-fill: white;";
+        String inactiveStyle = "-fx-background-color: #7f8c8d; -fx-text-fill: white;";
+        btnSkin.setStyle(category.equals("skin") ? activeStyle : inactiveStyle);
+        btnBombe.setStyle(category.equals("bombe") ? activeStyle : inactiveStyle);
+
+        for (Map.Entry<String, SkinData> entry : registry.entrySet()) {
+            skinGrid.getChildren().add(buildCard(entry.getKey(), entry.getValue(), category));
+        }
+    }
+
+    private VBox buildCard(String name, SkinData data, String category) {
+        ImageView iv = new ImageView();
+        iv.setFitWidth(80); iv.setFitHeight(80); iv.setPreserveRatio(true);
+        try {
+            iv.setImage(new Image(getClass().getResourceAsStream(data.imagePath)));
+        } catch (Exception e) { System.err.println("Image introuvable : " + data.imagePath); }
+
+        Label lbl = new Label(name);
+        lbl.setStyle("-fx-text-fill: white;");
+
+        VBox card = new VBox(8, iv, lbl);
+        card.setAlignment(Pos.CENTER);
+        card.setPrefSize(110, 120);
+
+        boolean isEquipped = name.equals(category.equals("skin") ? equippedSkin : equippedBombe);
+        String baseStyle = "-fx-border-radius: 8; -fx-padding: 8; -fx-background-radius: 8;";
+        card.setStyle(baseStyle + (isEquipped ? "-fx-background-color: #2c3e50; -fx-border-color: #27ae60; -fx-border-width: 3;"
+                : "-fx-background-color: #34495e; -fx-border-color: #7f8c8d; -fx-border-width: 1;"));
+
+        card.setOnMouseClicked(e -> equipItem(name, data, category));
+        return card;
+    }
+
+    private void equipItem(String name, SkinData data, String category) {
+        if (category.equals("skin")) {
+            equippedSkin = name;
+        } else {
+            equippedBombe = name;
+        }
+        updateEquippedDisplay();
+        showCategory(category);
+    }
+
+    private void updateEquippedDisplay() {
+        try {
+            SkinData s = skinRegistry.get(equippedSkin);
+            if (s != null) {
+                equippedSkinView.setImage(new Image(getClass().getResourceAsStream(s.imagePath)));
+                equippedSkinLabel.setText(equippedSkin);
+            }
+            SkinData b = bombeRegistry.get(equippedBombe);
+            if (b != null) {
+                equippedBombeView.setImage(new Image(getClass().getResourceAsStream(b.imagePath)));
+                equippedBombeLabel.setText(equippedBombe);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    @FXML
+    public void handleSave(ActionEvent event) throws IOException {
+        System.out.println("Sauvegardé : Skin=" + equippedSkin + ", Bombe=" + equippedBombe);
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/launcher.fxml"));
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
+    }
+
+    @FXML
+    public void handleBackToMenu(ActionEvent event) throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("/fxml/launcher.fxml"));
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.setScene(new Scene(root));
+    }
+
+    private static class SkinData {
+        String imagePath, description;
+        SkinData(String p, String d) { this.imagePath = p; this.description = d; }
+    }
+}
