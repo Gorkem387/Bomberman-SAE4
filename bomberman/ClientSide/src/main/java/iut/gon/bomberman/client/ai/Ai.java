@@ -3,6 +3,7 @@ package iut.gon.bomberman.client.ai;
 import iut.gon.bomberman.client.controllers.GameController;
 
 import iut.gon.bomberman.client.MainApp;
+import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.player.Joueur;
 
@@ -12,6 +13,7 @@ public class Ai {
     private AISTRATEGIES strategy;
     private Joueur trackedPlayer;
     private HeatMap hM;
+    private BombManager bombManager;
 
     public Ai(Joueur j, Labyrinthe l, AISTRATEGIES strategy, GameController gC, HeatMap hM){
         this.player = j;
@@ -67,6 +69,10 @@ public class Ai {
 
     public void setTrackedPlayer(Joueur trackedPlayer) {
         this.trackedPlayer = trackedPlayer;
+    }
+
+    public BombManager getBombManager() {
+        return this.bombManager;
     }
 
     public void randomMove(HeatMap hM) {

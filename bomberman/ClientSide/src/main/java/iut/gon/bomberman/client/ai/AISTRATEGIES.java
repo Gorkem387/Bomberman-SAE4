@@ -30,7 +30,7 @@ public enum AISTRATEGIES {
                 // Déplace vers le haut si possible
                 ia.getPlayer().setY(ia.getPlayer().getY() - 1);
             } else if ((Math.abs(dx) + Math.abs(dy) <= 1) && ia.getPlayer().getNb_bombes() > 0) {
-                ia.getLabyrinthe().setBomb((int) ia.getPlayer().getX(), (int) ia.getPlayer().getY(), ia.getPlayer(), BOMB_COUNTDOWN);
+                ia.getBombManager().placeBomb(ia.getPlayer(), BOMB_COUNTDOWN);
             } else {
                 ia.randomMove(hM);
             }
@@ -69,7 +69,7 @@ public enum AISTRATEGIES {
                 ia.randomMove(hM);
 
                 if (Math.random() < 0.3 && ia.getPlayer().getNb_bombes() > 0 && ia.getLabyrinthe().getCell((int) ia.getPlayer().getX(), (int) ia.getPlayer().getY()) == CellType.EMPTY) {
-                    ia.getLabyrinthe().setBomb((int) ia.getPlayer().getX(), (int) ia.getPlayer().getY(), ia.getPlayer(), BOMB_COUNTDOWN); // Compte à rebours de 3 tours (ajustez si nécessaire)
+                    ia.getBombManager().placeBomb(ia.getPlayer(), BOMB_COUNTDOWN); // Compte à rebours de 3 tours (ajustez si nécessaire)
                 }
             } else {
                 ia.setStrategy(AISTRATEGIES.AGGRESSIVE);
@@ -86,7 +86,7 @@ public enum AISTRATEGIES {
                 ia.randomMove(hM);
             } else {
                 if (Math.random() < 0.5 && ia.getPlayer().getNb_bombes() > 0) {
-                    ia.getLabyrinthe().setBomb((int) ia.getPlayer().getX(), (int) ia.getPlayer().getY(), ia.getPlayer(), BOMB_COUNTDOWN);
+                    ia.getBombManager().placeBomb(ia.getPlayer(), BOMB_COUNTDOWN);
                 }
             }
         }

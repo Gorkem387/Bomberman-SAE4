@@ -4,10 +4,4 @@ module iut.gon.serverside {
     
     // Dépendances Java natives si nécessaire
     requires java.base;
-
-    // Exportation des packages du serveur
-    exports iut.gon.serverside;
-    exports iut.gon.serverside.Threads;
-    exports iut.gon.serverside.Threads.PlayerInputHandling;
-    exports iut.gon.serverside.Logger;
 }
