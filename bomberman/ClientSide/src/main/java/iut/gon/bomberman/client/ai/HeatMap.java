@@ -6,7 +6,7 @@ public class HeatMap{
     int y;
 
     public void updateMap(int x, int y, int value){
-        this.map[x][y] += value
+        this.map[x][y] += value;
     }
 
     public int readRisk(int x, int y){
@@ -22,7 +22,7 @@ public class HeatMap{
         this.y = y;
         for(int i = 0; i < this.x; i++){
             for(int j = 0; j < this.y; j++){
-                assert false;
+                assert  false;
                 this.map[i][j] = 0;
             }
         }
