@@ -8,20 +8,40 @@
         <groupId>iut.gon</groupId>
         <artifactId>bomberman</artifactId>
         <version>1.0-SNAPSHOT</version>
+<<<<<<< HEAD
     </parent>
 
     <artifactId>ClientSide</artifactId>
     <name>ClientSide</name>
 
     <dependencies>
+=======
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>ClientSide</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>iut.gon</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+>>>>>>> test-merge
 
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
+<<<<<<< HEAD
+=======
+            <version>17.0.6</version>
+>>>>>>> test-merge
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
+<<<<<<< HEAD
         </dependency>
 
         <dependency>
@@ -56,3 +76,21 @@
         </plugins>
     </build>
 </project>
+=======
+            <version>17.0.6</version>
+        </dependency>
+        <dependency>
+            <groupId>iut.gon</groupId>
+            <artifactId>ClientSide</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>iut.gon</groupId>
+            <artifactId>common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+</project>
+>>>>>>> test-merge
