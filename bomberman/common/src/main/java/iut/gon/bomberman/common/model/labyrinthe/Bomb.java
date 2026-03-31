@@ -9,6 +9,7 @@ public class Bomb implements Serializable {
     private final int range;
     private double timer;
     private boolean exploded;
+    private boolean solid = false;
 
     public Bomb(int x, int y, int range) {
         this.x = x;
@@ -33,4 +34,6 @@ public class Bomb implements Serializable {
     public int getY() { return y; }
     public int getRange() { return range; }
     public double getTimer() { return timer; }
+    public boolean isSolid() { return solid; }
+    public void setSolid(boolean solid) { this.solid = solid; }
 }
