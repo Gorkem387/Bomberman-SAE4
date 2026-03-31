@@ -18,6 +18,9 @@ public class UiController {
 
     @FXML
     private Label speedLabel;
+
+    @FXML
+    private Label rangeLabel;
     
     private Image heartImage;
     
@@ -43,6 +46,12 @@ public class UiController {
 
         if (bombCountLabel != null) {
             bombCountLabel.setText("BOMBES : " + j.getNb_bombes() + " / " + j.getNb_bombes_max());
+        }
+        if (rangeLabel != null) {
+            rangeLabel.setText("PORTÉE : " + j.getExplosionRange());
+            if (j.getExplosionRange() > 2) {
+                rangeLabel.setStyle("-fx-text-fill: #ff4500; -fx-font-weight: bold;");
+            }
         }
         if (speedLabel != null) {
             String speedText = String.format("VITESSE : x%.1f", j.getSpeed_multiplier());

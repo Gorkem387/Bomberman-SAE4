@@ -158,7 +158,7 @@ public class GameController {
         if (joueur.isAlive()) {
             renderer.drawPlayer(gc, joueur);
         }
-        drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getSpeed_multiplier());
+        drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
         if (isGameOver) {
             drawGameOverScreen();
         }
@@ -180,15 +180,19 @@ public class GameController {
      * @param bombs           Nombre de bombes disponibles
      * @param hearts          Nombre de cœurs disponibles
      */
-    private void drawStatsBar(GraphicsContext gc, int bombs, int hearts, float speed) {
+    private void drawStatsBar(GraphicsContext gc, int bombs, int hearts, int range, float speed) {
         double barHeight = 35;
         double barY = gameCanvas.getHeight() - barHeight - 5;
 
-        double barWidth = 185;
+        double barWidth = 300;
         double barX = (gameCanvas.getWidth() - barWidth) / 2.0;
 
         gc.setFill(javafx.scene.paint.Color.rgb(25, 50, 100));
         gc.fillRoundRect(barX, barY, barWidth, barHeight, 15, 15);
+
+        gc.setFill(javafx.scene.paint.Color.ORANGERED);
+        gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 14));
+        gc.fillText("RANGE: " + range, barX + 220, barY + 23);
 
         gc.setStroke(javafx.scene.paint.Color.rgb(50, 100, 200));
         gc.setLineWidth(2);
@@ -202,16 +206,12 @@ public class GameController {
         if (speed > 1.0f) {
             gc.setFill(javafx.scene.paint.Color.GOLD);
             gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 14));
-            String speedTxt = String.format("SPD x%.1f", speed);
-            gc.fillText(speedTxt, barX + 125, barY + 23);
-
-            gc.setFill(javafx.scene.paint.Color.YELLOW);
-            gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 10));
-            gc.fillText("BONUS ACTIF", barX + 120, barY - 5);
+            String speedTxt = String.format("SPEED x%.1f", speed);
+            gc.fillText(speedTxt, barX + 130, barY + 23);
         } else {
             gc.setFill(javafx.scene.paint.Color.LIGHTGRAY);
             gc.setFont(javafx.scene.text.Font.font("Arial", 14));
-            gc.fillText("SPD x1.0", barX + 125, barY + 23);
+            gc.fillText("SPEED x1.0", barX + 130, barY + 23);
         }
     }
     
