@@ -54,7 +54,7 @@
                     <execution>
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>iut.gon.bomberman.HelloApplication</mainClass>
+                            <mainClass>iut.gon.bomberman.client.MainApp</mainClass>
                         </configuration>
                     </execution>
                 </executions>

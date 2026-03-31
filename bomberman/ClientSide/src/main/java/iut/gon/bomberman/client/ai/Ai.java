@@ -35,9 +35,7 @@ public class Ai {
 
 
     public void play(Joueur[] players){
-        while(this.player.getPv() > 0){
-            this.strategy.play(this, players, this.hM, this.bM);
-        }
+        this.strategy.play(this, players, this.hM, this.bM);
     }
 
     public Joueur getPlayer() {

@@ -31,6 +31,7 @@ public class GameController {
     // AI ===================
     private HeatMap heatMap;
     private Ai ia;
+    private Joueur iaPlayer;
     // Fin AI ===============
 
     private Joueur joueur;
@@ -57,9 +58,12 @@ public class GameController {
         this.joueur.setY(1);
 
         //=========Ai ===========
+        this.iaPlayer = new Joueur(2, "IA");
         this.heatMap = new HeatMap(21, 21);
-        this.ia = new Ai(new Joueur(2, "IA"), this.labyrinthe, AISTRATEGIES.AGGRESSIVE, this, heatMap, bombManager);
-        // Fin AI ===============
+        this.ia = new Ai(iaPlayer, this.labyrinthe, AISTRATEGIES.AGGRESSIVE, this, heatMap, bombManager);
+        this.iaPlayer.setX(19);
+        this.iaPlayer.setY(19);
+        // Fin AI ==============
 
         gameCanvas.setWidth(labyrinthe.getWidth() * 32);
         gameCanvas.setHeight(labyrinthe.getHeight() * 32);
@@ -141,6 +145,7 @@ public class GameController {
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
         if (joueur.isAlive()) {
             renderer.drawPlayer(gc, joueur);
+            renderer.drawPlayer(gc, this.iaPlayer);
         }
         if (isGameOver) {
             drawGameOverScreen();
