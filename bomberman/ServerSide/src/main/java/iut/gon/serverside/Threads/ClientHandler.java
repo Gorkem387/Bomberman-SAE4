@@ -1,49 +1,87 @@
 package iut.gon.serverside.Threads;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import iut.gon.bomberman.common.model.player.Joueur;
+import iut.gon.serverside.Logger.LogTypes;
+import iut.gon.serverside.Logger.Logger;
+import iut.gon.serverside.Message.Message;
+import iut.gon.serverside.Threads.PlayerInputHandling.MessageDispatcher;
+
+import java.io.*;
 import java.net.Socket;
 
+/**
+ * Gère la communication réseau avec un client unique.
+ * Ne contient aucune logique métier (déléguée au MessageDispatcher).
+ */
 public class ClientHandler extends Thread {
 
     private final Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
+    private final MessageDispatcher dispatcher;
+    private final Logger logger = Logger.getInstance();
+    public int playerId;
+    public Joueur joueur;
 
-    public ClientHandler(Socket socket) {
+
+    public ClientHandler(Socket socket, MessageDispatcher dispatcher) {
         this.socket = socket;
+        this.dispatcher = dispatcher;
+        this.joueur = new Joueur(this);
+
     }
 
+    @Override
     public void run() {
         try {
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            out = new PrintWriter(socket.getOutputStream(), true);
+            // Utilisation de flux binaire pour les objets Message
+            this.out = new ObjectOutputStream(socket.getOutputStream());
+            this.in = new ObjectInputStream(socket.getInputStream());
 
-            String message;
-            while ((message = in.readLine()) != null) {
-                ThreadPrincipal.broadcast(message);
+            Object obj;
+            // Lecture continue des messages envoyés par le client
+            while ((obj = in.readObject()) != null) {
+                if (obj instanceof Message) {
+                    // Pattern STRATÉGIE : On délègue totalement le traitement au dispatcher
+                    dispatcher.dispatch((Message) obj, this);
+                }
             }
-        } catch (IOException e) {
-            System.out.println("Erreur avec un client.");
+        } catch (IOException | ClassNotFoundException e) {
+            logger.log(LogTypes.ERROR, "Perte de connexion avec le client: " + socket.getInetAddress());
         } finally {
             disconnect();
         }
     }
 
-    public void send(String message) {
-        out.println(message);
-    }
-
-    private void disconnect() {
+    /**
+     * Envoie un message sérialisé au client.
+     * @param message L'objet message à envoyer.
+     */
+    public synchronized void send(Message message) {
         try {
-            ThreadPrincipal.broadcast("Joueur a quitté la discussion.");
-            ThreadPrincipal.removeClient(this);
-            if (socket != null) socket.close();
+            out.writeObject(message);
+            out.flush();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(LogTypes.ERROR, "Erreur d'envoi de message au client.");
         }
     }
-}
 
+    /**
+     * Ferme proprement les flux et la socket.
+     */
+    private void disconnect() {
+        try {
+            logger.log(LogTypes.INFO, "Déconnexion d'un client.");
+            ThreadPrincipal.removeClient(this);
+            if (in != null) in.close();
+            if (out != null) out.close();
+            if (socket != null && !socket.isClosed()) socket.close();
+        } catch (IOException e) {
+            logger.log(LogTypes.ERROR, "Erreur lors de la déconnexion.");
+        }
+    }
+
+    private int getPlayerId(){
+        return playerId;
+    }
+}
