@@ -151,17 +151,14 @@ public class GameController {
 
     private void render() {
         gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
-
         renderer.draw(gc, labyrinthe);
         renderer.drawBombs(gc, bombManager.getBombs());
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
+
         if (joueur.isAlive()) {
             renderer.drawPlayer(gc, joueur);
         }
-        
-        // Dessine la barre de statistiques en bas
-        drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv());
-        
+        drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getSpeed_multiplier());
         if (isGameOver) {
             drawGameOverScreen();
         }
@@ -178,37 +175,44 @@ public class GameController {
     
     /**
      * Affiche une barre bleu foncé arrondie en bas avec les bombes et les cœurs centrés
-     * @param gc GraphicsContext pour dessiner
-     * @param bombs Nombre de bombes disponibles
-     * @param hearts Nombre de cœurs disponibles
+     *
+     * @param gc              GraphicsContext pour dessiner
+     * @param bombs           Nombre de bombes disponibles
+     * @param hearts          Nombre de cœurs disponibles
      */
-    private void drawStatsBar(GraphicsContext gc, int bombs, int hearts) {
+    private void drawStatsBar(GraphicsContext gc, int bombs, int hearts, float speed) {
         double barHeight = 35;
-        double barY = gameCanvas.getHeight() - barHeight - 5; // Fixée au bas
-        
-        // Largeur compacte
-        double barWidth = 120;
-        double barX = (gameCanvas.getWidth() - barWidth) / 2.0; // Centré horizontalement
-        
-        // Fond bleu foncé avec coins arrondis
-        gc.setFill(javafx.scene.paint.Color.rgb(25, 50, 100)); // Bleu foncé
+        double barY = gameCanvas.getHeight() - barHeight - 5;
+
+        double barWidth = 185;
+        double barX = (gameCanvas.getWidth() - barWidth) / 2.0;
+
+        gc.setFill(javafx.scene.paint.Color.rgb(25, 50, 100));
         gc.fillRoundRect(barX, barY, barWidth, barHeight, 15, 15);
-        
-        // Bordure avec coins arrondis
-        gc.setStroke(javafx.scene.paint.Color.rgb(50, 100, 200)); // Bleu plus clair
+
+        gc.setStroke(javafx.scene.paint.Color.rgb(50, 100, 200));
         gc.setLineWidth(2);
         gc.strokeRoundRect(barX, barY, barWidth, barHeight, 15, 15);
-        
-        // Positionnement des éléments centrés verticalement
+
         double elementY = barY + (barHeight - 25) / 2;
-        
-        // Affiche les bombes (à gauche de la barre)
-        double bombX = barX + 8;
-        drawStatItem(gc, bombImage, bombs, bombX, elementY, "x");
-        
-        // Affiche les cœurs (à droite de la barre)
-        double heartX = barX + 62;
-        drawStatItem(gc, heartImage, hearts, heartX, elementY, "x");
+
+        drawStatItem(gc, bombImage, bombs, barX + 8, elementY, "x");
+        drawStatItem(gc, heartImage, hearts, barX + 68, elementY, "x");
+
+        if (speed > 1.0f) {
+            gc.setFill(javafx.scene.paint.Color.GOLD);
+            gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 14));
+            String speedTxt = String.format("SPD x%.1f", speed);
+            gc.fillText(speedTxt, barX + 125, barY + 23);
+
+            gc.setFill(javafx.scene.paint.Color.YELLOW);
+            gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 10));
+            gc.fillText("BONUS ACTIF", barX + 120, barY - 5);
+        } else {
+            gc.setFill(javafx.scene.paint.Color.LIGHTGRAY);
+            gc.setFont(javafx.scene.text.Font.font("Arial", 14));
+            gc.fillText("SPD x1.0", barX + 125, barY + 23);
+        }
     }
     
     /**
