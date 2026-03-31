@@ -11,10 +11,12 @@ import javafx.scene.canvas.Canvas;
 import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
+import javafx.scene.image.Image;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Objects;
 
 public class GameController {
 
@@ -28,6 +30,9 @@ public class GameController {
     private BombManager bombManager;
     private AnimationTimer gameLoop;
     private boolean isGameOver = false;
+    
+    private Image heartImage;
+    private Image bombImage;
 
     private final Set<KeyCode> input = new HashSet<>();
     private long lastNanoTime = -1;
@@ -35,7 +40,27 @@ public class GameController {
 
     @FXML
     public void initialize() {
-        // Choix du générateur (DFS par défaut)
+        // Charge l'image du cœur
+        try {
+            String resourcePath = Objects.requireNonNull(
+                getClass().getResource("/iut/gon/bomberman/client/assets/heart.png")
+            ).toExternalForm();
+            heartImage = new Image(resourcePath, 30, 30, true, true);
+        } catch (NullPointerException e) {
+            System.err.println("Impossible de charger l'image du cœur : " + e.getMessage());
+        }
+        
+        // Charge l'image de la bombe
+        try {
+            String resourcePath = Objects.requireNonNull(
+                getClass().getResource("/iut/gon/bomberman/client/assets/B_0.png")
+            ).toExternalForm();
+            bombImage = new Image(resourcePath, 30, 30, true, true);
+        } catch (NullPointerException e) {
+            System.err.println("Impossible de charger l'image de la bombe : " + e.getMessage());
+        }
+        
+        // ...existing code...
         DFSGenerator generator = new DFSGenerator();
         this.labyrinthe = generator.createLabyrinthe(21, 21);
 
@@ -107,6 +132,7 @@ public class GameController {
     private void update(double deltaTime) {
         if (joueur.isAlive()) {
             handleInputs();
+
             if (joueur.getPv() <= 0) {
                 joueur.setAlive(false);
                 this.isGameOver = true;
@@ -125,6 +151,13 @@ public class GameController {
         if (joueur.isAlive()) {
             renderer.drawPlayer(gc, joueur);
         }
+        
+        // Dessine les cœurs sur le canvas
+        drawHearts(gc, joueur.getPv());
+        
+        // Dessine les bombes sur le canvas
+        drawBombs(gc, joueur.getNb_bombes());
+        
         if (isGameOver) {
             drawGameOverScreen();
         }
@@ -137,5 +170,48 @@ public class GameController {
         gc.setFill(javafx.scene.paint.Color.RED);
         gc.setFont(javafx.scene.text.Font.font("Arial", 50));
         gc.fillText("GAME OVER", gameCanvas.getWidth()/2 - 140, gameCanvas.getHeight()/2);
+    }
+    
+    /**
+     * Affiche les cœurs et les bombes côte à côte au centre du canvas
+     * @param gc GraphicsContext pour dessiner
+     * @param hearts Nombre de cœurs à afficher
+     */
+    private void drawHearts(GraphicsContext gc, int hearts) {
+        if (heartImage == null) return;
+        
+        // Calcule le centre du canvas
+        double centerX = gameCanvas.getWidth() / 2.0;
+        double centerY = 0;
+        
+        // Calcule la largeur totale des cœurs
+        int heartsWidth = hearts * 35;
+        
+        // Position de départ des cœurs (alignés à droite du centre)
+        double xStart = centerX - heartsWidth - 10; // -10 pour l'espace entre cœurs et bombes
+        
+        for (int i = 0; i < hearts; i++) {
+            gc.drawImage(heartImage, xStart + (i * 35), centerY);
+        }
+    }
+    
+    /**
+     * Affiche les bombes disponibles du joueur
+     * @param gc GraphicsContext pour dessiner
+     * @param bombs Nombre de bombes à afficher
+     */
+    private void drawBombs(GraphicsContext gc, int bombs) {
+        if (bombImage == null) return;
+        
+        // Calcule le centre du canvas
+        double centerX = gameCanvas.getWidth() / 2.0;
+        double centerY = 0;
+        
+        // Position de départ des bombes (alignées à gauche du centre)
+        double xStart = centerX + 10; // +10 pour l'espace entre cœurs et bombes
+        
+        for (int i = 0; i < bombs; i++) {
+            gc.drawImage(bombImage, xStart + (i * 35), centerY);
+        }
     }
 }

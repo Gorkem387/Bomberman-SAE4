@@ -3,8 +3,8 @@ package iut.gon.serverside.Threads.PlayerInputHandling;
 import iut.gon.serverside.LobbyManager;
 import iut.gon.serverside.Logger.LogTypes;
 import iut.gon.serverside.Logger.Logger;
-import iut.gon.bomberman.common.model.Message.CreateLobbyRequest;
-import iut.gon.bomberman.common.model.Message.CreateLobbyResponse;
+import iut.gon.bomberman.common.model.message.CreateLobbyRequest;
+import iut.gon.bomberman.common.model.message.CreateLobbyResponse;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.Lob.Lobby;
 

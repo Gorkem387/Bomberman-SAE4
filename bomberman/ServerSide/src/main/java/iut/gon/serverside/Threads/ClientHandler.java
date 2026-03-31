@@ -3,7 +3,7 @@ package iut.gon.serverside.Threads;
 import iut.gon.bomberman.common.model.player.Joueur;
 import iut.gon.serverside.Logger.LogTypes;
 import iut.gon.serverside.Logger.Logger;
-import iut.gon.bomberman.common.model.Message.Message;
+import iut.gon.bomberman.common.model.message.Message;
 import iut.gon.serverside.Threads.PlayerInputHandling.MessageDispatcher;
 
 import java.io.*;

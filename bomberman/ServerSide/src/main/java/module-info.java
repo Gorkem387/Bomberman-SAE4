@@ -4,6 +4,9 @@ module iut.gon.serverside {
     
     // Dépendances Java natives si nécessaire
     requires java.base;
+    requires javafx.graphics;
+    requires javafx.controls;
+    requires javafx.fxml;
 
     // Exportation des packages du serveur
     exports iut.gon.serverside;
