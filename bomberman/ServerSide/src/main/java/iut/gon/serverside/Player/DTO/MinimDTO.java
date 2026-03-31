@@ -1,6 +1,6 @@
 package iut.gon.serverside.Player.DTO;
 
-import iut.gon.bomberman.common.model.Message.MessageType;
+import iut.gon.bomberman.common.model.message.MessageType;
 
 public class MinimDTO implements IDTO {
 
