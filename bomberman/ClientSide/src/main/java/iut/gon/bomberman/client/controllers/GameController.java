@@ -1,5 +1,8 @@
 package iut.gon.bomberman.client.controllers;
 
+import iut.gon.bomberman.client.ai.AISTRATEGIES;
+import iut.gon.bomberman.client.ai.Ai;
+import iut.gon.bomberman.client.ai.HeatMap;
 import iut.gon.bomberman.client.view.LabRenderer;
 import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.labyrinthe.DFSGenerator;
@@ -24,6 +27,12 @@ public class GameController {
     private GraphicsContext gc;
     private final LabRenderer renderer = new LabRenderer();
     private Labyrinthe labyrinthe;
+
+    // AI ===================
+    private HeatMap heatMap;
+    private Ai ia;
+    // Fin AI ===============
+
     private Joueur joueur;
     private BombManager bombManager;
     private AnimationTimer gameLoop;
@@ -37,6 +46,7 @@ public class GameController {
     public void initialize() {
         // Choix du générateur (DFS par défaut)
         DFSGenerator generator = new DFSGenerator();
+
         this.labyrinthe = generator.createLabyrinthe(21, 21);
 
         this.gc = gameCanvas.getGraphicsContext2D();
@@ -45,6 +55,11 @@ public class GameController {
         this.joueur = new Joueur(1, "Gorke");
         this.joueur.setX(1);
         this.joueur.setY(1);
+
+        //=========Ai ===========
+        this.heatMap = new HeatMap(21, 21);
+        this.ia = new Ai(new Joueur(2, "IA"), this.labyrinthe, AISTRATEGIES.AGGRESSIVE, this, heatMap, bombManager);
+        // Fin AI ===============
 
         gameCanvas.setWidth(labyrinthe.getWidth() * 32);
         gameCanvas.setHeight(labyrinthe.getHeight() * 32);
@@ -111,6 +126,8 @@ public class GameController {
                 joueur.setAlive(false);
                 this.isGameOver = true;
             }
+
+            this.ia.play(new Joueur[]{this.ia.getPlayer(), this.joueur});
         }
         // Mise à jour de la physique (bombes, explosions, dégâts)
         bombManager.update(deltaTime, labyrinthe, List.of(joueur));

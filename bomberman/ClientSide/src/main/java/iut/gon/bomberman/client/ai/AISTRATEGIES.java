@@ -1,12 +1,13 @@
 package iut.gon.bomberman.client.ai;
 
+import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.labyrinthe.CellType;
 import iut.gon.bomberman.common.model.player.Joueur;
 
 public enum AISTRATEGIES {
     AGGRESSIVE {
         @Override
-        public void play(Ai ia, Joueur[] players, HeatMap hM) {
+        public void play(Ai ia, Joueur[] players, HeatMap hM, BombManager bM) {
             final int  BOMB_COUNTDOWN = 3;
 
             if (ia.getTrackedPlayer() == null || ia.getTrackedPlayer().getPv() <= 0) {
@@ -30,7 +31,7 @@ public enum AISTRATEGIES {
                 // Déplace vers le haut si possible
                 ia.getPlayer().setY(ia.getPlayer().getY() - 1);
             } else if ((Math.abs(dx) + Math.abs(dy) <= 1) && ia.getPlayer().getNb_bombes() > 0) {
-                ia.getLabyrinthe().setBomb((int) ia.getPlayer().getX(), (int) ia.getPlayer().getY(), ia.getPlayer(), BOMB_COUNTDOWN);
+                bM.placeBomb(ia.getPlayer(), 3);
             } else {
                 ia.randomMove(hM);
             }
@@ -38,7 +39,7 @@ public enum AISTRATEGIES {
     },
     SURVIVOR {
         @Override
-        public void play(Ai ia, Joueur[] players, HeatMap hM) {
+        public void play(Ai ia, Joueur[] players, HeatMap hM, BombManager bM) {
             final int BOMB_COUNTDOWN = 3;
 
             int count = 0;
@@ -69,8 +70,7 @@ public enum AISTRATEGIES {
                 ia.randomMove(hM);
 
                 if (Math.random() < 0.3 && ia.getPlayer().getNb_bombes() > 0 && ia.getLabyrinthe().getCell((int) ia.getPlayer().getX(), (int) ia.getPlayer().getY()) == CellType.EMPTY) {
-                    ia.getLabyrinthe().setBomb((int) ia.getPlayer().getX(), (int) ia.getPlayer().getY(), ia.getPlayer(), BOMB_COUNTDOWN); // Compte à rebours de 3 tours (ajustez si nécessaire)
-                }
+                    bM.placeBomb(ia.getPlayer(), 3);                }
             } else {
                 ia.setStrategy(AISTRATEGIES.AGGRESSIVE);
             }
@@ -78,7 +78,7 @@ public enum AISTRATEGIES {
     },
     CHAOS {
         @Override
-        public void play(Ai ia, Joueur[] players, HeatMap hM) {
+        public void play(Ai ia, Joueur[] players, HeatMap hM, BombManager bM) {
             final int BOMB_COUNTDOWN = 3;
 
             if (hM.readRisk((int) ia.getPlayer().getX(), (int) ia.getPlayer().getY()) > 0) {
@@ -86,12 +86,11 @@ public enum AISTRATEGIES {
                 ia.randomMove(hM);
             } else {
                 if (Math.random() < 0.5 && ia.getPlayer().getNb_bombes() > 0) {
-                    ia.getLabyrinthe().setBomb((int) ia.getPlayer().getX(), (int) ia.getPlayer().getY(), ia.getPlayer(), BOMB_COUNTDOWN);
-                }
+                    bM.placeBomb(ia.getPlayer(), 3);                }
             }
         }
     };
 
-    public void play(Ai ia, Joueur[] players, HeatMap hM) {
+    public void play(Ai ia, Joueur[] players, HeatMap hM, BombManager bM) {
     }
 }
