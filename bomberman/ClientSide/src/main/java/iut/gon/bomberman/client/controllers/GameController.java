@@ -285,9 +285,6 @@ public class GameController {
         if (iaPlayer2.isAlive()) targets.add(iaPlayer2);
         if (iaPlayer3.isAlive()) targets.add(iaPlayer3);
 
-        // Bombes, les deux joueurs peuvent recevoir des dégâts
-        bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer, iaPlayer2, iaPlayer3));
-
         if (!joueur.isAlive() && !isGameOver) {
             this.isGameOver = true;
             deathAnimationStartTime = System.currentTimeMillis();
