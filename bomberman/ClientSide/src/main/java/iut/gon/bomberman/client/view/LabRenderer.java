@@ -214,12 +214,14 @@ public class LabRenderer {
         // Calculer l'index du frame (0, 1, 2)
         int frameIndex = isIdle ? 0 : (animationCounter / ANIMATION_SPEED) % 3;
 
+        String cacheKey = joueur.getId() + "_" + dirSuffix;
+
         // Charger/Récupérer les sprites depuis le cache
-        if (!spriteCache.containsKey(dirSuffix)) {
-            loadSpritesIntoCache(dirSuffix, joueur);
+        if (!spriteCache.containsKey(cacheKey)) {
+            loadSpritesIntoCache(cacheKey, dirSuffix, joueur);
         }
 
-        Image currentSprite = spriteCache.get(dirSuffix)[frameIndex];
+        Image currentSprite = spriteCache.get(cacheKey)[frameIndex];
 
 
         gc.drawImage(currentSprite,
@@ -253,12 +255,12 @@ public class LabRenderer {
             deathAnimationCounter++;
         }
 
-        String deathDirection = "D";
-        if (!spriteCache.containsKey(deathDirection)) {
-            loadSpritesIntoCache(deathDirection, joueur);
+        String cacheKey = joueur.getId() + "_D";
+        if (!spriteCache.containsKey(cacheKey)) {
+            loadSpritesIntoCache(cacheKey, "D",joueur);
         }
 
-        Image[] deathSprites = spriteCache.get(deathDirection);
+        Image[] deathSprites = spriteCache.get(cacheKey);
 
         int frameIndex = Math.min((deathAnimationCounter / ANIMATION_SPEED), 2);
         Image currentDeathSprite = deathSprites[frameIndex];
@@ -266,7 +268,7 @@ public class LabRenderer {
         gc.drawImage(currentDeathSprite, screenX, screenY, TILE_SIZE, TILE_SIZE);
     }
 
-    private void loadSpritesIntoCache(String direction, Joueur joueur) {
+    private void loadSpritesIntoCache(String cacheKey, String direction, Joueur joueur) {
         // On récupère le chemin du skin (ex: /.../assets/32/S_0.png)
         String fullPath = joueur.getSkinPath();
 
@@ -290,8 +292,7 @@ public class LabRenderer {
             frames[1] = frames[0];
             frames[2] = frames[0];
         }
-
-        spriteCache.put(direction, frames);
+        spriteCache.put(cacheKey, frames);
     }
 
     public String updateDirection(Direction direction) {
