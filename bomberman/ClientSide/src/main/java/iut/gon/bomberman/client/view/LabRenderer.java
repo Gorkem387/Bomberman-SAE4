@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.List;
 import javafx.scene.paint.Color;
 
 public class LabRenderer {
@@ -40,8 +39,26 @@ public class LabRenderer {
     private int deathAnimationCounter = 0;
     private boolean isDeathAnimationPlaying = false;
 
+    private int explosionAnimationCounter = 0;
+    private boolean wasExploding = false;
+    private Image[] explosionSprites = new Image[6];
+
     public LabRenderer() {
         updateAssets();
+        loadExplosionSprites();
+    }
+
+    private void loadExplosionSprites() {
+        for (int i = 0; i < 6; i++) {
+            int index = i + 9;
+            String path = "/iut/gon/bomberman/client/assets/explosion/explosion_0_" + index + ".png";
+            try {
+                explosionSprites[i] = load(path);
+            } catch (Exception e) {
+                System.err.println("Sprite explosion manquant: " + path);
+                explosionSprites[i] = explosionImg; // fallback
+            }
+        }
     }
 
     /**
@@ -184,8 +201,27 @@ public class LabRenderer {
      * @param cells la liste des cellules d'explosion à dessiner
      */
     public void drawExplosions(GraphicsContext gc, List<int[]> cells) {
+        if (cells.isEmpty()) {
+            wasExploding = false;
+            return;
+        }
+
+        if (!wasExploding) {
+            explosionAnimationCounter = 0;
+            wasExploding = true;
+        } else {
+            explosionAnimationCounter++;
+        }
+
+        int frameIndex = explosionAnimationCounter / ANIMATION_SPEED;
+        if (frameIndex >= explosionSprites.length) {
+            frameIndex = explosionSprites.length - 1;
+        }
+
+        Image currentExplosion = explosionSprites[frameIndex] != null ? explosionSprites[frameIndex] : explosionImg;
+
         for (int[] cell : cells) {
-            gc.drawImage(explosionImg, cell[0] * TILE_SIZE, cell[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            gc.drawImage(currentExplosion, cell[0] * TILE_SIZE, cell[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         }
     }
 
@@ -311,8 +347,5 @@ public class LabRenderer {
             case IDLE -> "R";//R_0
         };
     }
-
-    public void stopAnimation() {
-        animationCounter = 0;
-    }
 }
+
