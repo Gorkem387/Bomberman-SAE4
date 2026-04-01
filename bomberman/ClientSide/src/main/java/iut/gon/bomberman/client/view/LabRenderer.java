@@ -8,12 +8,12 @@ import iut.gon.bomberman.common.model.player.Direction;
 import iut.gon.bomberman.common.model.player.Joueur;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
-import javafx.scene.paint.Color;
-
 import java.util.HashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.List;
+import javafx.scene.paint.Color;
 
 public class LabRenderer {
 
@@ -26,12 +26,19 @@ public class LabRenderer {
     private final Image explosionImg    = load("/iut/gon/bomberman/client/assets/explosion_0_4.png");
     private Image bombImg;
 
+    // Cache clé = "playerId_direction" pour éviter que deux joueurs s'écrasent
     private final Map<String, Image[]> spriteCache = new HashMap<>();
-    private int animationCounter = 0;
+
+    // Un compteur d'animation PAR joueur (clé = id)
+    private final Map<Integer, Integer> animCounters      = new HashMap<>();
+    private final Map<Integer, Integer> deathCounters     = new HashMap<>();
+    private final Map<Integer, Boolean> deathAnimPlaying  = new HashMap<>();
+
+    private Image[] bombSprites;
     private int bombAnimationCounter = 0;
+    private int animationCounter = 0;
     private int deathAnimationCounter = 0;
     private boolean isDeathAnimationPlaying = false;
-    private Image[] bombSprites = null;
 
     public LabRenderer() {
         updateAssets();
@@ -44,9 +51,6 @@ public class LabRenderer {
         // Recharge la bombe depuis les paramètres globaux
         String bombPath = GameSettings.getSelectedBombPath();
         this.bombImg = load(bombPath);
-
-        // Charger les sprites de bombe avec le bon préfixe (B, B2, etc.)
-        loadBombSprites(bombPath);
 
         // Vide le cache pour forcer le rechargement du nouveau skin choisi
         spriteCache.clear();
@@ -64,7 +68,7 @@ public class LabRenderer {
 
         String filename = bombPath.substring(lastSlash + 1);  // "B_0.png" ou "B2_0.png"
         String bombPrefix = filename.substring(0, filename.indexOf("_"));  // "B" ou "B2"
-        
+
         System.out.println("Détection du préfixe de bombe: " + bombPrefix);
 
         String spriteFolder = assetsFolder + (bombPrefix.equals("B") ? "b" : "B2") + "/";
@@ -82,7 +86,7 @@ public class LabRenderer {
                 break;
             }
         }
-        
+
         if (spriteCount == 0) {
             System.err.println("Aucun sprite de bombe trouvé avec le préfixe: " + bombPrefix);
             bombSprites = new Image[]{bombImg};
@@ -153,20 +157,17 @@ public class LabRenderer {
      */
     public void drawBombs(GraphicsContext gc, List<Bomb> bombs) {
         bombAnimationCounter++;
-        
+
         int frameIndex = (bombAnimationCounter / ANIMATION_SPEED) % (bombSprites != null ? bombSprites.length : 1);
-        
+
         Image bombImageToUse = (bombSprites != null && bombSprites[frameIndex] != null)
             ? bombSprites[frameIndex]
             : bombImg;
-        
+
         for (Bomb bomb : bombs) {
             double sx = bomb.getX() * TILE_SIZE;
             double sy = bomb.getY() * TILE_SIZE;
-            
-            if (bombImageToUse != null) {
-                gc.drawImage(bombImageToUse, sx, sy, TILE_SIZE, TILE_SIZE);
-            }
+            gc.drawImage(bombImg, sx, sy, TILE_SIZE, TILE_SIZE);
         }
     }
 
@@ -226,6 +227,12 @@ public class LabRenderer {
                 (joueur.getY() + visualOffsetY) * TILE_SIZE,
                 TILE_SIZE, TILE_SIZE);
         gc.setStroke(javafx.scene.paint.Color.RED);
+        double hSize = 0.7;
+        double off = 0.15;
+        // Hitbox
+        gc.strokeRect((joueur.getX() + off) * TILE_SIZE,
+                (joueur.getY() + off) * TILE_SIZE,
+                hSize * TILE_SIZE, hSize * TILE_SIZE);
     }
 
     /**
@@ -295,5 +302,9 @@ public class LabRenderer {
             case RIGHT -> "E";//E_0
             case IDLE -> "R";//R_0
         };
+    }
+
+    public void stopAnimation() {
+        animationCounter = 0;
     }
 }

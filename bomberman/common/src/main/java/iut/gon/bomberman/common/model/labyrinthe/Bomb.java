@@ -64,4 +64,7 @@ public class Bomb implements Serializable {
     public boolean isSolid() { return solid; }
 
     public void setSolid(boolean solid) { this.solid = solid; }
+    public Joueur getJoueur() {
+        return this.joueur;
+    }
 }
