@@ -6,27 +6,41 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.scene.Parent;
 
+import java.io.IOException;
 import java.net.URL;
 
 public class MainApp extends Application {
 
-    // MENU
+    private static Scene scene;
+
     @Override
-    public void start(Stage primaryStage) {
-        try{
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/launcher.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            primaryStage.setTitle("Bomberman - Menu Principal");
-            primaryStage.setScene(scene);
-            primaryStage.show();
-        } catch(Exception e) {
-            System.err.println("Erreur lors du chargement de l'appliaction.");
-            e.printStackTrace();
+    public void start(Stage stage) throws IOException {
+        // Au démarrage, on lance le launcher (Menu principal)
+        Parent root = loadFXML("fxml/launcher");
+        scene = new Scene(root, 650, 450);
+        stage.setScene(scene);
+        stage.setTitle("Bomberman - Menu Principal");
+        stage.show();
+    }
+
+    public static void setRoot(String fxml) throws IOException {
+        scene.setRoot(loadFXML(fxml));
+    }
+
+    private static Parent loadFXML(String fxml) throws IOException {
+        URL resource = MainApp.class.getResource("/" + fxml + ".fxml");
+        if (resource == null) {
+            // Fallback si le chemin commence déjà par /
+            resource = MainApp.class.getResource(fxml + ".fxml");
         }
+        if (resource == null) {
+            throw new IOException("Fichier FXML non trouvé : " + fxml);
+        }
+        FXMLLoader fxmlLoader = new FXMLLoader(resource);
+        return fxmlLoader.load();
     }
 
     public static void main(String[] args) {
-        launch(args);
+        launch();
     }
 }

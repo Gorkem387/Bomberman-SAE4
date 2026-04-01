@@ -1,4 +1,5 @@
-package iut.gon.bomberman.common.model.message;
+package iut.gon.bomberman.common.model.Mess;
+
 
 public class JoinLobbyRequest implements Message {
     private final int lobbyId;

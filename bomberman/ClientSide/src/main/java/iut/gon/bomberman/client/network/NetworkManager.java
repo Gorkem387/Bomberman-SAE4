@@ -7,8 +7,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import iut.gon.bomberman.common.model.message.Message;
-import iut.gon.bomberman.common.model.message.MessageType;
+import iut.gon.bomberman.common.model.Mess.Message;
+import iut.gon.bomberman.common.model.Mess.MessageType;
 import javafx.application.Platform;
 
 public class NetworkManager{
@@ -20,9 +20,14 @@ public class NetworkManager{
     private boolean isConnected = false;
     private Thread listenerThread;
 
+    private String localPlayerName;
+    private int localPlayerId;
+    private int currentLobbyId;
+
+
     private NetworkManager (){}
 
-    public static synchronized NetworkManager getInstance (){
+    public static synchronized NetworkManager getInstance(){
         if (network == null){
             network = new NetworkManager();
         }
@@ -32,8 +37,8 @@ public class NetworkManager{
     public void connectToServer(String host, int port){
         try {
             socket = new Socket(host, port);
-            in = new ObjectInputStream(socket.getInputStream());
             out = new ObjectOutputStream(socket.getOutputStream());
+            in = new ObjectInputStream(socket.getInputStream());
             isConnected = true;
             startListening();
         } catch (IOException e) {
@@ -63,6 +68,7 @@ public class NetworkManager{
                     }
                 }
             } catch (IOException | ClassNotFoundException e) {
+                isConnected = false;
                 e.printStackTrace();
             }
         });
@@ -94,11 +100,36 @@ public class NetworkManager{
     private void notifyListeners(Message message) {
         List<ServerMessageListener> list = listeners.get(message.getType());
         if (list != null) {
-            list.forEach(l -> l.onServerMessage(message));
+            List<ServerMessageListener> copy = new ArrayList<>(list);
+            copy.forEach(l -> l.onServerMessage(message));
         }
     }
 
     public boolean isConnected() {
         return isConnected;
+    }
+
+    public int getLocalPlayerId() {
+        return localPlayerId;
+    }
+
+    public String getLocalPlayerName() {
+        return localPlayerName;
+    }
+
+    public void setLocalPlayerId(int localPlayerId) {
+        this.localPlayerId = localPlayerId;
+    }
+
+    public void setLocalPlayerName(String localPlayerName){
+        this.localPlayerName = localPlayerName;
+    }
+
+    public int getCurrentLobbyId() {
+        return currentLobbyId;
+    }
+
+    public void setCurrentLobbyId(int currentLobbyId) {
+        this.currentLobbyId = currentLobbyId;
     }
 }

@@ -1,10 +1,11 @@
 package iut.gon.serverside.Threads.PlayerInputHandling;
 
+import iut.gon.bomberman.common.model.player.Joueur;
 import iut.gon.serverside.LobbyManager;
 import iut.gon.serverside.Logger.LogTypes;
 import iut.gon.serverside.Logger.Logger;
-import iut.gon.bomberman.common.model.message.CreateLobbyRequest;
-import iut.gon.bomberman.common.model.message.CreateLobbyResponse;
+import iut.gon.bomberman.common.model.Mess.CreateLobbyRequest;
+import iut.gon.bomberman.common.model.Mess.CreateLobbyResponse;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.Lob.Lobby;
 
@@ -15,10 +16,18 @@ public class CreateLobbyHandler implements MessageHandler<CreateLobbyRequest> {
 
     @Override
     public void handle(CreateLobbyRequest message, ClientHandler client) {
-        // Le joueur qui crée le lobby en devient le propriétaire
-        // Note: L'ID du skin ou le type de labyrinthe pourrait être dans la requête
+        // --- MISE À JOUR : On utilise le pseudo de la requête ---
+        String playerName = message.getPlayerName();
+        if (playerName == null || playerName.isEmpty()) {
+            playerName = "Joueur_" + client.hashCode();
+        }
+        
+        // Initialisation du joueur avec son vrai nom
+        client.setJoueur(new Joueur(client.hashCode(), playerName)); 
+
+        // Création du lobby avec cet owner
         Lobby newLobby = LobbyManager.getInstance().createLobby(
-                client.joueur, //owner du lobby (celui qui créé le lobby)
+                client.getJoueur(),
                 message.getLobbyName(),
                 message.getMaxPlayers(),
                 message.getLabyrintheType(),
@@ -28,12 +37,13 @@ public class CreateLobbyHandler implements MessageHandler<CreateLobbyRequest> {
 
         Logger logger = Logger.getInstance();
         if (newLobby != null) {
-            client.send(new CreateLobbyResponse(true, "Lobby créé avec succès", newLobby.getId()));
-            logger.log(LogTypes.SUCCESS, "Lobby créé avec succès " + newLobby.getNom() + " avec id : " + newLobby.getId());
-        } else {
-            client.send(new CreateLobbyResponse(false, "Erreur lors de la création du lobby", -1));
+            client.setLobbyId(newLobby.getId());
+            newLobby.addJoueur(client.getJoueur(), client);
 
-            logger.log(LogTypes.ERROR, "Erreur de création de lobby");
+            client.send(new CreateLobbyResponse(true, "Lobby créé avec succès", newLobby.getId()));
+            logger.log(LogTypes.SUCCESS, "Lobby créé : " + newLobby.getNom() + " par " + playerName);
+        } else {
+            client.send(new CreateLobbyResponse(false, "Erreur de création", -1));
         }
     }
 }

@@ -1,6 +1,7 @@
 package iut.gon.serverside.Player;
 
-import iut.gon.serverside.Effects.Bonus;
+import iut.gon.bomberman.common.model.player.Effects.Bonus;
+import iut.gon.bomberman.common.model.player.EtatJoueur;
 import iut.gon.serverside.Threads.ClientHandler;
 
 import java.util.HashMap;

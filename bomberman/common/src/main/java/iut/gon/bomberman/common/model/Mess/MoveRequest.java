@@ -1,4 +1,4 @@
-package iut.gon.bomberman.common.model.message;
+package iut.gon.bomberman.common.model.Mess;
 
 public class MoveRequest implements Message {
     private final int x;

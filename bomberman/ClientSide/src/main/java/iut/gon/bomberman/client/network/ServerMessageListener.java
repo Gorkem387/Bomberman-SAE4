@@ -1,6 +1,6 @@
 package iut.gon.bomberman.client.network;
 
-import iut.gon.bomberman.common.model.message.Message;
+import iut.gon.bomberman.common.model.Mess.Message;
 
 public interface ServerMessageListener {
 
