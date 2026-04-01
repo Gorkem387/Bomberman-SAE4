@@ -1,5 +1,9 @@
 package iut.gon.bomberman.common.model.player;
 
+
+import iut.gon.bomberman.common.model.player.Effects.Bonus;
+import iut.gon.bomberman.common.model.player.EtatJoueur;
+import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.labyrinthe.CellType;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
@@ -65,7 +69,6 @@ public class Joueur {
     }
 
     // Méthode move
-    // Méthode move
     public void move(double deltaX, double deltaY, Labyrinthe laby, BombManager bombManager) {
         double vitesseBase = 0.05;
         double speed = vitesseBase * speed_multiplier;
@@ -108,7 +111,6 @@ public class Joueur {
         if (deltaX == 0 && deltaY == 0) direction = Direction.IDLE;
     }
 
-
     private boolean canMoveTo(double x, double y, double size, double offset, Labyrinthe laby, BombManager bm) {
         double left = x + offset;
         double right = x + offset + size;
@@ -126,7 +128,6 @@ public class Joueur {
         }
         return true;
     }
-
 
     ///////////////////
     //GETTERS/SETTERS//
@@ -150,6 +151,7 @@ public class Joueur {
     public void setX(double newX) {
         this.cooX = newX;
     }
+
     public void setY(double newY) {
         this.cooY = newY;
     }

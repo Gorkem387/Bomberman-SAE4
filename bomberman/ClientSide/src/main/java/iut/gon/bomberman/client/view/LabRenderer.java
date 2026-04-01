@@ -112,13 +112,7 @@ public class LabRenderer {
         double screenX = joueur.getX() * TILE_SIZE;
         double screenY = joueur.getY() * TILE_SIZE;
 
-        // Si le joueur est mort, jouer l'animation de mort
-        if (!joueur.isAlive()) {
-            drawDeathAnimation(gc, joueur, screenX, screenY);
-            return;
-        }
-
-        // Logique normale d'animation de mouvement
+        // Déterminer la direction et l'état
         String dirSuffix = updateDirection(joueur.getDirection());
         boolean isIdle = joueur.getDirection() == Direction.IDLE;
 
@@ -128,6 +122,8 @@ public class LabRenderer {
         } else {
             animationCounter = 0;
         }
+
+        double visualOffsetY = -0.25;
 
         // Calculer l'index du frame (0, 1, 2)
         int frameIndex = isIdle ? 0 : (animationCounter / ANIMATION_SPEED) % 3;
@@ -139,8 +135,18 @@ public class LabRenderer {
 
         Image currentSprite = spriteCache.get(dirSuffix)[frameIndex];
 
-        // Dessiner le sprite du joueur
-        gc.drawImage(currentSprite, screenX, screenY, TILE_SIZE, TILE_SIZE);
+
+        gc.drawImage(currentSprite,
+                joueur.getX() * TILE_SIZE,
+                (joueur.getY() + visualOffsetY) * TILE_SIZE,
+                TILE_SIZE, TILE_SIZE);
+        gc.setStroke(javafx.scene.paint.Color.RED);
+        double hSize = 0.7;
+        double off = 0.15;
+        // Hitbox
+        gc.strokeRect((joueur.getX() + off) * TILE_SIZE,
+                (joueur.getY() + off) * TILE_SIZE,
+                hSize * TILE_SIZE, hSize * TILE_SIZE);
     }
 
     /**
@@ -167,7 +173,7 @@ public class LabRenderer {
         }
 
         Image[] deathSprites = spriteCache.get(deathDirection);
-        
+
         int frameIndex = Math.min((deathAnimationCounter / ANIMATION_SPEED), 2);
         Image currentDeathSprite = deathSprites[frameIndex];
 
@@ -191,11 +197,6 @@ public class LabRenderer {
         spriteCache.put(direction, frames);
     }
 
-    /**
-     * Met à jour la direction du joueur actuel
-     * @param direction la direction d'un joueur
-     * @return String correspondant au préfix des sprit dans les ressources
-     * */
     public String updateDirection(Direction direction) {
         return switch (direction) {
             case UP -> "N";//N_0
@@ -204,5 +205,9 @@ public class LabRenderer {
             case RIGHT -> "E";//E_0
             case IDLE -> "R";//R_0
         };
+    }
+
+    public void stopAnimation() {
+        animationCounter = 0;
     }
 }

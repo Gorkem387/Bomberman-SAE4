@@ -2,6 +2,7 @@ package iut.gon.bomberman.client.controllers;
 
 import iut.gon.bomberman.common.model.player.Joueur;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -13,12 +14,13 @@ public class UiController {
     private Pane heartImageBox;
 
     @FXML
-
-    private javafx.scene.control.Label rangeLabel;
+    private Label bombCountLabel;
 
     @FXML
+    private Label speedLabel;
 
-    private javafx.scene.control.Label speedLabel;
+    @FXML
+    private Label rangeLabel;
     
     private Image heartImage;
     
@@ -35,14 +37,30 @@ public class UiController {
         }
     }
 
+    /**
+     * Met à jour toute l'interface d'un coup
+     */
     public void updatePlayerStats(Joueur j) {
         if (j == null) return;
         displayHearts(j.getPv());
+
+        if (bombCountLabel != null) {
+            bombCountLabel.setText("BOMBES : " + j.getNb_bombes() + " / " + j.getNb_bombes_max());
+        }
         if (rangeLabel != null) {
             rangeLabel.setText("PORTÉE : " + j.getExplosionRange());
+            if (j.getExplosionRange() > 2) {
+                rangeLabel.setStyle("-fx-text-fill: #ff4500; -fx-font-weight: bold;");
+            }
         }
         if (speedLabel != null) {
-            speedLabel.setText(String.format("VITESSE : x%.1f", j.getSpeed_multiplier()));
+            String speedText = String.format("VITESSE : x%.1f", j.getSpeed_multiplier());
+            speedLabel.setText(speedText);
+            if (j.getSpeed_multiplier() > 1.0) {
+                speedLabel.setStyle("-fx-text-fill: yellow; -fx-font-weight: bold;");
+            } else {
+                speedLabel.setStyle("-fx-text-fill: white;");
+            }
         }
     }
     
