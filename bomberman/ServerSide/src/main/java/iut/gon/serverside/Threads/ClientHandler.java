@@ -1,8 +1,8 @@
 package iut.gon.serverside.Threads;
 
 import iut.gon.bomberman.common.model.player.Joueur;
-import iut.gon.serverside.LobbyManager;
 import iut.gon.serverside.Lob.Lobby;
+import iut.gon.serverside.LobbyManager;
 import iut.gon.serverside.Logger.LogTypes;
 import iut.gon.serverside.Logger.Logger;
 import iut.gon.bomberman.common.model.Mess.Message;
@@ -64,28 +64,22 @@ public class ClientHandler extends Thread {
         }
     }
 
-    /**
-     * Ferme proprement les flux et la socket.
-     * Si le client était propriétaire d'un lobby, celui-ci est supprimé.
-     */
     private void disconnect() {
         try {
             logger.log(LogTypes.INFO, "Déconnexion d'un client (" + (joueur != null ? joueur.getNom() : socket.getInetAddress()) + ").");
             
-            // Nettoyage des lobbies si nécessaire
+            // Si le joueur était dans un lobby
             if (lobbyId != -1) {
                 LobbyManager lm = LobbyManager.getInstance();
                 Lobby lobby = lm.getLobby(lobbyId);
-                
-                if (lobby != null && joueur != null) {
-                    // Si le joueur qui se déconnecte est le propriétaire, on supprime le lobby
-                    if (lobby.getProprietaire() != null && lobby.getProprietaire().getId() == joueur.getId()) {
-                        logger.log(LogTypes.WARNING, "Le propriétaire s'est déconnecté. Suppression du lobby: " + lobby.getNom());
+                if (lobby != null) {
+                    // Si c'est le propriétaire qui part, on supprime le lobby
+                    if (lobby.getProprietaire() != null && lobby.getProprietaire().equals(this.joueur)) {
+                        logger.log(LogTypes.WARNING, "Le propriétaire a quitté. Suppression du lobby: " + lobby.getNom());
                         lm.removeLobby(lobbyId);
                     } else {
-                        // Sinon, on retire juste le joueur de la liste des invités du lobby
-                        lobby.removeJoueur(joueur);
-                        logger.log(LogTypes.INFO, "Le joueur " + joueur.getNom() + " a quitté le lobby " + lobby.getNom());
+                        // Sinon on retire juste le joueur
+                        lobby.removeJoueur(this.joueur);
                     }
                 }
             }
@@ -95,11 +89,10 @@ public class ClientHandler extends Thread {
             if (out != null) out.close();
             if (socket != null && !socket.isClosed()) socket.close();
         } catch (IOException e) {
-            logger.log(LogTypes.ERROR, "Erreur lors de la déconnexion d'un client.");
+            logger.log(LogTypes.ERROR, "Erreur lors de la déconnexion.");
         }
     }
 
-    // Getters et Setters
     public int getPlayerId() { return playerId; }
     public void setPlayerId(int playerId) { this.playerId = playerId; }
     public Joueur getJoueur() { return joueur; }

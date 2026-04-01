@@ -23,6 +23,7 @@ public class MessageDispatcher {
         handlers.put(MessageType.READY_STATUS, new ReadyStatusHandler());
         handlers.put(MessageType.LOBBY_LIST_REQUEST, new LobbyListHandler());
         handlers.put(MessageType.LOBBY_DETAILS_REQUEST, new LobbyDetailsHandler());
+        handlers.put(MessageType.START_GAME_REQUEST, new StartGameHandler()); // Ajout du handler de lancement
     }
 
     /**

@@ -52,8 +52,4 @@ public class LobbyManager {
     public synchronized Map<Integer, Lobby> getLobbies() {
         return Collections.unmodifiableMap(lobbies);
     }
-
-    public synchronized void joinLobby(int lobbyId, Joueur joueur){
-        lobbies.get(lobbyId).addJoueur(joueur);
-    }
 }

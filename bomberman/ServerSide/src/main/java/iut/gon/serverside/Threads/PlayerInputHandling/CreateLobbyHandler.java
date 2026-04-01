@@ -16,15 +16,18 @@ public class CreateLobbyHandler implements MessageHandler<CreateLobbyRequest> {
 
     @Override
     public void handle(CreateLobbyRequest message, ClientHandler client) {
-        // Initialisation du joueur si nécessaire (le créateur est un joueur)
-        if (client.getJoueur() == null) {
-            // Le nom vient de l'initialisation côté client dans le NetworkManager
-            client.setJoueur(new Joueur(client.hashCode(), "Créateur")); 
+        // --- MISE À JOUR : On utilise le pseudo de la requête ---
+        String playerName = message.getPlayerName();
+        if (playerName == null || playerName.isEmpty()) {
+            playerName = "Joueur_" + client.hashCode();
         }
+        
+        // Initialisation du joueur avec son vrai nom
+        client.setJoueur(new Joueur(client.hashCode(), playerName)); 
 
-        // Le joueur qui crée le lobby en devient le propriétaire
+        // Création du lobby avec cet owner
         Lobby newLobby = LobbyManager.getInstance().createLobby(
-                client.getJoueur(), //owner du lobby
+                client.getJoueur(),
                 message.getLobbyName(),
                 message.getMaxPlayers(),
                 message.getLabyrintheType(),
@@ -35,14 +38,12 @@ public class CreateLobbyHandler implements MessageHandler<CreateLobbyRequest> {
         Logger logger = Logger.getInstance();
         if (newLobby != null) {
             client.setLobbyId(newLobby.getId());
-            // Le créateur rejoint automatiquement son propre lobby
-            newLobby.addJoueur(client.getJoueur());
+            newLobby.addJoueur(client.getJoueur(), client);
 
             client.send(new CreateLobbyResponse(true, "Lobby créé avec succès", newLobby.getId()));
-            logger.log(LogTypes.SUCCESS, "Lobby créé avec succès " + newLobby.getNom() + " avec id : " + newLobby.getId());
+            logger.log(LogTypes.SUCCESS, "Lobby créé : " + newLobby.getNom() + " par " + playerName);
         } else {
-            client.send(new CreateLobbyResponse(false, "Erreur lors de la création du lobby", -1));
-            logger.log(LogTypes.ERROR, "Erreur de création de lobby");
+            client.send(new CreateLobbyResponse(false, "Erreur de création", -1));
         }
     }
 }
