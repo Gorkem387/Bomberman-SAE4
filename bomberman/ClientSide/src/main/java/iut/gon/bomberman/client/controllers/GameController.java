@@ -178,9 +178,6 @@ public class GameController {
         if (joueur.isAlive()) {
             handleInputs(deltaTime);
 
-            // Mise à jour de la physique (bombes, explosions, dégâts)
-            bombManager.update(deltaTime, labyrinthe, List.of(joueur));
-
             if (joueur.getPv() <= 0) {
                 joueur.setAlive(false);
                 this.isGameOver = true;
