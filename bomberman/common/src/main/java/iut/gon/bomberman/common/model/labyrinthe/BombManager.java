@@ -111,14 +111,23 @@ public class BombManager {
             }
         }
 
-
         for (Joueur joueur : joueurs) {
-            int jx = (int) joueur.getX();
-            int jy = (int) joueur.getY();
+            if (!joueur.isAlive()) continue;
+            double pSize = 0.7;
+            double pOffset = 0.15;
+            double pLeft = joueur.getX() + pOffset;
+            double pRight = joueur.getX() + pOffset + pSize;
+            double pTop = joueur.getY() + pOffset;
+            double pBottom = joueur.getY() + pOffset + pSize;
+
             for (int[] cell : explosionCells) {
-                if (cell[0] == jx && cell[1] == jy) {
+                boolean collisionX = pRight > cell[0] && pLeft < cell[0] + 1;
+                boolean collisionY = pBottom > cell[1] && pTop < cell[1] + 1;
+
+                if (collisionX && collisionY) {
                     joueur.setPv(joueur.getPv() - 1);
-                    break;
+                    System.out.println(joueur.getNom() + " touché ! PV: " + joueur.getPv());
+                    break; // Joueur touche que 1 fois par la meme bombe
                 }
             }
         }
