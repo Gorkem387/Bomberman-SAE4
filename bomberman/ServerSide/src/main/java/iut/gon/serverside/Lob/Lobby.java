@@ -91,14 +91,17 @@ public class Lobby {
             // Envoyer LobbyDetailsResponse à tout le monde
             // (Implémenté via LobbyDetailsHandler)
         }
-        
-        public void broadcast(Message message) {
-            synchronized (handlers) {
-                for (ClientHandler h : handlers.values()) {
+
+    public void broadcast(Message message) {
+        synchronized (handlers) {
+            for (ClientHandler h : handlers.values()) {
+                //skip les socket mortes
+                if (h.getSocket() != null && !h.getSocket().isClosed()) {
                     h.send(message);
                 }
             }
         }
+    }
 
         public synchronized void startCountdown() {
             if (isCountdownRunning) return;

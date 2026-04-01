@@ -321,18 +321,10 @@ public class OnlineGameController {
         if (gameLoop != null) {
             gameLoop.stop();
         }
-        remotePlayers.clear();
-        NetworkManager.getInstance().clearLastInitGameMessage();
-        NetworkManager.getInstance().disconnect();
+        NetworkManager.reset(); // remet le singleton à zéro comme au premier lancement
         try {
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/launcher.fxml"));
-            javafx.scene.Parent root = loader.load();
-            javafx.scene.Scene scene = new javafx.scene.Scene(root);
-
             javafx.stage.Stage stage = (javafx.stage.Stage) gameCanvas.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle("Bomberman - Menu Principal");
-            stage.show();
+            new iut.gon.bomberman.client.MainApp().start(stage);
         } catch (Exception e) {
             System.err.println("Erreur lors du retour au menu : " + e.getMessage());
         }
