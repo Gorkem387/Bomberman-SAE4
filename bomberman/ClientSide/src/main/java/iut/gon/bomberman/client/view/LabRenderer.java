@@ -51,6 +51,7 @@ public class LabRenderer {
         // Recharge la bombe depuis les paramètres globaux
         String bombPath = GameSettings.getSelectedBombPath();
         this.bombImg = load(bombPath);
+        loadBombSprites(bombPath);
 
         // Vide le cache pour forcer le rechargement du nouveau skin choisi
         spriteCache.clear();
@@ -167,7 +168,7 @@ public class LabRenderer {
         for (Bomb bomb : bombs) {
             double sx = bomb.getX() * TILE_SIZE;
             double sy = bomb.getY() * TILE_SIZE;
-            gc.drawImage(bombImg, sx, sy, TILE_SIZE, TILE_SIZE);
+            gc.drawImage(bombImageToUse, sx, sy, TILE_SIZE, TILE_SIZE);
         }
     }
 
