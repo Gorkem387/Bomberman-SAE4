@@ -171,7 +171,12 @@ public class GameController {
     }
 
     private void update(double deltaTime) {
-        if ((deathAnimationComplete || isVictory ) && input.contains(KeyCode.ESCAPE) && !escWasPressed) {
+        if (isVictory && input.contains(KeyCode.ESCAPE) && !escWasPressed) {
+            escWasPressed = true;
+            goBackToMenu();
+            return;
+        }
+        if (deathAnimationComplete && isGameOver && input.contains(KeyCode.ESCAPE) && !escWasPressed) {
             escWasPressed = true;
             goBackToMenu();
             return;
@@ -188,11 +193,6 @@ public class GameController {
         if (joueur.isAlive() && !isVictory) {
             handleInputs(deltaTime);
 
-            if (joueur.getPv() <= 0) {
-                joueur.setAlive(false);
-                this.isGameOver = true;
-                deathAnimationStartTime = System.currentTimeMillis();
-            }
         }
 
         if (iaPlayer.isAlive()) {
@@ -212,6 +212,11 @@ public class GameController {
 
         // Bombes, les deux joueurs peuvent recevoir des dégâts
         bombManager.update(deltaTime, labyrinthe, targets);
+
+        if (!joueur.isAlive() && !isGameOver) {
+            this.isGameOver = true;
+            deathAnimationStartTime = System.currentTimeMillis();
+        }
 
         if (uiController != null) {
             uiController.updatePlayerStats(joueur);
@@ -247,8 +252,10 @@ public class GameController {
             drawVictoryOverScreen();
         }
         // Afficher l'écran GAME OVER uniquement après que l'animation de mort soit complète
-        else if (isGameOver && deathAnimationComplete) {
-            drawGameOverScreen();
+        else if (isGameOver) {
+            if (deathAnimationComplete){
+                drawGameOverScreen();
+            }
         }
     }
 
