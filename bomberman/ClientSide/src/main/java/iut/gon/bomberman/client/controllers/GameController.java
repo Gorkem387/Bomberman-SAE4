@@ -242,7 +242,7 @@ public class GameController {
         bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer, iaPlayer2, iaPlayer3));
 
         if (!joueur.isAlive() && !isGameOver) {
-            this.isGameOver = true;z
+            this.isGameOver = true;
             deathAnimationStartTime = System.currentTimeMillis();
         }
 
