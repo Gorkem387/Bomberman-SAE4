@@ -12,7 +12,8 @@ public enum MessageType {
     MOVE_REQUEST,
     CHAT_MESSAGE,
     READY_STATUS,
-    START_GAME_REQUEST, // Ajouté pour le lancement manuel par l'owner
+    START_GAME_REQUEST,
     GAME_UPDATE,
-    INIT_GAME
+    INIT_GAME,
+    COUNTDOWN_UPDATE // Nouveau message pour le décompte
 }

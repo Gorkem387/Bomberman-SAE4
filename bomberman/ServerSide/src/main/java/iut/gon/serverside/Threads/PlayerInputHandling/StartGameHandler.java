@@ -6,7 +6,7 @@ import iut.gon.serverside.Lob.Lobby;
 import iut.gon.serverside.Threads.ClientHandler;
 
 /**
- * Gère le lancement manuel de la partie par le propriétaire.
+ * Gère le lancement du décompte par le propriétaire.
  */
 public class StartGameHandler implements MessageHandler<StartGameRequest> {
 
@@ -15,10 +15,10 @@ public class StartGameHandler implements MessageHandler<StartGameRequest> {
         Lobby lobby = LobbyManager.getInstance().getLobby(message.getLobbyId());
         
         if (lobby != null && lobby.getProprietaire() != null) {
-            // Seul l'owner peut lancer
+            // Seul l'owner peut lancer le décompte
             if (lobby.getProprietaire().equals(client.getJoueur())) {
-                System.out.println("Le propriétaire lance la partie !");
-                lobby.startGame();
+                System.out.println("Le propriétaire lance le décompte avant la partie !");
+                lobby.startCountdown();
             }
         }
     }

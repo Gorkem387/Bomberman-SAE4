@@ -3,6 +3,7 @@ package iut.gon.bomberman.client.controllers;
 import iut.gon.bomberman.client.MainApp;
 import iut.gon.bomberman.client.network.NetworkManager;
 import iut.gon.bomberman.common.model.Mess.*;
+import iut.gon.bomberman.common.model.player.EtatJoueur;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -48,29 +49,48 @@ public class LobbyController implements Initializable {
                         String prefix = p.isOwner ? "👑 " : "";
                         listeJoueurs.getItems().add(prefix + p.name + status);
                         
-                        // Détection de l'owner local
                         if (p.isOwner && p.name.equals(localPlayerName)) {
                             this.isOwner = true;
                         }
                         
-                        // Si au moins un joueur n'est pas prêt, on ne peut pas lancer
                         if (!p.isReady) {
                             everyoneReady = false;
                         }
                     }
 
-                    // --- LOGIQUE DE LANCEMENT ---
-                    // Le bouton "Lancer" n'est visible QUE si l'utilisateur est l'owner
                     btnStartGame.setVisible(this.isOwner);
-                    
-                    // Il n'est activé QUE si tout le monde (y compris l'owner) est prêt
-                    // Et s'il y a au moins 2 joueurs (minimum requis pour lancer)
                     btnStartGame.setDisable(!(everyoneReady && r.getPlayers().size() >= 2));
-                    
-                    // Mise à jour de l'affichage du bouton "Prêt" local
                     validerLobby.setText(isReady ? "Prêt !" : "Prêt");
                 });
             }
+        });
+
+        // --- ÉCOUTE DU DÉCOMPTE ---
+        NetworkManager.getInstance().addServerMessageListener(MessageType.COUNTDOWN_UPDATE, msg -> {
+            CountdownUpdate countdown = (CountdownUpdate) msg;
+            Platform.runLater(() -> {
+                if (countdown.getRemainingSeconds() > 0) {
+                    lobbyTitre.setText("LANCEMENT DANS : " + countdown.getRemainingSeconds() + " s");
+                    // On grise le bouton de lancement pendant le décompte
+                    btnStartGame.setDisable(true);
+                } else if (countdown.getRemainingSeconds() == -1) {
+                    lobbyTitre.setText("LANCEMENT ANNULÉ");
+                }
+            });
+        });
+
+        // --- ÉCOUTE DU MESSAGE D'INITIALISATION DE LA PARTIE ---
+        NetworkManager.getInstance().addServerMessageListener(MessageType.INIT_GAME, msg -> {
+            Platform.runLater(() -> {
+                try {
+                    System.out.println("Partie lancée ! Chargement de la vue du jeu...");
+                    // On change de vue vers le jeu (à adapter selon le chemin de votre FXML)
+                    MainApp.setRoot("iut/gon/bomberman/client/game-view"); 
+                } catch (IOException e) {
+                    System.err.println("Erreur : Impossible de charger la vue du jeu !");
+                    e.printStackTrace();
+                }
+            });
         });
 
         // Écouter les messages de chat
@@ -81,25 +101,21 @@ public class LobbyController implements Initializable {
             });
         });
 
-        // Actions des boutons
         envoyerMessage.setOnAction(e -> handleSendMessage());
         texteMessage.setOnAction(e -> handleSendMessage());
 
-        // Bouton Prêt/Pas Prêt (utilisé par tout le monde, même l'owner)
         validerLobby.setOnAction(e -> {
             isReady = !isReady;
             NetworkManager.getInstance().send(new ReadyStatus(isReady, currentLobbyId));
         });
 
-        // Bouton Lancer la partie (utilisé uniquement par l'owner)
         btnStartGame.setOnAction(e -> {
-            System.out.println("Lancement de la partie par l'owner...");
+            System.out.println("L'owner demande le lancement du décompte...");
             NetworkManager.getInstance().send(new StartGameRequest(currentLobbyId));
         });
 
         quitterLobby.setOnAction(e -> handleLeaveLobby());
 
-        // Demander les détails initiaux dès l'arrivée
         NetworkManager.getInstance().send(new LobbyDetailsRequest(currentLobbyId));
     }
 
