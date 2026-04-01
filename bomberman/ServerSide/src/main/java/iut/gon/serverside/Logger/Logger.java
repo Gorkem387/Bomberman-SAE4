@@ -69,7 +69,7 @@ public class Logger {
      *  @param message le message de log à afficher
      *  @return String le message de log formaté
      * */
-    public String createLogMessage(LogTypes type, String message) {
+    private String createLogMessage(LogTypes type, String message) {
         return getCurrentTimeFormated() + " [" + type + "] " + message;
     }
 

@@ -6,6 +6,7 @@ import iut.gon.serverside.Logger.LogTypes;
 import iut.gon.serverside.Logger.Logger;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.Threads.Thread_Jeu;
+import iut.gon.bomberman.common.model.labyrinthe.DFSGenerator;
 
 import iut.gon.bomberman.common.model.labyrinthe.TypeLab;
 import iut.gon.bomberman.common.model.player.Joueur;
@@ -77,6 +78,10 @@ public class Lobby {
             return nbJMax;
         }
 
+        public Labyrinthe getLabyrinthe() {
+            return labyrinthe;
+        }
+
         public void broadcastUpdate() {
             // Envoyer LobbyDetailsResponse à tout le monde
             // (Implémenté via LobbyDetailsHandler)
@@ -113,7 +118,7 @@ public class Lobby {
                         broadcast(new CountdownUpdate(countdownSecondsRemaining));
                         countdownSecondsRemaining--;
                     } else {
-                        cancel(); // Arrêter le timer
+                        this.cancel(); // Arrêter le timer
                         initGame();
                     }
                 }
@@ -135,15 +140,34 @@ public class Lobby {
         private void initGame() {
             logger.log(LogTypes.SUCCESS, "Initialisation de la partie pour le lobby " + id);
             
-            // Création de la liste des joueurs DTO pour InitGameMessage
+            // 1. Générer le labyrinthe sur le serveur
+            DFSGenerator generator = new DFSGenerator();
+            generator.generateRecursive(this.labyrinthe, 1, 1);
+            generator.addDestructibleWalls(this.labyrinthe);
+
+            // 2. Définir les points de spawn
+            int[][] spawnPoints = {
+                {1, 1},
+                {labyrinthe.getWidth() - 2, 1},
+                {1, labyrinthe.getHeight() - 2},
+                {labyrinthe.getWidth() - 2, labyrinthe.getHeight() - 2}
+            };
+
+            for (int i = 0; i < joueursInvites.size(); i++) {
+                Joueur j = joueursInvites.get(i);
+                j.setX(spawnPoints[i % 4][0]);
+                j.setY(spawnPoints[i % 4][1]);
+            }
+
+            // 3. Envoyer l'initialisation à tout le monde
             List<InitGameMessage.PlayerInitDTO> players = joueursInvites.stream()
                 .map(j -> new InitGameMessage.PlayerInitDTO(j.getId(), j.getNom(), j.getX(), j.getY()))
                 .collect(Collectors.toList());
 
-            // Envoi du message INIT_GAME à tout le monde
-            broadcast(new InitGameMessage(id, "map_data", players));
+            InitGameMessage mes = new InitGameMessage(id, this.labyrinthe, players);
+            broadcast(mes);
             
-            // Démarrage réel du thread de jeu
+            // 4. Démarrer la boucle de jeu
             startGame();
         }
 
@@ -187,6 +211,10 @@ public class Lobby {
 
         public EtatLobby getStatus(){
             return etatLobby;
+        }
+
+        public Thread_Jeu getThread() {
+            return thread;
         }
 
         public void setThread(Thread_Jeu threadJeu) {

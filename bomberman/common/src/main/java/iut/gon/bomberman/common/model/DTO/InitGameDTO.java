@@ -1,4 +1,4 @@
-package iut.gon.serverside.Player.DTO;
+package iut.gon.bomberman.common.model.DTO;
 
 import iut.gon.bomberman.common.model.Mess.MessageType;
 

@@ -4,6 +4,6 @@
 
 <StackPane xmlns="http://javafx.com/fxml/1"
            xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="iut.gon.bomberman.client.controllers.GameController">
+           fx:controller="iut.gon.bomberman.client.controllers.OnlineGameController">
     <Canvas fx:id="gameCanvas" width="800" height="800" />
 </StackPane>

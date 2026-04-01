@@ -15,5 +15,7 @@ public enum MessageType {
     START_GAME_REQUEST,
     GAME_UPDATE,
     INIT_GAME,
-    COUNTDOWN_UPDATE // Nouveau message pour le décompte
+    COUNTDOWN_UPDATE,
+    PLACE_BOMB_REQUEST, // Nouveau message pour la pose de bombe
+    BOMB_UPDATE // Nouveau message pour la mise à jour des bombes (peut être intégré à GAME_UPDATE)
 }

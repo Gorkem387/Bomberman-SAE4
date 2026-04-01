@@ -24,7 +24,7 @@ public class MessageDispatcher {
         handlers.put(MessageType.LOBBY_LIST_REQUEST, new LobbyListHandler());
         handlers.put(MessageType.LOBBY_DETAILS_REQUEST, new LobbyDetailsHandler());
         handlers.put(MessageType.START_GAME_REQUEST, new StartGameHandler());
-        // Pas besoin de handler pour INIT_GAME côté serveur car c'est lui qui l'envoie
+        handlers.put(MessageType.PLACE_BOMB_REQUEST, new PlaceBombHandler()); // Ajout du handler de bombe
     }
 
     /**

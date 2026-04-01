@@ -1,14 +1,12 @@
 package iut.gon.bomberman.common.model.Mess;
 
 public class MoveRequest implements Message {
-    private final int x;
-    private final int y;
-    private final String direction; // "UP", "DOWN", "LEFT", "RIGHT"
+    private final double dx;
+    private final double dy;
 
-    public MoveRequest(int x, int y, String direction) {
-        this.x = x;
-        this.y = y;
-        this.direction = direction;
+    public MoveRequest(double dx, double dy) {
+        this.dx = dx;
+        this.dy = dy;
     }
 
     @Override
@@ -16,7 +14,6 @@ public class MoveRequest implements Message {
         return MessageType.MOVE_REQUEST;
     }
 
-    public int getX() { return x; }
-    public int getY() { return y; }
-    public String getDirection() { return direction; }
+    public double getDx() { return dx; }
+    public double getDy() { return dy; }
 }

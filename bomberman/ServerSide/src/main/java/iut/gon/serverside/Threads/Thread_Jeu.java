@@ -1,14 +1,16 @@
 package iut.gon.serverside.Threads;
 
-import iut.gon.serverside.Lob.Lobby;
-import iut.gon.serverside.Logger.Logger;
-import iut.gon.bomberman.common.model.Mess.Message;
-import iut.gon.bomberman.common.model.Mess.InitGame;
-import iut.gon.bomberman.common.model.Mess.GameUpdate;
+import iut.gon.bomberman.common.model.labyrinthe.Bomb;
+import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.player.Joueur;
+import iut.gon.serverside.Lob.Lobby;
+import iut.gon.bomberman.common.model.DTO.JoueurMisAJourDTO;
+import iut.gon.bomberman.common.model.DTO.MinimDTO;
+import iut.gon.bomberman.common.model.Mess.BombUpdate;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Gère la boucle de jeu (60 FPS) pour un lobby spécifique.
@@ -17,60 +19,64 @@ import java.util.Map;
 public class Thread_Jeu extends Thread {
 
     private boolean running = true;
-    private Lobby lobby;
-    private Logger logger = Logger.getInstance();
+    private final Lobby lobby;
+    private final BombManager bombManager; // Gestionnaire de bombes côté serveur
 
     public Thread_Jeu(Lobby lobby) {
         this.lobby = lobby;
-        lobby.setThread(this);
+        this.bombManager = new BombManager();
     }
 
     @Override
     public void run() {
-        // Construire et envoyer un message d'initialisation global
-        Map<Integer, InitGame.PlayerInitDTO> playersMap = new HashMap<>();
-        for (Joueur j : lobby.getJoueurs()) {
-            int id = j.getId();
-            String pseudo = j.getNom();
-            int skin = 0; // valeur par défaut, à adapter si vous avez un skin côté joueur
-            int x = (int) j.getX();
-            int y = (int) j.getY();
-            playersMap.put(id, new InitGame.PlayerInitDTO(id, pseudo, skin, x, y));
-        }
+        long lastTime = System.nanoTime();
 
-        // Note : les champs pseudoLocal/idLocal étaient initialement pris du lobby dans le code existant;
-        // on conserve ce comportement pour rester compatible, mais idéalement ce serait les infos du joueur local.
-        InitGame init = new InitGame(lobby.getNom(), lobby.getId(), 0, 0, 0, playersMap);
-        broadcastUpdate(init);
-
+        // Boucle de jeu (Synchronisation temps réel)
         while (running) {
-            // Construire une mise à jour légère (GameUpdate) et l'envoyer
-            Map<Integer, GameUpdate.PlayerPositionDTO> posMap = new HashMap<>();
-            for (Joueur j : lobby.getJoueurs()) {
-                int id = j.getId();
-                int x = (int) j.getX();
-                int y = (int) j.getY();
-                String dir = j.getDirection() != null ? j.getDirection().toString() : null;
-                posMap.put(id, new GameUpdate.PlayerPositionDTO(x, y, dir));
-            }
+            long now = System.nanoTime();
+            double deltaTime = (now - lastTime) / 1_000_000_000.0;
+            lastTime = now;
 
-            GameUpdate update = new GameUpdate(posMap);
-            broadcastUpdate(update);
+            // 1. Mise à jour de la physique (bombes, explosions, dégâts) sur le serveur
+            bombManager.update(deltaTime, lobby.getLabyrinthe(), lobby.getJoueurs());
+
+            // 2. Broadcast des positions des joueurs
+            JoueurMisAJourDTO updateDTO = new JoueurMisAJourDTO();
+            List<MinimDTO> positions = new ArrayList<>();
+            for (Joueur j : lobby.getJoueurs()) {
+                MinimDTO m = new MinimDTO(
+                    j.getId(),
+                    (int)(j.getX() * 100),
+                    (int)(j.getY() * 100)
+                );
+
+                positions.add(m);
+            }
+            updateDTO.positionsAll = positions;
+            lobby.broadcast(updateDTO);
+
+            // 3. Broadcast de l'état des bombes et explosions
+            List<BombUpdate.BombDTO> bombDTOs = bombManager.getBombs().stream()
+                    .map(b -> new BombUpdate.BombDTO(b.getX(), b.getY(), b.isSolid(), b.getJoueur() != null ? b.getJoueur().getId() : -1))
+                    .collect(Collectors.toList());
+            
+            BombUpdate bombUpdate = new BombUpdate(bombDTOs, new ArrayList<>(bombManager.getExplosionCells()));
+            lobby.broadcast(bombUpdate);
 
             try {
-                Thread.sleep(16); // ~60 FPS
+                // Pause pour maintenir environ 60 FPS (16ms)
+                Thread.sleep(16);
             } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
+                running = false;
             }
         }
-    }
-
-    private void broadcastUpdate(Message message) {
-        // Envoie uniquement aux clients du lobby associé à ce Thread_Jeu
-        ThreadPrincipal.broadcastToLobby(lobby, message);
     }
 
     public void stopGame() {
         this.running = false;
+    }
+
+    public BombManager getBombManager() {
+        return bombManager;
     }
 }

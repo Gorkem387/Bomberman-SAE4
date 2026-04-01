@@ -39,7 +39,6 @@ public class ClientHandler extends Thread {
         this.dispatcher = dispatcher;
         // Initialisation temporaire du Joueur avec un constructeur valide du module common
         this.joueur = new Joueur(-1, "");
-        //todo : donner l'id du lobby qlq part au constructeur
         this.lobbyId = lobbyId;
     }
 

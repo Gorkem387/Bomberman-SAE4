@@ -6,9 +6,6 @@ import iut.gon.bomberman.common.model.player.EtatJoueur;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.labyrinthe.CellType;
-import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
-import iut.gon.bomberman.common.model.player.Effects.Bonus;
-import iut.gon.bomberman.common.model.player.EtatJoueur;
 
 public class Joueur {
 
@@ -30,7 +27,8 @@ public class Joueur {
 
     private boolean alive = true;
 
-    private String skinPath = "/iut/gon.bomberman/client/assets/8/S_0.png";
+    // Chemin corrigé pour correspondre à la structure réelle des ressources
+    private String skinPath = "/iut/gon/bomberman/client/assets/8/S_0.png";
 
     private int explosionRange = 2;
 
@@ -94,7 +92,7 @@ public class Joueur {
         int centerX = (int) Math.round(cooX);
         int centerY = (int) Math.round(cooY);
 
-        if (laby.isInside(centerX, centerY)) {
+        if (laby != null && laby.isInside(centerX, centerY)) {
             CellType typeCase = laby.getCell(centerX, centerY);
 
             if (typeCase == CellType.SPEED_BONUS) {
@@ -112,6 +110,8 @@ public class Joueur {
     }
 
     private boolean canMoveTo(double x, double y, double size, double offset, Labyrinthe laby, BombManager bm) {
+        if (laby == null) return true; // Sécurité si le labyrinthe n'est pas encore chargé
+        
         double left = x + offset;
         double right = x + offset + size;
         double top = y + offset;
@@ -124,7 +124,7 @@ public class Joueur {
 
         for (double[] p : corners) {
             if (!laby.isWalkable((int)p[0], (int)p[1])) return false;
-            if (bm.isBombAt((int)p[0], (int)p[1])) return false;
+            if (bm != null && bm.isBombAt((int)p[0], (int)p[1])) return false;
         }
         return true;
     }

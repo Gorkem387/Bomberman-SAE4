@@ -12,27 +12,15 @@ public class MoveHandler implements MessageHandler<MoveRequest> {
 
     @Override
     public void handle(MoveRequest message, ClientHandler client) {
-        // Le mouvement se fait dans un lobby spécifique.
-        // Un clientHandler devrait stocker l'ID du lobby dans lequel il se trouve (par exemple via client.lobbyId)
-        // Ou bien, on peut chercher le lobby qui contient le joueur (moins performant)
-        
-        // Simuler la recherche du lobby (à adapter dans votre LobbyManager pour obtenir le lobby par ID)
-        //todo : donner l'id du lobby au clientHandler
         Lobby lobby = LobbyManager.getInstance().getLobby(client.getLobbyId());
 
-
-        if (client.getJoueur() != null) {
-            // Mise à jour de la position dans le modèle métier Joueur
-            // Le serveur fait ici de la "Vérification de mouvement"
-
-            //todo : double check si les mouvement sont ok, check pour les collisions
-            client.getJoueur().setX(message.getX());
-            client.getJoueur().setY(message.getY());
+        if (client.getJoueur() != null && lobby != null) {
+            // Le serveur applique le mouvement sur son modèle de données
+            // (La logique de collision est incluse dans la méthode move du Joueur)
+            client.getJoueur().move(message.getDx(), message.getDy(), lobby.getLabyrinthe(), null);
             
-            // Si le mouvement est valide, le serveur diffusera la position 
-            // via le GameUpdate du Thread_Jeu (60 itérations/sec)
-            System.out.println("Déplacement du joueur " + client.getJoueur().getNom() +
-                " vers (" + message.getX() + "," + message.getY() + ")");
+            // Le Thread_Jeu (60 FPS) se chargera de diffuser cette nouvelle position
+            // à tous les membres du lobby via GAME_UPDATE.
         }
     }
 }

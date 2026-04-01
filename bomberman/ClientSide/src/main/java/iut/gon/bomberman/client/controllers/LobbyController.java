@@ -1,6 +1,7 @@
 package iut.gon.bomberman.client.controllers;
 
 import iut.gon.bomberman.client.MainApp;
+import iut.gon.bomberman.client.controllers.OnlineGameController;
 import iut.gon.bomberman.client.network.NetworkManager;
 import iut.gon.bomberman.common.model.Mess.*;
 import iut.gon.bomberman.common.model.player.EtatJoueur;
@@ -83,9 +84,12 @@ public class LobbyController implements Initializable {
         NetworkManager.getInstance().addServerMessageListener(MessageType.INIT_GAME, msg -> {
             Platform.runLater(() -> {
                 try {
-                    System.out.println("Partie lancée ! Chargement de la vue du jeu...");
-                    // On change de vue vers le jeu (à adapter selon le chemin de votre FXML)
-                    MainApp.setRoot("iut/gon/bomberman/client/game-view"); 
+                    System.out.println("Partie lance ! Chargement de la vue du jeu...");
+                    javafx.fxml.FXMLLoader loader = MainApp.setRootAndGetLoader("iut/gon/bomberman/client/game-view");
+                    OnlineGameController gameController = loader.getController();
+                    InitGameMessage initMsg = (InitGameMessage) msg;
+                    gameController.setLabyrinthe(initMsg.getLabyrinthe());
+                    gameController.initPlayers(initMsg.getPlayers());
                 } catch (IOException e) {
                     System.err.println("Erreur : Impossible de charger la vue du jeu !");
                     e.printStackTrace();

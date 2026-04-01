@@ -40,4 +40,8 @@ public class Bomb implements Serializable {
     public double getTimer() { return timer; }
     public boolean isSolid() { return solid; }
     public void setSolid(boolean solid) { this.solid = solid; }
+
+    public Joueur getJoueur() {
+        return joueur;
+    }
 }
