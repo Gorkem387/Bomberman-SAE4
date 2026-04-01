@@ -53,6 +53,10 @@ public class GameController {
     private boolean deathAnimationComplete = false;
     private long deathAnimationStartTime = -1;
     private static final long DEATH_ANIMATION_DURATION = 1000;
+    
+    private boolean victoryAnimationComplete = false;
+    private long victoryAnimationStartTime = -1;
+    private static final long VICTORY_ANIMATION_DURATION = 1500;
 
     private Image heartImage;
     private Image bombImage;
@@ -192,7 +196,7 @@ public class GameController {
     private void update(double deltaTime) {
         if (input.contains(KeyCode.ESCAPE) && !escWasPressed) {
             escWasPressed = true;
-            if (isVictory || (isGameOver && deathAnimationComplete)) {
+            if ((isVictory && victoryAnimationComplete) || (isGameOver && deathAnimationComplete)) {
                 goBackToMenu();
                 return;
             } else if (!isGameOver && !isVictory) {
@@ -208,6 +212,10 @@ public class GameController {
             if (isGameOver && deathAnimationStartTime > 0) {
                 long elapsed = System.currentTimeMillis() - deathAnimationStartTime;
                 if (elapsed >= DEATH_ANIMATION_DURATION) deathAnimationComplete = true;
+            }
+            if (isVictory && victoryAnimationStartTime > 0) {
+                long elapsed = System.currentTimeMillis() - victoryAnimationStartTime;
+                if (elapsed >= VICTORY_ANIMATION_DURATION) victoryAnimationComplete = true;
             }
             return;
         }
@@ -235,6 +243,7 @@ public class GameController {
 
         if (!isVictory && checkVictoryCondition()) {
             isVictory = true;
+            victoryAnimationStartTime = System.currentTimeMillis();
         }
 
         List<Joueur> targets = new ArrayList<>();
@@ -286,16 +295,18 @@ public class GameController {
         renderer.drawBombs(gc, bombManager.getBombs());
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
 
-        renderer.drawPlayer(gc, joueur);
-        renderer.drawPlayer(gc, iaPlayer);
-        renderer.drawPlayer(gc, iaPlayer2);
-        renderer.drawPlayer(gc, iaPlayer3);
+        renderer.drawPlayer(gc, joueur, isVictory && joueur.isAlive());
+        renderer.drawPlayer(gc, iaPlayer, isVictory && iaPlayer.isAlive());
+        renderer.drawPlayer(gc, iaPlayer2, isVictory && iaPlayer2.isAlive());
+        renderer.drawPlayer(gc, iaPlayer3, isVictory && iaPlayer3.isAlive());
 
         drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
         
         // Afficher l'écran VICTORY
         if (isVictory) {
-            drawVictoryOverScreen();
+            if (victoryAnimationComplete) {
+                drawVictoryOverScreen();
+            }
         }
         // Afficher l'écran GAME OVER uniquement après que l'animation de mort soit complète
         else if (isGameOver) {

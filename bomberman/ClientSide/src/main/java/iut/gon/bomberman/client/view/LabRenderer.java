@@ -39,6 +39,9 @@ public class LabRenderer {
     private int deathAnimationCounter = 0;
     private boolean isDeathAnimationPlaying = false;
 
+    private int victoryAnimationCounter = 0;
+    private boolean isVictoryAnimationPlaying = false;
+
     private int explosionAnimationCounter = 0;
     private boolean wasExploding = false;
     private Image[] explosionSprites = new Image[6];
@@ -230,7 +233,7 @@ public class LabRenderer {
      * @param gc le contexte graphique du canvas
      * @param joueur le joueur à dessiner
      */
-    public void drawPlayer(GraphicsContext gc, Joueur joueur) {
+    public void drawPlayer(GraphicsContext gc, Joueur joueur, boolean isVictory) {
         if (joueur == null) return;
 
         double screenX = joueur.getX() * TILE_SIZE;
@@ -238,6 +241,11 @@ public class LabRenderer {
 
         if (!joueur.isAlive()) {
             drawDeathAnimation(gc, joueur, screenX, screenY);
+            return;
+        }
+
+        if (isVictory) {
+            drawVictoryAnimation(gc, joueur, screenX, screenY);
             return;
         }
 
@@ -280,6 +288,10 @@ public class LabRenderer {
                 hSize * TILE_SIZE, hSize * TILE_SIZE);
     }
 
+    public void drawPlayer(GraphicsContext gc, Joueur joueur) {
+        drawPlayer(gc, joueur, false);
+    }
+
     /**
      * Affiche l'animation de mort avec les sprites "D"
      * L'animation se joue une seule fois puis reste sur le dernier frame
@@ -309,6 +321,27 @@ public class LabRenderer {
         Image currentDeathSprite = deathSprites[frameIndex];
 
         gc.drawImage(currentDeathSprite, screenX, screenY, TILE_SIZE, TILE_SIZE);
+    }
+
+    private void drawVictoryAnimation(GraphicsContext gc, Joueur joueur, double screenX, double screenY) {
+        if (!isVictoryAnimationPlaying) {
+            isVictoryAnimationPlaying = true;
+            victoryAnimationCounter = 0;
+        }
+
+        victoryAnimationCounter++;
+
+        String cacheKey = joueur.getId() + "_V";
+        if (!spriteCache.containsKey(cacheKey)) {
+            loadSpritesIntoCache(cacheKey, "V", joueur);
+        }
+
+        Image[] victorySprites = spriteCache.get(cacheKey);
+
+        int frameIndex = (victoryAnimationCounter / ANIMATION_SPEED) % 3;
+        Image currentVictorySprite = victorySprites[frameIndex];
+
+        gc.drawImage(currentVictorySprite, screenX, screenY, TILE_SIZE, TILE_SIZE);
     }
 
     private void loadSpritesIntoCache(String cacheKey, String direction, Joueur joueur) {
