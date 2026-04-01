@@ -23,11 +23,20 @@ public class CreateLobbyHandler implements MessageHandler<CreateLobbyRequest> {
         }
         
         // Initialisation du joueur avec son vrai nom
-        client.setJoueur(new Joueur(client.hashCode(), playerName)); 
+        Joueur j = client.getJoueur();
+        int uniqueId = Math.abs(client.hashCode());
+        if (j == null) {
+            // Sécurité si jamais il est null
+            j = new Joueur(uniqueId, playerName);
+            client.setJoueur(j);
+        } else {
+            j.setId(uniqueId);
+            j.setNom(playerName);
+        }
 
         // Création du lobby avec cet owner
         Lobby newLobby = LobbyManager.getInstance().createLobby(
-                client.getJoueur(),
+                j,
                 message.getLobbyName(),
                 message.getMaxPlayers(),
                 message.getLabyrintheType(),

@@ -224,15 +224,26 @@ public class OnlineGameController {
 
     private void render() {
         if (labyrinthe == null) return;
-        
+
+        // Efface tout
         gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
+
+        // Dessine le décor et les effets
         renderer.draw(gc, labyrinthe);
         renderer.drawBombs(gc, bombManager.getBombs());
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
-        
-        renderer.drawPlayer(gc, localPlayer);
+
+        // Dessine Le joueur local seulement si l'ID est prêt
+        if (localPlayer.getId() != -1 && localPlayer.isAlive()) {
+            renderer.drawPlayer(gc, localPlayer);
+        }
+
+        // Dessine les autres joueurs
         for (Joueur remote : remotePlayers.values()) {
-            renderer.drawPlayer(gc, remote);
+            // Dessine pas le remote s'il a le même ID que nous
+            if (remote.getId() != localPlayer.getId() && remote.isAlive()) {
+                renderer.drawPlayer(gc, remote);
+            }
         }
 
         if (localPlayer.isAlive()) {
@@ -335,14 +346,25 @@ public class OnlineGameController {
     }
 
     public void initPlayers(List<InitGameMessage.PlayerInitDTO> players) {
+        String myName = NetworkManager.getInstance().getLocalPlayerName();
+
         for (InitGameMessage.PlayerInitDTO dto : players) {
-            if (dto.id == localPlayer.getId()) {
+            if (dto.name != null && dto.name.equals(myName)) {
+                // On s'assure d'avoir l'ID définitif donné par le serveur
+                NetworkManager.getInstance().setLocalPlayerId(dto.id);
+                this.localPlayer.setId(dto.id);
+                
+                // On met à jour le localPlayer
+                localPlayer.setNom(dto.name);
                 localPlayer.setX(dto.startX);
                 localPlayer.setY(dto.startY);
+                localPlayer.setAlive(true);
             } else {
+                // Un autre joueur
                 Joueur remote = remotePlayers.computeIfAbsent(dto.id, id -> new Joueur(id, dto.name));
                 remote.setX(dto.startX);
                 remote.setY(dto.startY);
+                remote.setAlive(true);
             }
         }
     }

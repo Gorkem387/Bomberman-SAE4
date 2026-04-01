@@ -44,6 +44,11 @@ public class Lobby {
         }
 
         public synchronized void addJoueur(Joueur joueur, ClientHandler handler) {
+            for (Joueur j : joueursInvites) {
+                if (j.getId() == joueur.getId()) {
+                    return;
+                }
+            }
             joueursInvites.add(joueur);
             handlers.put(joueur.getId(), handler);
             broadcastUpdate();
@@ -138,7 +143,11 @@ public class Lobby {
         }
 
         private void initGame() {
+            this.etatLobby = EtatLobby.EN_JEU;
             logger.log(LogTypes.SUCCESS, "Initialisation de la partie pour le lobby " + id);
+
+            Set<Integer> vus = new HashSet<>();
+            joueursInvites.removeIf(j -> j.getId() == -1 || !vus.add(j.getId()));
             
             // 1. Générer le labyrinthe sur le serveur
             DFSGenerator generator = new DFSGenerator();
@@ -181,6 +190,9 @@ public class Lobby {
         }
 
         public boolean rejoindreLobby(ClientHandler client){
+            if (this.etatLobby != EtatLobby.EN_ATTENTE) {
+                return false;
+            }
             Joueur j = client.getJoueur();
             if (joueursInvites.contains(j)) return true;
             

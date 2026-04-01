@@ -73,6 +73,13 @@ public class Thread_Jeu extends Thread {
             BombUpdate bombUpdate = new BombUpdate(bombDTOs, new ArrayList<>(bombManager.getExplosionCells()), currentLab);
             lobby.broadcast(bombUpdate);
 
+            // 4. Vérification de la condition de victoire
+            long nbSurvivants = lobby.getJoueurs().stream().filter(Joueur::isAlive).count();
+            if (nbSurvivants <= 1 && lobby.getJoueurs().size() > 1) {
+                // On arrête la boucle, le client détectera la victoire tout seul grâce aux PVs mis à jour
+                stopGame();
+            }
+
             try {
                 // Pause pour maintenir environ 60 FPS (16ms)
                 Thread.sleep(16);
