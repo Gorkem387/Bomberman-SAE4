@@ -157,4 +157,8 @@ public class Lobby {
         public EtatLobby getStatus(){
             return etatLobby;
         }
+
+    public void setThread(Thread_Jeu threadJeu) {
+        this.thread = threadJeu;
+    }
 }

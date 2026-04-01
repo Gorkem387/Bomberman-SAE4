@@ -14,4 +14,5 @@ public enum MessageType {
     READY_STATUS,
     START_GAME_REQUEST, // Ajouté pour le lancement manuel par l'owner
     GAME_UPDATE,
+    INIT_GAME
 }

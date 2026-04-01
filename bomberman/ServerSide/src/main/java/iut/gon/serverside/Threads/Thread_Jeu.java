@@ -2,9 +2,9 @@ package iut.gon.serverside.Threads;
 
 import iut.gon.serverside.Lob.Lobby;
 import iut.gon.serverside.Logger.Logger;
-import iut.gon.bomberman.common.model.Message.Message;
-import iut.gon.bomberman.common.model.Message.InitGame;
-import iut.gon.bomberman.common.model.Message.GameUpdate;
+import iut.gon.bomberman.common.model.Mess.Message;
+import iut.gon.bomberman.common.model.Mess.InitGame;
+import iut.gon.bomberman.common.model.Mess.GameUpdate;
 import iut.gon.bomberman.common.model.player.Joueur;
 
 import java.util.HashMap;

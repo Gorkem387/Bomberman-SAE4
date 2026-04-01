@@ -1,4 +1,7 @@
-package iut.gon.bomberman.common.model.Message;
+package iut.gon.bomberman.common.model.Mess;
+
+import iut.gon.bomberman.common.model.Mess.Message;
+import iut.gon.bomberman.common.model.Mess.MessageType;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
