@@ -19,7 +19,7 @@ public class BombManager {
 
     /**
      * Tente de placer une bombe sur la carte à la position du joueur.
-     * * @param joueur Le joueur qui pose la bombe.
+     * @param joueur Le joueur qui pose la bombe.
      * @param range La portée de l'explosion.
      * @param labyrinthe Le labyrinthe actuel pour vérifier si la case est libre.
      * @return true si la bombe a été posée, false sinon.
@@ -45,7 +45,7 @@ public class BombManager {
 
     /**
      * Met à jour l'état des bombes et des explosions à chaque frame.
-     * * @param deltaTime Temps écoulé depuis la dernière frame (en secondes).
+     * @param deltaTime Temps écoulé depuis la dernière frame (en secondes).
      * @param labyrinthe Référence du labyrinthe pour les collisions.
      * @param joueurs Liste des joueurs présents pour tester les dégâts et la solidité.
      */
@@ -53,6 +53,10 @@ public class BombManager {
         // Gestion du timer de l'effet visuel de l'explosion
         if (!explosionCells.isEmpty()) {
             explosionTimer -= deltaTime;
+
+            // On vérifie les degats à chaque frame
+            checkExplosionDamage(joueurs);
+
             if (explosionTimer <= 0) {
                 explosionCells.clear();
             }
@@ -98,7 +102,7 @@ public class BombManager {
                 System.out.println(String.format(" > Temps écoulé : %d ms (Attendu: 3000 ms)", dureeReelle));
                 System.out.println("------------------------------------");
 
-                explode(bomb, labyrinthe, joueurs);
+                explode(bomb, labyrinthe);
 
                 // On rend la bombe au proprio
                 Joueur proprio = bomb.getJoueur();
@@ -111,12 +115,11 @@ public class BombManager {
     }
 
     /**
-     * Gère la détonation d'une bombe et propage les flammes.
-     * * @param bomb La bombe qui explose.
-     * @param labyrinthe Le labyrinthe à modifier (murs destructibles).
-     * @param joueurs La liste des joueurs à tester pour les dégâts.
+     * Calcule la zone d'impact d'une explosion et modifie le labyrinthe.
+     * @param bomb La bombe arrivant à expiration.
+     * @param labyrinthe Le labyrinthe subissant les modifications (murs brisés).
      */
-    private void explode(Bomb bomb, Labyrinthe labyrinthe, List<Joueur> joueurs) {
+    private void explode(Bomb bomb, Labyrinthe labyrinthe) {
         explosionCells.clear();
         explosionTimer = EXPLOSION_DURATION;
         explosionCells.add(new int[]{bomb.getX(), bomb.getY()});
@@ -130,46 +133,41 @@ public class BombManager {
 
                 if (!labyrinthe.isInside(cx, cy)) break;
                 CellType cell = labyrinthe.getCell(cx, cy);
-
-                // L'explosion est stoppée par les murs
-                if (cell == CellType.WALL) {
-                    break;
-                }
+                if (cell == CellType.WALL) break; // Mur incassable, on arrête les flammes
                 explosionCells.add(new int[]{cx, cy});
-
-                // Si le mur est destructible, on gère l'apparition de bonus
                 if (cell == CellType.DESTRUCTIBLE) {
-                    double rand = Math.random();
-
-                    if (rand < 0.10) {
-                        // 10% fire
-                        labyrinthe.setCell(cx, cy, CellType.FIRE_BONUS);
-                    }
-                    else if (rand < 0.30) {
-                        // 20% speed
-                        labyrinthe.setCell(cx, cy, CellType.SPEED_BONUS);
-                    }
-                    else if (rand < 0.35){
-                        // 5% bombe limite +1 ( limite 6 )
-                        labyrinthe.setCell(cx, cy, CellType.BOMB_BONUS);
-                    }
-                    else if (rand < 0.40){
-                        // 5% de pouvoir regénérer une vie
-                        labyrinthe.setCell(cx, cy, CellType.HEAL_BONUS);
-                    }
-                    else {
-                        // 60% rien
-                        labyrinthe.setCell(cx, cy, CellType.EMPTY);
-                    }
+                    handleBoxDestruction(labyrinthe, cx, cy);
                     break;
                 }
             }
         }
-        // Gestion des collisions entre les joueurs et l'explosion
+    }
+
+    /**
+     * Gère le remplacement d'un mur destructible par du vide ou un bonus aléatoire.
+     * @param laby Le labyrinthe à modifier.
+     * @param x Coordonnée X de la caisse détruite.
+     * @param y Coordonnée Y de la caisse détruite.
+     */
+    private void handleBoxDestruction(Labyrinthe laby, int x, int y) {
+        double rand = Math.random();
+        if (rand < 0.10) laby.setCell(x, y, CellType.FIRE_BONUS);
+        else if (rand < 0.30) laby.setCell(x, y, CellType.SPEED_BONUS);
+        else if (rand < 0.35) laby.setCell(x, y, CellType.BOMB_BONUS);
+        else if (rand < 0.40) laby.setCell(x, y, CellType.HEAL_BONUS);
+        else laby.setCell(x, y, CellType.EMPTY);
+    }
+
+    /**
+     * Analyse les collisions entre les flammes actives et les hitboxes des joueurs.
+     * * @param joueurs Liste des joueurs à tester.
+     */
+    private void checkExplosionDamage(List<Joueur> joueurs) {
         for (Joueur joueur : joueurs) {
-            if (!joueur.isAlive()) continue;
-            double pSize = 0.7;
-            double pOffset = 0.15;
+            if (!joueur.isAlive() || !joueur.canTakeDamage()) continue;
+
+            double pSize = 0.8;
+            double pOffset = 0.1;
             double pLeft = joueur.getX() + pOffset;
             double pRight = joueur.getX() + pOffset + pSize;
             double pTop = joueur.getY() + pOffset;
@@ -180,16 +178,14 @@ public class BombManager {
                 boolean collisionY = pBottom > cell[1] && pTop < cell[1] + 1;
 
                 if (collisionX && collisionY) {
-                    joueur.setPv(joueur.getPv() - 1);
-                    System.out.println(joueur.getNom() + " touché ! PV: " + joueur.getPv());
-
-                    // Vérifie si le joueur doit mourir
+                    joueur.registerDamage();
+                    System.out.println(joueur.getNom() + " touché ! PV restants: " + joueur.getPv());
                     if (joueur.getPv() <= 0) {
                         joueur.setAlive(false);
-                        joueur.setNb_bombes(0); // il ne peut plus poser de bombes
+                        joueur.setNb_bombes(0);
                         System.out.println(joueur.getNom() + " est MORT !");
                     }
-                    break;
+                    break; // Le joueur a été touché par cette explosion, on passe au joueur suivant
                 }
             }
         }

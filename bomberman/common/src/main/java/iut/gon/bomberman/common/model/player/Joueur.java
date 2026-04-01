@@ -35,6 +35,9 @@ public class Joueur {
 
     private int explosionRange = 2;
 
+    private long lastDamageTime = 0;
+    private static final long INVINCIBILITY_DURATION = 1000;
+
     // Directions
     private Direction direction = Direction.DOWN;
 
@@ -270,5 +273,14 @@ public class Joueur {
 
     public void addExplosionRange() {
         this.explosionRange++;
+    }
+
+    public boolean canTakeDamage() {
+        return System.currentTimeMillis() - lastDamageTime > INVINCIBILITY_DURATION;
+    }
+
+    public void registerDamage() {
+        this.pv--;
+        this.lastDamageTime = System.currentTimeMillis();
     }
 }
