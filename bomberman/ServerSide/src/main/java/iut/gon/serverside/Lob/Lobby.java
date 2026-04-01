@@ -87,8 +87,8 @@ public class Lobby {
         }
 
         public void broadcastInit(InitGame init) {
-            // envoie l'objet InitGame à tous les clients connectés via ThreadPrincipal
-            ThreadPrincipal.broadcast(init);
+            // envoie l'objet InitGame seulement aux clients du lobby via ThreadPrincipal
+            ThreadPrincipal.broadcastToLobby(this, init);
         }
 
         private boolean peuCommencer(){

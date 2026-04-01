@@ -16,20 +16,32 @@ public class JoinLobbyHandler implements MessageHandler<JoinLobbyRequest> {
         Lobby lobby = LobbyManager.getInstance().getLobby(message.getLobbyId());
 
         if (lobby != null) {
-            // Mise à jour de l'ID du joueur dans le handler
-            client.playerId = message.getLobbyId(); // Ou un ID unique global si nécessaire
-            
+            // Définir l'id du lobby sur le client (important pour broadcastToLobby)
+            client.setLobbyId(lobby.getId());
+
+            // Mettre à jour le nom du joueur côté serveur
+            if (client.joueur != null) {
+                client.joueur.setNom(message.getPlayerName());
+            }
+
             // On délègue au lobby l'ajout du joueur (pour gérer le nombre max, l'état, etc.)
             boolean succes = lobby.rejoindreLobby(client);
 
+            // Si ajouté avec succès, déterminer et stocker l'index du joueur dans le lobby
+            if (succes) {
+                int index = lobby.getJoueurs().indexOf(client.joueur);
+                if (index >= 0) {
+                    client.playerId = index; // utilisé ailleurs comme index dans la liste joueursInvites
+                    client.joueur.setId(index);
+                }
+            }
 
-            //reponse
-            String text_message = "";
-            if(succes) text_message = "Vous avez rejoint le lobby" + lobby.getNom();
+            // Réponse au client
+            String text_message;
+            if (succes) text_message = "Vous avez rejoint le lobby " + lobby.getNom();
             else text_message = "Probleme avec lobby " + lobby.getNom();
 
             JoinLobbyResponse response = new JoinLobbyResponse(succes, text_message, lobby.getId());
-
 
             client.send(response);
             // Broadcast : On pourrait ici prévenir les autres joueurs qu'un nouveau est arrivé

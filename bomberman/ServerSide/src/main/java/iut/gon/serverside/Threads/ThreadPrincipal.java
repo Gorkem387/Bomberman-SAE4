@@ -6,7 +6,6 @@ import iut.gon.serverside.Logger.Logger;
 import iut.gon.bomberman.common.model.Message.Message;
 import iut.gon.serverside.Threads.PlayerInputHandling.MessageDispatcher;
 import iut.gon.serverside.Lob.Lobby;
-import iut.gon.bomberman.common.model.player.Joueur;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -14,8 +13,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Thread principal qui attend et accepte les connexions des clients.
@@ -66,14 +63,18 @@ public class ThreadPrincipal {
 
     /**
      * Envoie un message uniquement aux clients dont le joueur est présent dans le lobby donné.
+     * Modification : on utilise l'ID du lobby stocké côté ClientHandler (getLobbyId()) pour cibler
+     * précisément les clients qui sont dans le lobby qui a créé le Thread_Jeu.
      */
     public static void broadcastToLobby(Lobby lobby, Message message) {
-        // Copie la liste des joueurs du lobby dans un Set pour éviter les problèmes de concurrence
-        Set<Joueur> lobbyPlayers = new HashSet<>(lobby.getJoueurs());
+        if (lobby == null) return;
+        int targetLobbyId = lobby.getId();
         synchronized (clients) {
             for (ClientHandler client : clients) {
                 try {
-                    if (client != null && client.joueur != null && lobbyPlayers.contains(client.joueur)) {
+                    if (client == null) continue;
+                    // Utilise l'id de lobby du client (défini lors du join) pour vérifier l'appartenance
+                    if (client.getLobbyId() == targetLobbyId) {
                         client.send(message);
                     }
                 } catch (Exception e) {
