@@ -27,6 +27,7 @@ public class Joueur {
     private float speed_multiplier;
     private String nom;
     private int skinId;
+    private static final int MAX_BOMBES = 6;
 
     private boolean alive = true;
 
@@ -128,6 +129,22 @@ public class Joueur {
             }
             else if (typeCase == CellType.FIRE_BONUS) {
                 this.addExplosionRange();
+                laby.setCell(centerX, centerY, CellType.EMPTY);
+            }
+            else if (typeCase == CellType.BOMB_BONUS){
+                if (nb_bombes_max < MAX_BOMBES){
+                    nb_bombes_max++;
+                    nb_bombes = Math.min(nb_bombes + 1, nb_bombes_max);
+                    System.out.println("[BONUS] Bombes max : " + nb_bombes_max);
+                }
+                laby.setCell(centerX, centerY, CellType.EMPTY);
+            }
+            else if (typeCase == CellType.HEAL_BONUS){
+                int pvMax = 3;
+                if (pv < pvMax){
+                    pv++;
+                    System.out.println("[BONUS] PV récupéré : " + pv);
+                }
                 laby.setCell(centerX, centerY, CellType.EMPTY);
             }
         }

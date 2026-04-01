@@ -146,8 +146,16 @@ public class BombManager {
                         // 20% speed
                         labyrinthe.setCell(cx, cy, CellType.SPEED_BONUS);
                     }
+                    else if (rand < 0.35){
+                        // 5% bombe limite +1 ( limite 6 )
+                        labyrinthe.setCell(cx, cy, CellType.BOMB_BONUS);
+                    }
+                    else if (rand < 0.40){
+                        // 5% de pouvoir regénérer une vie
+                        labyrinthe.setCell(cx, cy, CellType.HEAL_BONUS);
+                    }
                     else {
-                        // 70% rien
+                        // 60% rien
                         labyrinthe.setCell(cx, cy, CellType.EMPTY);
                     }
                     break;
