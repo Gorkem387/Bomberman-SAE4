@@ -129,6 +129,12 @@ public class LabRenderer {
 
                 else if (type == CellType.FIRE_BONUS)
                     drawBonus(gc, x, y, Color.RED, Color.BLACK, "F");
+
+                else if (type == CellType.BOMB_BONUS)
+                    drawBonus(gc, x, y, Color.BLACK, Color.WHITE, "B");
+
+                else if (type == CellType.HEAL_BONUS)
+                    drawBonus(gc, x, y, Color.PINK, Color.RED, "♥");
             }
         }
     }

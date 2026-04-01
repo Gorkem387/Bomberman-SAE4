@@ -11,5 +11,7 @@ public enum CellType {
     BOMB,
     EXPLOSION,
     SPEED_BONUS,
-    FIRE_BONUS
+    FIRE_BONUS,
+    BOMB_BONUS,
+    HEAL_BONUS
 }

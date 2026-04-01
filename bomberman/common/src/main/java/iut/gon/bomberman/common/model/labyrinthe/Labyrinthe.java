@@ -78,6 +78,8 @@ public class Labyrinthe implements Serializable {
         return type == CellType.EMPTY
                 || type == CellType.EXPLOSION
                 || type == CellType.SPEED_BONUS
-                || type == CellType.FIRE_BONUS;
+                || type == CellType.FIRE_BONUS
+                || type == CellType.BOMB_BONUS
+                || type == CellType.HEAL_BONUS;
     }
 }
