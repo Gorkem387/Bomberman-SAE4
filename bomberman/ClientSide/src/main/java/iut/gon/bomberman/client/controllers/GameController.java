@@ -63,8 +63,6 @@ public class GameController {
     private boolean spaceWasPressed = false;
     private boolean escWasPressed = false;
     private boolean isPaused = false;
-    private boolean victorySoundPlayed = false;
-    private boolean defeatSoundPlayed = false;
 
     private double debugTimer = 0;
 
@@ -221,6 +219,10 @@ public class GameController {
                 SoundManager.getInstance().playDefeat();
                 defeatSoundPlayed = true;
             }
+            if (isVictory && victoryAnimationStartTime > 0) {
+                long elapsed = System.currentTimeMillis() - victoryAnimationStartTime;
+                if (elapsed >= VICTORY_ANIMATION_DURATION) victoryAnimationComplete = true;
+            }
             return;
         }
 
@@ -255,6 +257,7 @@ public class GameController {
 
         if (!isVictory && checkVictoryCondition()) {
             isVictory = true;
+            victoryAnimationStartTime = System.currentTimeMillis();
         }
 
         List<Joueur> targets = new ArrayList<>();
@@ -306,16 +309,18 @@ public class GameController {
         renderer.drawBombs(gc, bombManager.getBombs());
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
 
-        renderer.drawPlayer(gc, joueur);
-        renderer.drawPlayer(gc, iaPlayer);
-        renderer.drawPlayer(gc, iaPlayer2);
-        renderer.drawPlayer(gc, iaPlayer3);
+        renderer.drawPlayer(gc, joueur, isVictory && joueur.isAlive());
+        renderer.drawPlayer(gc, iaPlayer, isVictory && iaPlayer.isAlive());
+        renderer.drawPlayer(gc, iaPlayer2, isVictory && iaPlayer2.isAlive());
+        renderer.drawPlayer(gc, iaPlayer3, isVictory && iaPlayer3.isAlive());
 
         drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
         
         // Afficher l'écran VICTORY
         if (isVictory) {
-            drawVictoryOverScreen();
+            if (victoryAnimationComplete) {
+                drawVictoryOverScreen();
+            }
         }
         // Afficher l'écran GAME OVER uniquement après que l'animation de mort soit complète
         else if (isGameOver) {
