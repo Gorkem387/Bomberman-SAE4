@@ -2,6 +2,10 @@ package iut.gon.serverside.Player.DTO;
 
 import iut.gon.bomberman.common.model.Mess.MessageType;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class MinimDTO implements IDTO {
 
     private int id;
@@ -38,6 +42,18 @@ public class MinimDTO implements IDTO {
         this.y = y;
     }
 
+    public void write(DataOutputStream out) throws IOException {
+        out.writeInt(id);
+        out.writeInt(x);
+        out.writeInt(y);
+    }
+
+    public static MinimDTO read(DataInputStream in) throws IOException {
+        int id = in.readInt();
+        int x = in.readInt();
+        int y = in.readInt();
+        return new MinimDTO(id, x, y);
+    }
 
     public MessageType getType(){
         return MessageType.GAME_UPDATE;

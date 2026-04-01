@@ -4,6 +4,8 @@ import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.player.EtatJoueur;
 import iut.gon.serverside.Logger.LogTypes;
 import iut.gon.serverside.Logger.Logger;
+import iut.gon.serverside.Threads.ThreadPrincipal;
+import iut.gon.bomberman.common.model.Mess.InitGame;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.Threads.Thread_Jeu;
 
@@ -59,16 +61,40 @@ public class Lobby {
             return nomLobby;
         }
 
-        public int getId(){
-            return id;
+        public void setNom(String nom) {
+            this.nomLobby = nom;
         }
 
-        public Joueur getProprietaire() {
-            return proprietaire;
+        public Labyrinthe getLabyrinthe() {
+            return labyrinthe;
         }
 
         public int getNbJMax() {
             return nbJMax;
+        }
+
+        public void setNbJMax(int nbJMax) {
+            this.nbJMax = nbJMax;
+        }
+
+        public TypeLab getTypeLab() {
+            return typeLab;
+        }
+
+        public int getId(){
+            return id;
+        }
+
+        public void broadcastInit(InitGame init) {
+            // envoie l'objet InitGame seulement aux clients du lobby via ThreadPrincipal
+            ThreadPrincipal.broadcastToLobby(this, init);
+        }
+
+        private boolean peuCommencer(){
+            for(Joueur j : joueursInvites){
+                if(j.getEtat() == EtatJoueur.NOT_CONNECTED || j.getEtat() == EtatJoueur.PAS_PRET) return false;
+            }
+            return true;
         }
 
         /**
@@ -78,7 +104,7 @@ public class Lobby {
             // Dans cette architecture, la mise à jour est déclenchée lors d'une action
             // ou via un message périodique si nécessaire.
         }
-        
+
         /**
          * Envoie un message à TOUS les joueurs du lobby de manière synchrone.
          */
@@ -95,19 +121,23 @@ public class Lobby {
             if (!joueursInvites.isEmpty()) {
                 logger.log(LogTypes.SUCCESS,"Démarrage de la partie avec " + joueursInvites.size() + " joueurs.");
                 etatLobby = EtatLobby.COMPLET;
-                this.thread = new Thread_Jeu(this);
+                this.thread = new Thread_Jeu( this);
+                // Démarrage du thread de jeu
                 this.thread.start();
+
+            } else {
+                logger.log(LogTypes.WARNING, "Pas assez de joueurs pour démarrer la partie.");
             }
         }
 
         public boolean rejoindreLobby(ClientHandler client){
             Joueur j = client.getJoueur();
             if (joueursInvites.contains(j)) return true;
-            
+
             if (joueursInvites.size() >= nbJMax) {
                 return false;
             }
-            
+
             addJoueur(j, client);
             return true;
         }

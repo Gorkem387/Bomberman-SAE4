@@ -18,37 +18,38 @@ public class JoinLobbyHandler implements MessageHandler<JoinLobbyRequest> {
         Lobby lobby = LobbyManager.getInstance().getLobby(message.getLobbyId());
 
         if (lobby != null) {
-            // Initialisation du joueur si nécessaire
-            if (client.getJoueur() == null) {
-                client.setJoueur(new Joueur(client.hashCode(), message.getPlayerName()));
+            // Définir l'id du lobby sur le client (important pour broadcastToLobby)
+            client.setLobbyId(lobby.getId());
+
+            // Mettre à jour le nom du joueur côté serveur
+            if (client.joueur != null) {
+                client.joueur.setNom(message.getPlayerName());
             }
 
-            // On délègue au lobby l'ajout du joueur
+            // On délègue au lobby l'ajout du joueur (pour gérer le nombre max, l'état, etc.)
             boolean succes = lobby.rejoindreLobby(client);
 
+            // Si ajouté avec succès, déterminer et stocker l'index du joueur dans le lobby
             if (succes) {
-                client.setLobbyId(lobby.getId());
-                client.send(new JoinLobbyResponse(true, "Lobby rejoint : " + lobby.getNom(), lobby.getId()));
-                
-                // --- MISE À JOUR TEMPS RÉEL ---
-                // On notifie TOUS les joueurs du lobby qu'un nouveau est arrivé
-                // On réutilise LobbyDetailsHandler pour envoyer les nouvelles infos à tout le monde
-                LobbyDetailsHandler detailsHandler = new LobbyDetailsHandler();
-                LobbyDetailsRequest updateReq = new LobbyDetailsRequest(lobby.getId());
-                
-                for (Joueur j : lobby.getJoueurs()) {
-                    // On retrouve le ClientHandler associé à chaque joueur (via son ID/HashCode ou stocké dans Joueur)
-                    // Pour simplifier ici, on peut faire un broadcast via le LobbyManager si les handlers sont liés
-                    // Mais la méthode la plus propre est que le lobby notifie ses membres
+                int index = lobby.getJoueurs().indexOf(client.joueur);
+                if (index >= 0) {
+                    client.playerId = index; // utilisé ailleurs comme index dans la liste joueursInvites
+                    client.joueur.setId(index);
                 }
-                
-                // On simule le broadcast via le dispatcher vers tous les membres du lobby
-                lobby.broadcast(new LobbyDetailsRequest(lobby.getId())); // On ajoute une méthode broadcast dans Lobby
-            } else {
-                client.send(new JoinLobbyResponse(false, "Lobby plein ou inaccessible", -1));
             }
+
+            // Réponse au client
+            String text_message;
+            if (succes) text_message = "Vous avez rejoint le lobby " + lobby.getNom();
+            else text_message = "Probleme avec lobby " + lobby.getNom();
+
+            JoinLobbyResponse response = new JoinLobbyResponse(succes, text_message, lobby.getId());
+
+            client.send(response);
+            // Broadcast : On pourrait ici prévenir les autres joueurs qu'un nouveau est arrivé
         } else {
-            client.send(new JoinLobbyResponse(false, "Lobby non trouvé", -1));
+            // Réponse négative (Lobby plein ou inexistant)
+            client.send(new JoinLobbyResponse(false, "Lobby non trouvé ou plein", -1));
         }
     }
 }

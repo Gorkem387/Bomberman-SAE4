@@ -3,8 +3,6 @@ package iut.gon.serverside.Player.DTO;
 import iut.gon.bomberman.common.model.Mess.Message;
 
 public interface IDTO extends Message {
-
-    int id = 0;
-    int x = 0;
-    int y = 0;
+    // Interface marqueur pour les DTO côté serveur qui implémentent Message.
+    // Ne pas définir de champs par défaut ici (éviter champs statiques mêlés à l'instance).
 }
