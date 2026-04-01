@@ -18,6 +18,8 @@ import javafx.scene.image.Image;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import java.util.*;
@@ -59,6 +61,7 @@ public class GameController {
     private long lastNanoTime = -1;
     private boolean spaceWasPressed = false;
     private boolean escWasPressed = false;
+    private boolean isPaused = false;
 
     private double debugTimer = 0;
 
@@ -85,7 +88,6 @@ public class GameController {
             System.err.println("Impossible de charger l'image de la bombe personnalisée");
         }
 
-        // ...existing code...
         DFSGenerator generator = new DFSGenerator();
         this.labyrinthe = generator.createLabyrinthe(21, 21);
 
@@ -188,14 +190,17 @@ public class GameController {
     }
 
     private void update(double deltaTime) {
-        if (isVictory && input.contains(KeyCode.ESCAPE) && !escWasPressed) {
+        if (input.contains(KeyCode.ESCAPE) && !escWasPressed) {
             escWasPressed = true;
-            goBackToMenu();
-            return;
+            if (isVictory || (isGameOver && deathAnimationComplete)) {
+                goBackToMenu();
+                return;
+            } else if (!isGameOver && !isVictory) {
+                isPaused = !isPaused;
+            }
         }
-        if (deathAnimationComplete && isGameOver && input.contains(KeyCode.ESCAPE) && !escWasPressed) {
-            escWasPressed = true;
-            goBackToMenu();
+
+        if (isPaused) {
             return;
         }
 
@@ -270,6 +275,11 @@ public class GameController {
     }
 
     private void render() {
+        if (joueur.isAlive() && isPaused) {
+            drawPauseMenu();
+            return;
+        }
+
         gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
 
         renderer.draw(gc, labyrinthe);
@@ -306,6 +316,22 @@ public class GameController {
         gc.setFill(javafx.scene.paint.Color.WHITE);
         gc.setFont(javafx.scene.text.Font.font("Arial", 24));
         gc.fillText("Appuyez sur ESC pour retourner au menu", gameCanvas.getWidth()/2 - 200, gameCanvas.getHeight()/2 + 60);
+    }
+
+    /**
+     *  Affiche l'écran de pause
+     * */
+    private void drawPauseMenu(){
+        gc.setFill(Color.rgb(0, 0, 0, 0.7));
+        gc.fillRect(0,0, gameCanvas.getWidth(), gameCanvas.getHeight());
+
+        gc.setFill(Color.YELLOW);
+        gc.setFont(Font.font("Arial", 50));
+        gc.fillText("PAUSE", gameCanvas.getWidth()/2 - 60, gameCanvas.getHeight()/2);
+
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial", 24));
+        gc.fillText("Appuyez sur ESC pour reprendre", gameCanvas.getWidth()/2 - 150, gameCanvas.getHeight()/2 + 60);
     }
 
     private void drawVictoryOverScreen(){
@@ -470,3 +496,4 @@ public class GameController {
         }
     }
 }
+
