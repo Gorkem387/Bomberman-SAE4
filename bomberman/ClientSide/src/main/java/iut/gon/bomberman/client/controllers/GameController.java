@@ -39,7 +39,11 @@ public class GameController {
 
     private HeatMap heatMap;
     private Ai ia;
+    private Ai ia2;
+    private Ai ia3;
     private Joueur iaPlayer;
+    private Joueur iaPlayer2;
+    private Joueur iaPlayer3;
 
     private Joueur joueur;
     private BombManager bombManager;
@@ -103,7 +107,17 @@ public class GameController {
         this.heatMap = new HeatMap(21, 21);
         this.iaPlayer.setX(19);
         this.iaPlayer.setY(19);
-        this.ia = new Ai(iaPlayer, this.labyrinthe, AISTRATEGIES.SURVIVOR, this, heatMap, bombManager);
+        this.ia = new Ai(iaPlayer, this.labyrinthe, AISTRATEGIES.CHAOS, this, heatMap, bombManager);
+
+        this.iaPlayer2 = new Joueur(3, "IA 2");
+        this.iaPlayer2.setX(19);
+        this.iaPlayer2.setY(1);
+        this.ia2 = new Ai(iaPlayer2, this.labyrinthe, AISTRATEGIES.CHAOS, this, heatMap, bombManager);
+
+        this.iaPlayer3 = new Joueur(3, "IA 2");
+        this.iaPlayer3.setX(1);
+        this.iaPlayer3.setY(19);
+        this.ia3 = new Ai(iaPlayer3, this.labyrinthe, AISTRATEGIES.SURVIVOR, this, heatMap, bombManager);
 
         gameCanvas.setWidth(labyrinthe.getWidth() * 32);
         gameCanvas.setHeight(labyrinthe.getHeight() * 32);
@@ -193,10 +207,18 @@ public class GameController {
         }
 
         if (iaPlayer.isAlive()) {
-            ia.update(deltaTime, new Joueur[]{iaPlayer, joueur});
-            if (iaPlayer.getPv() <= 0) {
-                iaPlayer.setAlive(false);
-            }
+            ia.update(deltaTime, new Joueur[]{iaPlayer, iaPlayer2, joueur});
+            if (iaPlayer.getPv() <= 0) iaPlayer.setAlive(false);
+        }
+
+        if (iaPlayer2.isAlive()) {
+            ia2.update(deltaTime, new Joueur[]{iaPlayer, iaPlayer2, joueur});
+            if (iaPlayer2.getPv() <= 0) iaPlayer2.setAlive(false);
+        }
+
+        if (iaPlayer3.isAlive()) {
+            ia3.update(deltaTime, new Joueur[]{iaPlayer, iaPlayer3, joueur});
+            if (iaPlayer3.getPv() <= 0) iaPlayer3.setAlive(false);
         }
 
         // Bombes, les deux joueurs peuvent recevoir des dégâts
@@ -228,6 +250,8 @@ public class GameController {
 
         renderer.drawPlayer(gc, joueur);
         renderer.drawPlayer(gc, iaPlayer);
+        renderer.drawPlayer(gc, iaPlayer2);
+        renderer.drawPlayer(gc, iaPlayer3);
 
         drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
         
