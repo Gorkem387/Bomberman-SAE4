@@ -1,37 +1,31 @@
 package iut.gon.serverside.Threads.PlayerInputHandling;
 
+import iut.gon.bomberman.common.model.Mess.LobbyDetailsRequest;
+import iut.gon.bomberman.common.model.Mess.ReadyStatus;
 import iut.gon.bomberman.common.model.player.EtatJoueur;
-import iut.gon.bomberman.common.model.player.Joueur;
-import iut.gon.serverside.Lob.EtatLobby;
-import iut.gon.serverside.Lob.Lobby;
-import iut.gon.serverside.Logger.LogTypes;
-import iut.gon.serverside.Logger.Logger;
-import iut.gon.bomberman.common.model.Message.ReadyStatus;
-import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.LobbyManager;
+import iut.gon.serverside.Lob.Lobby;
+import iut.gon.serverside.Threads.ClientHandler;
 
+/**
+ * Gère le changement de statut "Prêt / Pas prêt" d'un joueur.
+ */
 public class ReadyStatusHandler implements MessageHandler<ReadyStatus> {
 
     @Override
     public void handle(ReadyStatus message, ClientHandler client) {
-        System.out.println("Le joueur dans le lobby " + message.getLobbyId() + " est prêt: " + message.isReady());
-
         Lobby lobby = LobbyManager.getInstance().getLobby(message.getLobbyId());
-
-        //logging
-        Logger logger = Logger.getInstance();
-        logger.log(LogTypes.INFO, "\"Le joueur dans le lobby \" + message.getLobbyId() + \" est prêt: \" + message.isReady()");
-
-
-        // Logique de début de partie si tout le monde est prêt
-        lobby.setReadyStatus(client, message.isReady());
-
-        boolean isReadyToLaunch = true;
-
-        for(Joueur j : lobby.getJoueurs()){
-            if(j.getEtat() != EtatJoueur.PRET) isReadyToLaunch = false;
+        
+        if (lobby != null && client.getJoueur() != null) {
+            // Mise à jour de l'état du joueur
+            client.getJoueur().setEtat(message.isReady() ? EtatJoueur.PRET : EtatJoueur.PAS_PRET);
+            
+            // Le serveur notifie TOUS les membres du lobby du changement d'état
+            // On délègue à LobbyDetailsHandler pour générer et diffuser les détails mis à jour
+            LobbyDetailsHandler detailsHandler = new LobbyDetailsHandler();
+            lobby.broadcast(detailsHandler.createResponse(lobby));
+            
+            System.out.println("Joueur " + client.getJoueur().getNom() + " est désormais : " + client.getJoueur().getEtat());
         }
-
-        if(isReadyToLaunch) lobby.setStatus(EtatLobby.PRET);
     }
 }

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox alignment="CENTER" spacing="20.0" prefHeight="600.0" prefWidth="900.0"
+      style="-fx-background-color: #2c3e50;"
+      xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="iut.gon.bomberman.client.controllers.CustomizeController">
+
+    <padding><Insets top="30" right="30" bottom="30" left="30"/></padding>
+
+    <!-- section titre -->
+    <Text fill="WHITE" text="Personnalisation">
+        <font><Font size="32.0" name="System Bold"/></font>
+    </Text>
+
+    <!-- section bouton de sélection-->
+    <HBox alignment="CENTER" spacing="20.0">
+        <Button fx:id="btnSkin" text="Skin du personnage"
+                onAction="#handleSelectCategory"
+                style="-fx-background-color: #2980b9; -fx-text-fill: white; -fx-font-size: 14; -fx-padding: 10 20;"/>
+        <Button fx:id="btnBombe" text="Apparence de la bombe"
+                onAction="#handleSelectCategory"
+                style="-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-font-size: 14; -fx-padding: 10 20;"/>
+    </HBox>
+
+    <!-- section de choix et aperçu équipé -->
+    <HBox spacing="30.0" alignment="CENTER" VBox.vgrow="ALWAYS">
+
+        <!-- à gauche : grille des skins disponibles -->
+        <VBox spacing="10.0" alignment="TOP_CENTER">
+            <Label fx:id="categoryLabel" text="Skins disponibles"
+                   style="-fx-text-fill: white; -fx-font-size: 16; -fx-font-weight: bold;"/>
+            <ScrollPane fitToWidth="true" prefWidth="500.0" prefHeight="350.0"
+                        style="-fx-background: #34495e; -fx-background-color: #34495e;">
+                <!-- La grille est remplie dynamiquement depuis le controller -->
+                <FlowPane fx:id="skinGrid" hgap="15" vgap="15" alignment="TOP_LEFT"
+                          style="-fx-background-color: #34495e; -fx-padding: 15;">
+                </FlowPane>
+            </ScrollPane>
+        </VBox>
+
+        <!-- à droite : ce qu'on a équipé -->
+        <VBox spacing="20.0" alignment="TOP_CENTER" prefWidth="220.0"
+              style="-fx-border-color: #7f8c8d; -fx-border-width: 2;
+                     -fx-border-radius: 10; -fx-padding: 20;">
+
+            <Label text="Équipé" style="-fx-text-fill: white; -fx-font-size: 16; -fx-font-weight: bold;"/>
+
+            <!-- Skin équipé -->
+            <VBox alignment="CENTER" spacing="8.0">
+                <Label text="Personnage" style="-fx-text-fill: #bdc3c7; -fx-font-size: 13;"/>
+                <ImageView fx:id="equippedSkinView" fitHeight="80.0" fitWidth="80.0" preserveRatio="true"/>
+                <Label fx:id="equippedSkinLabel" text="Aucun"
+                       style="-fx-text-fill: #ecf0f1; -fx-font-size: 12;"/>
+            </VBox>
+
+            <Separator style="-fx-background-color: #7f8c8d;"/>
+
+            <!-- Bombe équipée -->
+            <VBox alignment="CENTER" spacing="8.0">
+                <Label text="Bombe" style="-fx-text-fill: #bdc3c7; -fx-font-size: 13;"/>
+                <ImageView fx:id="equippedBombeView" fitHeight="80.0" fitWidth="80.0" preserveRatio="true"/>
+                <Label fx:id="equippedBombeLabel" text="Aucune"
+                       style="-fx-text-fill: #ecf0f1; -fx-font-size: 12;"/>
+            </VBox>
+
+        </VBox>
+    </HBox>
+
+    <!-- section boutons -->
+    <HBox alignment="CENTER" spacing="20.0">
+        <Button onAction="#handleSave" text="Valider"
+                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 14; -fx-padding: 10 30;"/>
+        <Button onAction="#handleBackToMenu" text="Retour"
+                style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 14; -fx-padding: 10 30;"/>
+    </HBox>
+
+</VBox>

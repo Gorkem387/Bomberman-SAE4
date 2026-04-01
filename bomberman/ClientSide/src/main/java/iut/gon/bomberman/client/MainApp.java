@@ -4,29 +4,43 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.scene.Parent;
 
+import java.io.IOException;
 import java.net.URL;
 
 public class MainApp extends Application {
 
-    @Override
-    public void start(Stage stage) throws Exception {
-        URL fxmlLocation = getClass().getResource("/iut/gon/bomberman/client/game-view.fxml");
-        // Debug car le chemin ne fonctionné pas
-        if (fxmlLocation == null) {
-            System.err.println("ERREUR : Le fichier FXML n'a pas été trouvé dans les ressources !");
-            System.err.println("Chemin testé : /iut/gon/bomberman/client/game-view.fxml");
-            return;
-        }
+    private static Scene scene;
 
-        FXMLLoader fxmlLoader = new FXMLLoader(fxmlLocation);
-        Scene scene = new Scene(fxmlLoader.load());
-        stage.setTitle("Bomberman IUT");
+    @Override
+    public void start(Stage stage) throws IOException {
+        // Au démarrage, on lance le launcher (Menu principal)
+        Parent root = loadFXML("fxml/launcher");
+        scene = new Scene(root, 650, 450);
         stage.setScene(scene);
+        stage.setTitle("Bomberman - Menu Principal");
         stage.show();
     }
 
+    public static void setRoot(String fxml) throws IOException {
+        scene.setRoot(loadFXML(fxml));
+    }
+
+    private static Parent loadFXML(String fxml) throws IOException {
+        URL resource = MainApp.class.getResource("/" + fxml + ".fxml");
+        if (resource == null) {
+            // Fallback si le chemin commence déjà par /
+            resource = MainApp.class.getResource(fxml + ".fxml");
+        }
+        if (resource == null) {
+            throw new IOException("Fichier FXML non trouvé : " + fxml);
+        }
+        FXMLLoader fxmlLoader = new FXMLLoader(resource);
+        return fxmlLoader.load();
+    }
+
     public static void main(String[] args) {
-        launch(args);
+        launch();
     }
 }

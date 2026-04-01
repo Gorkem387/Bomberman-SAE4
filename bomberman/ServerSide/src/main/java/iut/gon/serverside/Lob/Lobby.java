@@ -4,14 +4,17 @@ import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.player.EtatJoueur;
 import iut.gon.serverside.Logger.LogTypes;
 import iut.gon.serverside.Logger.Logger;
-import iut.gon.serverside.Player.DTO.InitGameDTO;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.Threads.Thread_Jeu;
 
 import iut.gon.bomberman.common.model.labyrinthe.TypeLab;
 import iut.gon.bomberman.common.model.player.Joueur;
+import iut.gon.bomberman.common.model.Mess.Message;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Lobby {
 
@@ -19,22 +22,13 @@ public class Lobby {
         private int id;
         private String nomLobby;
         private Joueur proprietaire;
-        private final ArrayList<Joueur> joueursInvites = new ArrayList<>();
+        private final List<Joueur> joueursInvites = new ArrayList<>();
+        private final Map<Integer, ClientHandler> handlers = new HashMap<>(); // Lien JoueurId -> Connection
         private final Labyrinthe labyrinthe;
         private int nbJMax;
         private TypeLab typeLab;
         private EtatLobby etatLobby = EtatLobby.EN_ATTENTE;
         private Logger logger = Logger.getInstance();
-
-        public Lobby(Thread_Jeu thread, int id, String nom, Joueur owner, int nbJMax, TypeLab typeLab) {
-            this.thread = thread;
-            this.id = id;
-            this.nomLobby = nom;
-            this.proprietaire = owner;
-            this.nbJMax = nbJMax;
-            this.typeLab = typeLab;
-            this.labyrinthe = new Labyrinthe(20, 20); // Taille par défaut, peut être modifiée selon le type de labyrinthe
-        }
 
         public Lobby(int id, String nom, Joueur owner, int nbJMax, TypeLab typeLab, int lab_size_x, int lab_size_y) {
             this.id = id;
@@ -45,15 +39,19 @@ public class Lobby {
             this.labyrinthe = new Labyrinthe(lab_size_x, lab_size_y);
         }
 
-        public void addJoueur(Joueur joueur) {
+        public void addJoueur(Joueur joueur, ClientHandler handler) {
             joueursInvites.add(joueur);
+            handlers.put(joueur.getId(), handler);
+            broadcastUpdate();
         }
 
         public void removeJoueur(Joueur joueur) {
             joueursInvites.remove(joueur);
+            handlers.remove(joueur.getId());
+            broadcastUpdate();
         }
 
-        public ArrayList<Joueur> getJoueurs() {
+        public List<Joueur> getJoueurs() {
             return joueursInvites;
         }
 
@@ -61,41 +59,36 @@ public class Lobby {
             return nomLobby;
         }
 
-        public void setNom(String nom) {
-            this.nomLobby = nom;
+        public int getId(){
+            return id;
         }
 
-        public Labyrinthe getLabyrinthe() {
-            return labyrinthe;
+        public Joueur getProprietaire() {
+            return proprietaire;
         }
 
         public int getNbJMax() {
             return nbJMax;
         }
 
-        public void setNbJMax(int nbJMax) {
-            this.nbJMax = nbJMax;
+        /**
+         * Déclenche une mise à jour visuelle pour tous les membres du lobby.
+         */
+        public void broadcastUpdate() {
+            // Dans cette architecture, la mise à jour est déclenchée lors d'une action
+            // ou via un message périodique si nécessaire.
         }
-
-        public TypeLab getTypeLab() {
-            return typeLab;
-        }
-
-        public int getId(){
-            return id;
-        }
-
-        public void broadcastInit(InitGameDTO dto) {
-            for (Joueur tj : joueursInvites) {
-                tj.sendInitDTO(dto);
+        
+        /**
+         * Envoie un message à TOUS les joueurs du lobby de manière synchrone.
+         */
+        public void broadcast(Message message) {
+            // Synchronisation pour éviter les erreurs lors d'un départ de joueur simultané
+            synchronized (handlers) {
+                for (ClientHandler h : handlers.values()) {
+                    h.send(message);
+                }
             }
-        }
-
-        private boolean peuCommencer(){
-            for(Joueur j : joueursInvites){
-                if(j.getEtat() == EtatJoueur.NOT_CONNECTED || j.getEtat() == EtatJoueur.PAS_PRET) return false;
-            }
-            return true;
         }
 
         public void startGame() {
@@ -103,9 +96,27 @@ public class Lobby {
                 logger.log(LogTypes.SUCCESS,"Démarrage de la partie avec " + joueursInvites.size() + " joueurs.");
                 etatLobby = EtatLobby.COMPLET;
                 this.thread = new Thread_Jeu(this);
+                this.thread.start();
+            }
+        }
 
-            } else {
-                logger.log(LogTypes.WARNING, "Pas assez de joueurs pour démarrer la partie.");
+        public boolean rejoindreLobby(ClientHandler client){
+            Joueur j = client.getJoueur();
+            if (joueursInvites.contains(j)) return true;
+            
+            if (joueursInvites.size() >= nbJMax) {
+                return false;
+            }
+            
+            addJoueur(j, client);
+            return true;
+        }
+
+        public void setReadyStatus(ClientHandler client, Boolean isReady){
+            Joueur j = client.getJoueur();
+            if (j != null) {
+                j.setEtat(isReady ? EtatJoueur.PRET : EtatJoueur.PAS_PRET);
+                // Notification automatique de tous les membres
             }
         }
 
@@ -113,26 +124,7 @@ public class Lobby {
             this.etatLobby = newEtat;
         }
 
-        public void setReadyStatus(ClientHandler client, Boolean isReady){
-            EtatJoueur etat = isReady ? EtatJoueur.PRET : EtatJoueur.PAS_PRET;
-            joueursInvites.get(client.playerId).setEtat(etat);
+        public EtatLobby getStatus(){
+            return etatLobby;
         }
-
-        public Joueur getJoueur(int id){
-            return joueursInvites.get(id);
-        }
-
-        public boolean rejoindreLobby(ClientHandler client){
-
-            if (joueursInvites.size()+1 > nbJMax) {
-                logger.log(LogTypes.WARNING, "Le lobby est plein. Impossible de rejoindre.");
-                return false;
-            }
-            else joueursInvites.add(client.joueur);
-            return true;
-        }
-
-    public void setThread(Thread_Jeu threadJeu) {
-            this.thread = threadJeu;
-    }
 }

@@ -4,6 +4,7 @@ import iut.gon.bomberman.common.model.labyrinthe.TypeLab;
 import iut.gon.bomberman.common.model.player.Joueur;
 import iut.gon.serverside.Lob.Lobby;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,7 +49,7 @@ public class LobbyManager {
         return lobbies.get(id);
     }
 
-    public synchronized void joinLobby(int lobbyId, Joueur joueur){
-        lobbies.get(lobbyId).addJoueur(joueur);
+    public synchronized Map<Integer, Lobby> getLobbies() {
+        return Collections.unmodifiableMap(lobbies);
     }
 }

@@ -14,56 +14,94 @@ import javafx.scene.canvas.Canvas;
 import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.KeyCode;
+import javafx.scene.image.Image;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Objects;
 
 public class GameController {
 
     @FXML
     private Canvas gameCanvas;
 
+    @FXML
+    private UiController uiController;
+
     private GraphicsContext gc;
     private final LabRenderer renderer = new LabRenderer();
     private Labyrinthe labyrinthe;
 
-    // AI ===================
     private HeatMap heatMap;
     private Ai ia;
     private Joueur iaPlayer;
-    // Fin AI ===============
 
     private Joueur joueur;
     private BombManager bombManager;
     private AnimationTimer gameLoop;
     private boolean isGameOver = false;
+    private boolean deathAnimationComplete = false;
+    private long deathAnimationStartTime = -1;
+    private static final long DEATH_ANIMATION_DURATION = 1000;
+
+    private Image heartImage;
+    private Image bombImage;
 
     private final Set<KeyCode> input = new HashSet<>();
     private long lastNanoTime = -1;
     private boolean spaceWasPressed = false;
+    private boolean escWasPressed = false;
 
     @FXML
     public void initialize() {
-        // Choix du générateur (DFS par défaut)
-        DFSGenerator generator = new DFSGenerator();
+        // Charge l'image du cœur
+        try {
+            String resourcePath = Objects.requireNonNull(
+                getClass().getResource("/iut/gon/bomberman/client/assets/heart.png")
+            ).toExternalForm();
+            heartImage = new Image(resourcePath, 30, 30, true, true);
+        } catch (NullPointerException e) {
+            System.err.println("Impossible de charger l'image du cœur : " + e.getMessage());
+        }
 
+        // Charge l'image de la bombe
+        try {
+            String bombPath = iut.gon.bomberman.client.GameSettings.getSelectedBombPath();
+            String resourcePath = Objects.requireNonNull(
+                    getClass().getResource(bombPath)
+            ).toExternalForm();
+            bombImage = new Image(resourcePath, 30, 30, true, true);
+        } catch (NullPointerException e) {
+            System.err.println("Impossible de charger l'image de la bombe personnalisée");
+        }
+
+        // ...existing code...
+        DFSGenerator generator = new DFSGenerator();
         this.labyrinthe = generator.createLabyrinthe(21, 21);
 
         this.gc = gameCanvas.getGraphicsContext2D();
         this.bombManager = new BombManager();
 
         this.joueur = new Joueur(1, "Gorke");
+
+        String savedSkin = iut.gon.bomberman.client.GameSettings.getSelectedSkinPath();
+        this.joueur.setSkinPath(savedSkin);
+
+        renderer.updateAssets();
+
         this.joueur.setX(1);
         this.joueur.setY(1);
 
-        //=========Ai ===========
         this.iaPlayer = new Joueur(2, "IA");
         this.heatMap = new HeatMap(21, 21);
-        this.ia = new Ai(iaPlayer, this.labyrinthe, AISTRATEGIES.AGGRESSIVE, this, heatMap, bombManager);
         this.iaPlayer.setX(19);
         this.iaPlayer.setY(19);
-        // Fin AI ==============
+        this.ia = new Ai(iaPlayer, this.labyrinthe, AISTRATEGIES.SURVIVOR, this, heatMap, bombManager);
 
         gameCanvas.setWidth(labyrinthe.getWidth() * 32);
         gameCanvas.setHeight(labyrinthe.getHeight() * 32);
@@ -73,6 +111,7 @@ public class GameController {
         gameCanvas.setOnKeyReleased(e -> {
             input.remove(e.getCode());
             if (e.getCode() == KeyCode.SPACE) spaceWasPressed = false;
+            if (e.getCode() == KeyCode.ESCAPE) escWasPressed = false;
         });
 
         this.gameLoop = new AnimationTimer() {
@@ -95,6 +134,7 @@ public class GameController {
     private void handleInputs() {
         double dx = 0;
         double dy = 0;
+
 
         // Détection des directions
         if (input.contains(KeyCode.Z) || input.contains(KeyCode.UP)) {
@@ -119,22 +159,48 @@ public class GameController {
         // Pose de bombe (Verrouillage par spaceWasPressed pour éviter le spam)
         if (input.contains(KeyCode.SPACE) && !spaceWasPressed) {
             spaceWasPressed = true;
-            bombManager.placeBomb(joueur, 3);
+            bombManager.placeBomb(joueur, 3, labyrinthe);
         }
     }
 
     private void update(double deltaTime) {
+        if (deathAnimationComplete && input.contains(KeyCode.ESCAPE) && !escWasPressed) {
+            escWasPressed = true;
+            goBackToMenu();
+            return;
+        }
+
+        // Joueur humain
         if (joueur.isAlive()) {
             handleInputs();
             if (joueur.getPv() <= 0) {
                 joueur.setAlive(false);
                 this.isGameOver = true;
+                deathAnimationStartTime = System.currentTimeMillis();
             }
-
-            this.ia.play(new Joueur[]{this.ia.getPlayer(), this.joueur});
+        } else {
+            // Animation de mort
+            if (deathAnimationStartTime > 0) {
+                long elapsed = System.currentTimeMillis() - deathAnimationStartTime;
+                if (elapsed >= DEATH_ANIMATION_DURATION) {
+                    deathAnimationComplete = true;
+                }
+            }
         }
-        // Mise à jour de la physique (bombes, explosions, dégâts)
-        bombManager.update(deltaTime, labyrinthe, List.of(joueur));
+
+        if (iaPlayer.isAlive()) {
+            ia.update(deltaTime, new Joueur[]{iaPlayer, joueur});
+            if (iaPlayer.getPv() <= 0) {
+                iaPlayer.setAlive(false);
+            }
+        }
+
+        // Bombes, les deux joueurs peuvent recevoir des dégâts
+        bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer));
+
+        if (uiController != null) {
+            uiController.updatePlayerStats(joueur);
+        }
     }
 
     private void render() {
@@ -159,5 +225,157 @@ public class GameController {
         gc.setFill(javafx.scene.paint.Color.RED);
         gc.setFont(javafx.scene.text.Font.font("Arial", 50));
         gc.fillText("GAME OVER", gameCanvas.getWidth()/2 - 140, gameCanvas.getHeight()/2);
+
+        gc.setFill(javafx.scene.paint.Color.WHITE);
+        gc.setFont(javafx.scene.text.Font.font("Arial", 24));
+        gc.fillText("Appuyez sur ESC pour retourner au menu", gameCanvas.getWidth()/2 - 200, gameCanvas.getHeight()/2 + 60);
+    }
+
+    /**
+     * Affiche une barre bleu foncé arrondie en bas avec les bombes et les cœurs centrés
+     *
+     * @param gc              GraphicsContext pour dessiner
+     * @param bombs           Nombre de bombes disponibles
+     * @param hearts          Nombre de cœurs disponibles
+     */
+    private void drawStatsBar(GraphicsContext gc, int bombs, int hearts, int range, float speed) {
+        double barHeight = 35;
+        double barY = gameCanvas.getHeight() - barHeight - 5;
+        double barWidth = 320;
+        double barX = (gameCanvas.getWidth() - barWidth) / 2.0;
+
+        gc.setFill(javafx.scene.paint.Color.rgb(25, 50, 100, 0.9));
+        gc.fillRoundRect(barX, barY, barWidth, barHeight, 15, 15);
+
+        gc.setStroke(javafx.scene.paint.Color.rgb(50, 100, 200));
+        gc.setLineWidth(2);
+        gc.strokeRoundRect(barX, barY, barWidth, barHeight, 15, 15);
+
+        double elementY = barY + (barHeight - 25) / 2;
+
+        drawStatItem(gc, bombImage, bombs, barX + 15, elementY, "x");
+        drawStatItem(gc, heartImage, hearts, barX + 85, elementY, "x");
+
+        gc.setFill(speed > 1.0f ? javafx.scene.paint.Color.GOLD : javafx.scene.paint.Color.LIGHTGRAY);
+        gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 13));
+        String speedTxt = String.format("SPEED x%.1f", speed);
+        gc.fillText(speedTxt, barX + 155, barY + 23);
+
+        gc.setFill(javafx.scene.paint.Color.ORANGERED);
+        gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 13));
+        gc.fillText("RANGE: " + range, barX + 240, barY + 23);
+    }
+
+
+    /**
+     * Affiche un élément de statistique (image + compteur)
+     * @param gc GraphicsContext
+     * @param image Image à afficher
+     * @param count Nombre à afficher
+     * @param x Position X
+     * @param y Position Y
+     * @param label Texte
+     */
+    private void drawStatItem(GraphicsContext gc, Image image, int count, double x, double y, String label) {
+        if (image == null) return;
+
+        gc.drawImage(image, x, y, 25, 25);
+
+        gc.setFill(javafx.scene.paint.Color.WHITE);
+        gc.setFont(javafx.scene.text.Font.font("Arial", 16));
+        gc.fillText(label + " " + count, x + 30, y + 18);
+    }
+
+    /**
+     * Affiche les cœurs et les bombes côte à côte au centre du canvas
+     * @param gc GraphicsContext pour dessiner
+     * @param hearts Nombre de cœurs à afficher
+     */
+    private void drawHearts(GraphicsContext gc, int hearts) {
+        if (heartImage == null) return;
+
+        // Calcule le centre du canvas
+        double centerX = gameCanvas.getWidth() / 2.0;
+        double centerY = 15;
+
+        // Calcule la largeur totale des cœurs
+        int heartsWidth = hearts * 35;
+
+        // Position de départ des cœurs (alignés à droite du centre)
+        double xStart = centerX - heartsWidth - 20; // -20 pour l'espace entre cœurs et bombes
+
+        for (int i = 0; i < hearts; i++) {
+            gc.drawImage(heartImage, xStart + (i * 35), centerY);
+        }
+    }
+
+    /**
+     * Affiche les bombes disponibles du joueur avec un style amélioré
+     * @param gc GraphicsContext pour dessiner
+     * @param bombs Nombre de bombes à afficher
+     */
+    private void drawBombs(GraphicsContext gc, int bombs) {
+        if (bombImage == null) return;
+
+        // Calcule le centre du canvas
+        double centerX = gameCanvas.getWidth() / 2.0;
+        double centerY = 15;
+
+        // Position de départ des bombes (alignées à gauche du centre)
+        double xStart = centerX + 20; // +20 pour l'espace entre cœurs et bombes
+
+        for (int i = 0; i < bombs; i++) {
+            gc.drawImage(bombImage, xStart + (i * 35), centerY);
+        }
+    }
+
+    /**
+     * Dessine un fond semi-transparent avec bordure pour les statistiques
+     * @param gc GraphicsContext pour dessiner
+     * @param hearts Nombre de cœurs
+     * @param bombs Nombre de bombes
+     */
+    private void drawStatsBackground(GraphicsContext gc, int hearts, int bombs) {
+        double centerX = gameCanvas.getWidth() / 2.0;
+
+        // Calcule les dimensions du conteneur
+        int heartsWidth = hearts * 35;
+        int bombsWidth = bombs * 35;
+        int totalWidth = heartsWidth + bombsWidth + 60; // +60 pour l'espace entre et les padding
+        int height = 60;
+
+        double bgX = centerX - (totalWidth / 2.0);
+        double bgY = 5;
+
+        // Fond semi-transparent
+        gc.setFill(javafx.scene.paint.Color.rgb(0, 0, 0, 0.3));
+        gc.fillRoundRect(bgX, bgY, totalWidth, height, 10, 10);
+
+        // Bordure
+        gc.setStroke(javafx.scene.paint.Color.rgb(255, 255, 255, 0.6));
+        gc.setLineWidth(2);
+        gc.strokeRoundRect(bgX, bgY, totalWidth, height, 10, 10);
+    }
+
+    /**
+     * Retourne au menu principal, la partie est stoppée
+     * */
+    public void goBackToMenu() {
+        if (gameLoop != null) {
+            gameLoop.stop();
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/launcher.fxml"));
+            Parent root = loader.load();
+            Scene scene = new Scene(root);
+
+            Stage stage = (Stage) gameCanvas.getScene().getWindow();
+            stage.setScene(scene);
+            stage.setTitle("Bomberman - Menu Principal");
+            stage.show();
+        } catch (Exception e) {
+            System.err.println("Erreur lors du retour au menu : " + e.getMessage());
+        }
     }
 }

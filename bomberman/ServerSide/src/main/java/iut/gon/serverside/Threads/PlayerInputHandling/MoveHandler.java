@@ -1,6 +1,6 @@
 package iut.gon.serverside.Threads.PlayerInputHandling;
 
-import iut.gon.bomberman.common.model.Message.MoveRequest;
+import iut.gon.bomberman.common.model.Mess.MoveRequest;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.Lob.Lobby;
 import iut.gon.serverside.LobbyManager;
@@ -21,17 +21,17 @@ public class MoveHandler implements MessageHandler<MoveRequest> {
         Lobby lobby = LobbyManager.getInstance().getLobby(client.getLobbyId());
 
 
-        if (client.joueur != null) {
+        if (client.getJoueur() != null) {
             // Mise à jour de la position dans le modèle métier Joueur
             // Le serveur fait ici de la "Vérification de mouvement"
 
             //todo : double check si les mouvement sont ok, check pour les collisions
-            client.joueur.setX(message.getX());
-            client.joueur.setY(message.getY());
+            client.getJoueur().setX(message.getX());
+            client.getJoueur().setY(message.getY());
             
             // Si le mouvement est valide, le serveur diffusera la position 
             // via le GameUpdate du Thread_Jeu (60 itérations/sec)
-            System.out.println("Déplacement du joueur " + client.joueur.getNom() + 
+            System.out.println("Déplacement du joueur " + client.getJoueur().getNom() +
                 " vers (" + message.getX() + "," + message.getY() + ")");
         }
     }

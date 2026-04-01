@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.text.Font?>
+
+<!-- Ajout de l'attribut fx:controller pour lier au nouveau contrôleur -->
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1" fx:controller="iut.gon.bomberman.client.controllers.ConnexionController">
+   <children>
+      <Label alignment="CENTER" contentDisplay="CENTER" layoutY="14.0" prefHeight="34.0" prefWidth="600.0" text="Bomberman" textAlignment="CENTER" textFill="#0083da">
+         <font>
+            <Font name="Verdana Bold" size="24.0" />
+         </font>
+      </Label>
+      <TextField fx:id="pseudo" layoutX="217.0" layoutY="129.0" prefHeight="25.0" prefWidth="166.0" />
+      <Label layoutX="259.0" layoutY="73.0" prefHeight="27.0" prefWidth="83.0" text="Pseudo : ">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Button fx:id="boutonConnexion" layoutX="217.0" layoutY="200.0" mnemonicParsing="false" onAction="#handleConnexion" prefHeight="51.0" prefWidth="166.0" text="Se connecter">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Button>
+   </children>
+</Pane>

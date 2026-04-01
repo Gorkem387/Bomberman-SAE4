@@ -6,46 +6,58 @@ import iut.gon.serverside.Player.DTO.IDTO;
 import iut.gon.serverside.Player.DTO.InitGameDTO;
 import iut.gon.serverside.Player.DTO.JoueurMisAJourDTO;
 
+/**
+ * Gère la boucle de jeu (60 FPS) pour un lobby spécifique.
+ * Elle broadcast les mises à jour à tous les membres du lobby.
+ */
 public class Thread_Jeu extends Thread {
 
     private boolean running = true;
-    private Lobby lobby;
-    private Logger logger = Logger.getInstance();
-    private InitGameDTO initGameDTO;
-    private JoueurMisAJourDTO joueurMisAJourDTO;
+    private final Lobby lobby;
+    private final Logger logger = Logger.getInstance();
 
     public Thread_Jeu(Lobby lobby) {
         this.lobby = lobby;
-        lobby.setThread(this);
     }
 
     @Override
     public void run() {
-        initGameDTO = new InitGameDTO();
-        initGameDTO.id = lobby.getId();
-        initGameDTO.pseudo = lobby.getNom();
-        initGameDTO.skin = 0;
-        initGameDTO.x = 0;
-        initGameDTO.y = 0;
+        // 1. Initialisation de la partie pour tous les clients
+        InitGameDTO initDTO = new InitGameDTO();
+        initDTO.id = lobby.getId();
+        initDTO.pseudo = lobby.getNom();
+        initDTO.skin = 0;
+        initDTO.x = 0;
+        initDTO.y = 0;
 
-        broadcastUpdate(initGameDTO);
+        // Utilisation du broadcast du lobby (Remplace j.getClientHandler().send())
+        lobby.broadcast(initDTO);
+
+        // 2. Boucle de jeu (Synchronisation temps réel)
         while (running) {
-            joueurMisAJourDTO = new JoueurMisAJourDTO(
-                    lobby.getJoueur(0).getId(),
-                    lobby.getJoueur(0).getX(),
-                    lobby.getJoueur(0).getY()
-            );
+            // Dans cette architecture, chaque itération envoie l'état du monde
+            // (Pour l'instant on simule l'envoi pour le premier joueur)
+            if (!lobby.getJoueurs().isEmpty()) {
+                JoueurMisAJourDTO updateDTO = new JoueurMisAJourDTO(
+                        lobby.getJoueurs().get(0).getId(),
+                        (int) lobby.getJoueurs().get(0).getX(),
+                        (int) lobby.getJoueurs().get(0).getY()
+                );
+                
+                // Diffusion automatique à tout le monde via le Lobby
+                lobby.broadcast(updateDTO);
+            }
 
-            broadcastUpdate(joueurMisAJourDTO);
-            try { Thread.sleep(16); }
-            catch (InterruptedException e) {} // ~60 FPS
+            try {
+                // Pause pour maintenir 60 FPS
+                Thread.sleep(16);
+            } catch (InterruptedException e) {
+                running = false;
+            }
         }
     }
 
-    private void broadcastUpdate(IDTO DTO) {
-        // Pour chaque Joueur dans le lobby, on récupère son ClientHandler pour envoyer
-        for (int i = 0; i < lobby.getJoueurs().size(); i++) {
-            lobby.getJoueur(i).getClientHandler().send(DTO);
-        }
+    public void stopGame() {
+        this.running = false;
     }
 }

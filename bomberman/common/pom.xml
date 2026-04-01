@@ -13,4 +13,7 @@
     <artifactId>common</artifactId>
     <name>Common</name>
 
+    <dependencies>
+        <!-- Common dependencies if any -->
+    </dependencies>
 </project>

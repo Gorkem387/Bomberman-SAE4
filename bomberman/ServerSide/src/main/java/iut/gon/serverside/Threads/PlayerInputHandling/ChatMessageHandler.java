@@ -1,6 +1,6 @@
 package iut.gon.serverside.Threads.PlayerInputHandling;
 
-import iut.gon.bomberman.common.model.Message.ChatMessage;
+import iut.gon.bomberman.common.model.Mess.ChatMessage;
 import iut.gon.serverside.Threads.ClientHandler;
 import iut.gon.serverside.Threads.ThreadPrincipal;
 

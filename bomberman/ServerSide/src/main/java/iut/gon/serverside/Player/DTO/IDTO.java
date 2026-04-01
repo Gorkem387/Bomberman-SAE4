@@ -1,6 +1,6 @@
 package iut.gon.serverside.Player.DTO;
 
-import iut.gon.bomberman.common.model.Message.Message;
+import iut.gon.bomberman.common.model.Mess.Message;
 
 public interface IDTO extends Message {
 
