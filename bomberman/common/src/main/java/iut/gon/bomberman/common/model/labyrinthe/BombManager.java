@@ -87,10 +87,9 @@ public class BombManager {
                 it.remove();
                 explode(bomb, labyrinthe, joueurs);
 
-                // Rend une bombe au propriétaire (Joueur 0 par défaut ici)
-                if (!joueurs.isEmpty()) {
-                    Joueur j = joueurs.get(0);
-                    j.setNb_bombes(j.getNb_bombes() + 1);
+                Joueur proprio = bomb.getJoueur();
+                if (proprio != null) {
+                    proprio.setNb_bombes(proprio.getNb_bombes() + 1);
                 }
             }
         }
@@ -160,7 +159,14 @@ public class BombManager {
                 if (collisionX && collisionY) {
                     joueur.setPv(joueur.getPv() - 1);
                     System.out.println(joueur.getNom() + " touché ! PV: " + joueur.getPv());
-                    break; // Joueur touche que 1 fois par la meme bombe
+
+                    // Vérifie si le joueur doit mourir
+                    if (joueur.getPv() <= 0) {
+                        joueur.setAlive(false);
+                        joueur.setNb_bombes(0); // il ne peut plus poser de bombes
+                        System.out.println(joueur.getNom() + " est MORT !");
+                    }
+                    break;
                 }
             }
         }

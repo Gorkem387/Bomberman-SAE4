@@ -69,28 +69,30 @@ public class Joueur {
     }
 
     // Méthode move
-    public void move(double deltaX, double deltaY, Labyrinthe laby, BombManager bombManager) {
-        double vitesseBase = 0.05;
-        double speed = vitesseBase * speed_multiplier;
+    public void move(double deltaX, double deltaY, double deltaTime, Labyrinthe laby, BombManager bombManager) {
+        double vitesseBase = 4.0;
+        double speed = vitesseBase * speed_multiplier * deltaTime;
 
         double hitboxSize = 0.7;
         double offset = 0.15;
-
+        // Mise à jour de la direction pour l'animation
         if (deltaX > 0) direction = Direction.RIGHT;
         else if (deltaX < 0) direction = Direction.LEFT;
         else if (deltaY > 0) direction = Direction.DOWN;
         else if (deltaY < 0) direction = Direction.UP;
 
-        double nextX = cooX + (deltaX * speed);
-        if (canMoveTo(nextX, cooY, hitboxSize, offset, laby, bombManager)) {
-            this.cooX = nextX;
+        // On bouge soit en X, soit en Y
+        if (deltaX != 0) {
+            double nextX = cooX + (deltaX * speed);
+            if (canMoveTo(nextX, cooY, hitboxSize, offset, laby, bombManager)) {
+                this.cooX = nextX;
+            }
+        } else if (deltaY != 0) {
+            double nextY = cooY + (deltaY * speed);
+            if (canMoveTo(cooX, nextY, hitboxSize, offset, laby, bombManager)) {
+                this.cooY = nextY;
+            }
         }
-
-        double nextY = cooY + (deltaY * speed);
-        if (canMoveTo(cooX, nextY, hitboxSize, offset, laby, bombManager)) {
-            this.cooY = nextY;
-        }
-
         int centerX = (int) Math.round(cooX);
         int centerY = (int) Math.round(cooY);
 

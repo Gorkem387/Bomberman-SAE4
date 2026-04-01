@@ -57,6 +57,8 @@ public class GameController {
     private boolean spaceWasPressed = false;
     private boolean escWasPressed = false;
 
+    private double debugTimer = 0;
+
     @FXML
     public void initialize() {
         // Charge l'image du cœur
@@ -131,10 +133,9 @@ public class GameController {
         gameLoop.start();
     }
 
-    private void handleInputs() {
+    private void handleInputs(double deltaTime) {
         double dx = 0;
         double dy = 0;
-
 
         // Détection des directions
         if (input.contains(KeyCode.Z) || input.contains(KeyCode.UP)) {
@@ -154,12 +155,15 @@ public class GameController {
             joueur.setDirection(Direction.IDLE);
         }
         if (dx != 0 || dy != 0) {
-            joueur.move(dx, dy, labyrinthe, bombManager);
+            // deltaTime pour que la vitesse soit constante
+            joueur.move(dx, dy, deltaTime, labyrinthe, bombManager);
+        } else {
+            joueur.setDirection(Direction.IDLE);
         }
         // Pose de bombe (Verrouillage par spaceWasPressed pour éviter le spam)
         if (input.contains(KeyCode.SPACE) && !spaceWasPressed) {
             spaceWasPressed = true;
-            bombManager.placeBomb(joueur, 3, labyrinthe);
+            bombManager.placeBomb(joueur, joueur.getExplosionRange(), labyrinthe);
         }
     }
 
@@ -172,7 +176,7 @@ public class GameController {
 
         // Joueur humain
         if (joueur.isAlive()) {
-            handleInputs();
+            handleInputs(deltaTime);
             if (joueur.getPv() <= 0) {
                 joueur.setAlive(false);
                 this.isGameOver = true;
@@ -201,6 +205,18 @@ public class GameController {
         if (uiController != null) {
             uiController.updatePlayerStats(joueur);
         }
+
+        debugTimer += deltaTime;
+        if (debugTimer >= 1.0) { // On affiche toutes les 1 seconde
+            System.out.println("\nDEBUG VITESSE");
+            // Calcul de la vitesse théorique (Base * Multiplier)
+            System.out.println(String.format("[%s] Multiplier: %.2f",
+                    joueur.getNom(), joueur.getSpeed_multiplier()));
+
+            System.out.println(String.format("[%s] Multiplier: %.2f",
+                    iaPlayer.getNom(), iaPlayer.getSpeed_multiplier()));
+            debugTimer = 0;
+        }
     }
 
     private void render() {
@@ -209,10 +225,12 @@ public class GameController {
         renderer.draw(gc, labyrinthe);
         renderer.drawBombs(gc, bombManager.getBombs());
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
-        if (joueur.isAlive()) {
-            renderer.drawPlayer(gc, joueur);
-            renderer.drawPlayer(gc, this.iaPlayer);
-        }
+
+        renderer.drawPlayer(gc, joueur);
+        renderer.drawPlayer(gc, iaPlayer);
+
+        drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
+
         if (isGameOver) {
             drawGameOverScreen();
         }
