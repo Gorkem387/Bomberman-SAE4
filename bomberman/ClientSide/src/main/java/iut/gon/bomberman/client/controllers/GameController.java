@@ -1,6 +1,8 @@
 package iut.gon.bomberman.client.controllers;
 
 import iut.gon.bomberman.client.ai.AISTRATEGIES;
+import iut.gon.bomberman.client.ai.Ai;
+import iut.gon.bomberman.client.ai.HeatMap;
 import iut.gon.bomberman.client.view.LabRenderer;
 import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.labyrinthe.DFSGenerator;
@@ -46,6 +48,8 @@ public class GameController {
     private long lastNanoTime = -1;
     private boolean spaceWasPressed = false;
     private boolean escWasPressed = false;
+    private ArrayList<Ai> listBots = new ArrayList<Ai>();
+
 
 
     @FXML
@@ -127,8 +131,24 @@ public class GameController {
         gameCanvas.setWidth(labyrinthe.getWidth() * 32);
         gameCanvas.setHeight(labyrinthe.getHeight() * 32);
 
+        HeatMap heatMap = new HeatMap(tailleMap, tailleMap);
+
         for (int i = 0; i < strategies.size(); i++) {
-            // Créer les IA
+            int placementX = tailleMap - 2;
+            int placementY = tailleMap - 2;
+
+            switch (i){
+                case 1:
+                    placementX = 1;
+                    break;
+                case 2:
+                    placementY = 1;
+                    break;
+                case 3:
+                    placementY = placementX = (int) ((double) tailleMap / 2 + 0.5);
+                    break;
+            }
+            listBots.add(new Ai(new Joueur(i + 1, "Bot " + i, placementX, placementY), labyrinthe, strategies.get(i), this, heatMap));
         }
     }
 
@@ -205,6 +225,10 @@ public class GameController {
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
 
         renderer.drawPlayer(gc, joueur);
+
+        for (Ai bot : listBots){
+            renderer.drawPlayer(gc, bot.getPlayer());
+        }
 
         drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
         

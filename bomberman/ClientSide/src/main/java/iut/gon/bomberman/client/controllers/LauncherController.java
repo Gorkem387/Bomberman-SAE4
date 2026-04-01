@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 
 public class LauncherController {
 
@@ -55,23 +56,26 @@ public class LauncherController {
         }
     }
 
-    private void loadCustomizeView(ActionEvent event){
+    private void loadCustomizeView(ActionEvent event) {
         try {
-            String fxmlPath = "/iut/gon/bomberman/client/configPartieLocale.fxml";
+            String fxmlPath = "/fxml/configPartieLocale.fxml";
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            URL resource = getClass().getResource(fxmlPath);
+            if (resource == null) {
+                System.err.println("FXML introuvable : " + fxmlPath);
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(resource);
             Parent gameRoot = loader.load();
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
-            Scene gameScene = new Scene(gameRoot);
-            stage.setScene(gameScene);
+            stage.setScene(new Scene(gameRoot));
             stage.setTitle("Bomberman - Configuration Partie");
             stage.centerOnScreen();
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Erreur : Impossible de charger la vue du jeu !");
             e.printStackTrace();
         }
     }

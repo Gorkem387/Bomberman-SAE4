@@ -19,9 +19,12 @@ import java.util.ResourceBundle;
 
 public class AttenteLobbyController implements Initializable {
 
-    @FXML private ListView<String> listeLobby;
-    @FXML private MenuBar menu;
-    @FXML private Pane pane;
+    @FXML
+    private ListView<String> listeLobby;
+    @FXML
+    private MenuBar menu;
+    @FXML
+    private Pane pane;
     private final List<Integer> lobbyIds = new ArrayList<>();
 
     @Override
@@ -62,7 +65,11 @@ public class AttenteLobbyController implements Initializable {
             if (r.isSuccess()) {
                 nm.setCurrentLobbyId(r.getLobbyId());
                 Platform.runLater(() -> {
-                    try { MainApp.setRoot("fxml/lobby"); } catch (IOException ex) { ex.printStackTrace(); }
+                    try {
+                        MainApp.setRoot("fxml/lobby");
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                 });
             }
         });
@@ -84,7 +91,11 @@ public class AttenteLobbyController implements Initializable {
             if (r.isSuccess()) {
                 nm.setCurrentLobbyId(r.getLobbyId());
                 Platform.runLater(() -> {
-                    try { MainApp.setRoot("fxml/lobby"); } catch (IOException ex) { ex.printStackTrace(); }
+                    try {
+                        MainApp.setRoot("fxml/lobby");
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                 });
             }
         });
@@ -94,16 +105,11 @@ public class AttenteLobbyController implements Initializable {
 
     @FXML
     public void handleCreateLobby() {
-        NetworkManager nm = NetworkManager.getInstance();
-        // --- MISE À JOUR : On passe maintenant le pseudo du joueur local ---
-        nm.send(new CreateLobbyRequest(
-                nm.getLocalPlayerName() + "'s Lobby", 
-                nm.getLocalPlayerName(), // Pseudo de l'owner
-                4, 
-                TypeLab.DEEPSEARCH,
-                21, 
-                21
-        ));
+        try {
+            MainApp.setRoot("fxml/configPartieEnLigne");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

@@ -7,9 +7,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Slider;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -22,31 +20,32 @@ import java.util.List;
 
 public class ConfigPartieLocaleController {
 
-    @FXML private CheckBox cartePetite;
-    @FXML private CheckBox carteMoyenne;
-    @FXML private CheckBox carteGrande;
+    @FXML private ToggleButton cartePetite;
+    @FXML private ToggleButton carteMoyenne;
+    @FXML private ToggleButton carteGrande;
     @FXML private Slider nombreIA;
     @FXML private VBox listeIA;
     @FXML private Button startGame;
+    @FXML private Text valeurIA;
 
     @FXML
     public void initialize() {
-        carteMoyenne.setSelected(true);
-        cartePetite.selectedProperty().addListener((obs, o, selected) -> {
-            if (selected) { carteMoyenne.setSelected(false); carteGrande.setSelected(false); }
-        });
-        carteMoyenne.selectedProperty().addListener((obs, o, selected) -> {
-            if (selected) { cartePetite.setSelected(false); carteGrande.setSelected(false); }
-        });
-        carteGrande.selectedProperty().addListener((obs, o, selected) -> {
-            if (selected) { cartePetite.setSelected(false); carteMoyenne.setSelected(false); }
-        });
+        final int[] lastNb = {1};
 
         nombreIA.valueProperty().addListener((obs, oldVal, newVal) -> {
-            updateListeIA((int) Math.round(newVal.doubleValue()));
+            int nb = (int) Math.round(newVal.doubleValue());
+
+            valeurIA.setText(String.valueOf(nb));
+
+            if (nb != lastNb[0]) {
+                lastNb[0] = nb;
+                updateListeIA(nb);
+            }
         });
 
-        updateListeIA(1);
+        int depart = (int) Math.round(nombreIA.getValue());
+        valeurIA.setText(String.valueOf(depart));
+        updateListeIA(depart);
 
         startGame.setOnAction(this::loadGameView);
     }
@@ -60,20 +59,16 @@ public class ConfigPartieLocaleController {
 
             Text label = new Text("Adversaire " + (i + 1) + " : ");
 
-            CheckBox agressif = new CheckBox("Agressif");
-            CheckBox survivant = new CheckBox("Survivant");
-            CheckBox chaos = new CheckBox("Chaos");
+            ToggleButton agressif = new ToggleButton("Agressif");
+            ToggleButton survivant = new ToggleButton("Survivant");
+            ToggleButton chaos = new ToggleButton("Chaos");
+
+            ToggleGroup group = new ToggleGroup();
+            agressif.setToggleGroup(group);
+            survivant.setToggleGroup(group);
+            chaos.setToggleGroup(group);
 
             agressif.setSelected(true);
-            agressif.selectedProperty().addListener((obs, o, selected) -> {
-                if (selected) { survivant.setSelected(false); chaos.setSelected(false); }
-            });
-            survivant.selectedProperty().addListener((obs, o, selected) -> {
-                if (selected) { agressif.setSelected(false); chaos.setSelected(false); }
-            });
-            chaos.selectedProperty().addListener((obs, o, selected) -> {
-                if (selected) { agressif.setSelected(false); survivant.setSelected(false); }
-            });
 
             ligne.getChildren().addAll(label, agressif, survivant, chaos);
             listeIA.getChildren().add(ligne);
@@ -82,23 +77,28 @@ public class ConfigPartieLocaleController {
 
     public List<AISTRATEGIES> getStrategiesChoisies() {
         List<AISTRATEGIES> strategies = new ArrayList<>();
-        for (int i = 0; i < listeIA.getChildren().size(); i++) {
-            HBox ligne = (HBox) listeIA.getChildren().get(i);
-            CheckBox agressif = (CheckBox) ligne.getChildren().get(1);
-            CheckBox survivant = (CheckBox) ligne.getChildren().get(2);
-            CheckBox chaos = (CheckBox) ligne.getChildren().get(3);
+        for (Node node : listeIA.getChildren()) {
+            if (node instanceof HBox ligne) {
+                ToggleButton agressif = (ToggleButton) ligne.getChildren().get(1);
+                ToggleButton survivant = (ToggleButton) ligne.getChildren().get(2);
+                ToggleButton chaos = (ToggleButton) ligne.getChildren().get(3);
 
-            if (survivant.isSelected()) strategies.add(AISTRATEGIES.SURVIVOR);
-            else if (chaos.isSelected()) strategies.add(AISTRATEGIES.CHAOS);
-            else strategies.add(AISTRATEGIES.AGGRESSIVE);
+                if (survivant.isSelected()) {
+                    strategies.add(AISTRATEGIES.SURVIVOR);
+                } else if (chaos.isSelected()) {
+                    strategies.add(AISTRATEGIES.CHAOS);
+                } else {
+                    strategies.add(AISTRATEGIES.AGGRESSIVE);
+                }
+            }
         }
         return strategies;
     }
 
     public int getTailleMap() {
         if (cartePetite.isSelected()) return 15;
-        if (carteGrande.isSelected()) return 30;
-        return 21;
+        if (carteGrande.isSelected()) return 23;
+        return 19;
     }
 
     private void loadGameView(ActionEvent event) {

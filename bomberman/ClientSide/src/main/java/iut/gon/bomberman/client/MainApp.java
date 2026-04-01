@@ -16,7 +16,7 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         // Au démarrage, on lance le launcher (Menu principal)
-        Parent root = loadFXML("fxml/customize");
+        Parent root = loadFXML("fxml/launcher");
         scene = new Scene(root, 650, 450);
         stage.setScene(scene);
         stage.setTitle("Bomberman - Menu Principal");
