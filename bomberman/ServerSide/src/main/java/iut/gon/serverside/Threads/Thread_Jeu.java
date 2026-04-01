@@ -2,6 +2,7 @@ package iut.gon.serverside.Threads;
 
 import iut.gon.bomberman.common.model.labyrinthe.Bomb;
 import iut.gon.bomberman.common.model.labyrinthe.BombManager;
+import iut.gon.bomberman.common.model.labyrinthe.CellType;
 import iut.gon.bomberman.common.model.player.Joueur;
 import iut.gon.serverside.Lob.Lobby;
 import iut.gon.bomberman.common.model.DTO.JoueurMisAJourDTO;
@@ -21,6 +22,7 @@ public class Thread_Jeu extends Thread {
     private boolean running = true;
     private final Lobby lobby;
     private final BombManager bombManager; // Gestionnaire de bombes côté serveur
+    private boolean mapChanged = false;
 
     public Thread_Jeu(Lobby lobby) {
         this.lobby = lobby;
@@ -37,8 +39,8 @@ public class Thread_Jeu extends Thread {
             double deltaTime = (now - lastTime) / 1_000_000_000.0;
             lastTime = now;
 
-            // 1. Mise à jour de la physique (bombes, explosions, dégâts) sur le serveur
             bombManager.update(deltaTime, lobby.getLabyrinthe(), lobby.getJoueurs());
+            checkBonuses();
 
             // 2. Broadcast des positions des joueurs
             JoueurMisAJourDTO updateDTO = new JoueurMisAJourDTO();
@@ -66,8 +68,9 @@ public class Thread_Jeu extends Thread {
             
             // Envoyer le labyrinthe actualisé seulement s'il y a des explosions actives (il a pu changer)
             iut.gon.bomberman.common.model.labyrinthe.Labyrinthe currentLab = null;
-            if (!bombManager.getExplosionCells().isEmpty()) {
+            if (!bombManager.getExplosionCells().isEmpty() || mapChanged) {
                 currentLab = lobby.getLabyrinthe();
+                mapChanged = false;
             }
 
             BombUpdate bombUpdate = new BombUpdate(bombDTOs, new ArrayList<>(bombManager.getExplosionCells()), currentLab);
@@ -95,5 +98,45 @@ public class Thread_Jeu extends Thread {
 
     public BombManager getBombManager() {
         return bombManager;
+    }
+
+    private void checkBonuses() {
+        for (Joueur j : lobby.getJoueurs()) {
+            if (!j.isAlive()) continue;
+            // Calcule la case centrale du joueur
+            int x = (int) Math.round(j.getX());
+            int y = (int) Math.round(j.getY());
+
+            CellType type = lobby.getLabyrinthe().getCell(x, y);
+            if (isBonus(type)) {
+                appliquerBonus(j, type);
+                // Vide la case sur la carte du serveur
+                lobby.getLabyrinthe().setCell(x, y, CellType.EMPTY);
+                // Debug log
+                this.mapChanged = true;
+                System.out.println("[BONUS] " + j.getNom() + " ramasse " + type);
+            }
+        }
+    }
+
+    private void appliquerBonus(Joueur j, CellType type) {
+        switch (type) {
+            case SPEED_BONUS -> j.setSpeed_multiplier(j.getSpeed_multiplier() + 0.2f);
+            case FIRE_BONUS  -> j.addExplosionRange();
+            case BOMB_BONUS  -> {
+                if (j.getNb_bombes_max() < 6) {
+                    j.setNb_bombes_max(j.getNb_bombes_max() + 1);
+                    j.setNb_bombes(j.getNb_bombes() + 1);
+                }
+            }
+            case HEAL_BONUS  -> {
+                if (j.getPv() < 3) j.setPv(j.getPv() + 1);
+            }
+        }
+    }
+
+    private boolean isBonus(CellType type) {
+        return type == CellType.SPEED_BONUS || type == CellType.FIRE_BONUS
+                || type == CellType.BOMB_BONUS || type == CellType.HEAL_BONUS;
     }
 }

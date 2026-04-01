@@ -91,17 +91,25 @@ public class ClientHandler extends Thread {
                 LobbyManager lm = LobbyManager.getInstance();
                 Lobby lobby = lm.getLobby(lobbyId);
                 if (lobby != null) {
+                    // Arrêter le thread de jeu si c'est le proprio qui part ou si c'était le dernier
+                    if (lobby.getThread() != null) {
+                        lobby.getThread().stopGame();
+                    }
                     // Si c'est le propriétaire qui part, on supprime le lobby
                     if (lobby.getProprietaire() != null && lobby.getProprietaire().equals(this.joueur)) {
                         logger.log(LogTypes.WARNING, "Le propriétaire a quitté. Suppression du lobby: " + lobby.getNom());
                         lm.removeLobby(lobbyId);
                     } else {
-                        // Sinon on retire juste le joueur
                         lobby.removeJoueur(this.joueur);
+                        // Si le lobby est vide après le départ
+                        if (lobby.getJoueurs().isEmpty()) {
+                            lm.removeLobby(lobbyId);
+                        }
                     }
                 }
             }
 
+            this.lobbyId = -1;
             ThreadPrincipal.removeClient(this);
             if (in != null) in.close();
             if (out != null) out.close();
