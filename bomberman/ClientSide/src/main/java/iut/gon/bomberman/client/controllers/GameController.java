@@ -41,9 +41,11 @@ public class GameController {
     private Ai ia;
     private Ai ia2;
     private Ai ia3;
+    private Ai ia4;
     private Joueur iaPlayer;
     private Joueur iaPlayer2;
     private Joueur iaPlayer3;
+    private Joueur iaPlayer4;
 
     private Joueur joueur;
     private BombManager bombManager;
@@ -123,6 +125,11 @@ public class GameController {
         this.iaPlayer3.setY(19);
         this.ia3 = new Ai(iaPlayer3, this.labyrinthe, AISTRATEGIES.SURVIVOR, this, heatMap, bombManager);
 
+        this.iaPlayer4 = new Joueur(5, "IA SURVIVOR");
+        this.iaPlayer4.setX(9);
+        this.iaPlayer4.setY(9);
+        this.ia4 = new Ai(iaPlayer4, this.labyrinthe, AISTRATEGIES.SURVIVOR, this, heatMap, bombManager);
+
         gameCanvas.setWidth(labyrinthe.getWidth() * 32);
         gameCanvas.setHeight(labyrinthe.getHeight() * 32);
         gameCanvas.setFocusTraversable(true);
@@ -189,7 +196,8 @@ public class GameController {
         return joueur.isAlive()
                 && !iaPlayer.isAlive()
                 && !iaPlayer2.isAlive()
-                && !iaPlayer3.isAlive();
+                && !iaPlayer3.isAlive()
+                && !iaPlayer4.isAlive();
     }
 
     private void update(double deltaTime) {
@@ -224,7 +232,7 @@ public class GameController {
             return;
         }
 
-        boolean anExplosionHappened = bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer, iaPlayer2, iaPlayer3));
+        boolean anExplosionHappened = bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer, iaPlayer2, iaPlayer3, iaPlayer4));
 
         if (anExplosionHappened) {
             SoundManager.getInstance().playExplosion();
@@ -253,6 +261,11 @@ public class GameController {
             if (iaPlayer3.getPv() <= 0) iaPlayer3.setAlive(false);
         }
 
+        if (iaPlayer4.isAlive()) {
+            ia4.update(deltaTime, new Joueur[]{iaPlayer4, joueur});
+            if (iaPlayer4.getPv() <= 0) iaPlayer4.setAlive(false);
+        }
+
         if (!isVictory && checkVictoryCondition()) {
             isVictory = true;
         }
@@ -262,9 +275,6 @@ public class GameController {
         if (iaPlayer.isAlive()) targets.add(iaPlayer);
         if (iaPlayer2.isAlive()) targets.add(iaPlayer2);
         if (iaPlayer3.isAlive()) targets.add(iaPlayer3);
-
-        // Bombes, les deux joueurs peuvent recevoir des dégâts
-        bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer, iaPlayer2, iaPlayer3));
 
         if (!joueur.isAlive() && !isGameOver) {
             this.isGameOver = true;
@@ -310,6 +320,7 @@ public class GameController {
         renderer.drawPlayer(gc, iaPlayer);
         renderer.drawPlayer(gc, iaPlayer2);
         renderer.drawPlayer(gc, iaPlayer3);
+        renderer.drawPlayer(gc, iaPlayer4);
 
         drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
         
