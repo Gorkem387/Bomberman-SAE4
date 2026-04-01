@@ -30,6 +30,11 @@ public class ConnexionController {
         pseudo.setOnAction(event -> handleConnexion());
     }
 
+    /**
+     * Algoritme qui permet de gérer la connexion du joueur, d'ajouter le nom du joueur,
+     * établir la connexion HTTP au serveur et mettre à jour la liste des lobby.
+     */
+
     @FXML
     public void handleConnexion() {
         String playerName = pseudo.getText().trim();
@@ -63,6 +68,10 @@ public class ConnexionController {
         }
     }
 
+    /**
+     * Fonction permettant de passer de la page de connexion à la page d'attente des lobby.
+     */
+
     private void switchToLobbyList() {
         try {
             // On utilise la méthode de navigation de votre MainApp
@@ -72,6 +81,12 @@ public class ConnexionController {
             showAlert("Erreur", "Impossible de charger la vue des salons.");
         }
     }
+
+    /**
+     * Algorithme permettant d'afficher une alerte en cas d'erreur de connexion.
+     * @param title
+     * @param content
+     */
 
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);

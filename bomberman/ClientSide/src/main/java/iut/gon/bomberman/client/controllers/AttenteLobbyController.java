@@ -92,6 +92,10 @@ public class AttenteLobbyController implements Initializable {
         handleRefresh();
     }
 
+    /**
+     * Algorithme permettant au joueur de créer un lobby lorsque il appuie sur le bouton pour créer un lobby.
+     *
+     */
     @FXML
     public void handleCreateLobby() {
         NetworkManager nm = NetworkManager.getInstance();
@@ -106,6 +110,9 @@ public class AttenteLobbyController implements Initializable {
         ));
     }
 
+    /**
+     * Algorithme permettant de mettre à jours la liste des lobby
+     */
     @FXML
     public void handleRefresh() {
         NetworkManager.getInstance().send(new LobbyListRequest());
