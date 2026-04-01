@@ -20,7 +20,7 @@
             <Font size="18.0" />
          </font>
       </Label>
-      <Button fx:id="boutonConnexion" layoutX="217.0" layoutY="200.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="166.0" text="Se connecter">
+      <Button fx:id="boutonConnexion" layoutX="217.0" layoutY="200.0" mnemonicParsing="false" onAction="#handleConnexion" prefHeight="51.0" prefWidth="166.0" text="Se connecter">
          <font>
             <Font size="18.0" />
          </font>

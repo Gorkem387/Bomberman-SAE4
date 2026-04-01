@@ -30,7 +30,8 @@ public class ConnexionController {
         pseudo.setOnAction(event -> handleConnexion());
     }
 
-    private void handleConnexion() {
+    @FXML
+    public void handleConnexion() {
         String playerName = pseudo.getText().trim();
 
         if (playerName.isEmpty()) {
