@@ -4,6 +4,7 @@ module iut.gon.bomberman.client {
     requires javafx.fxml;
     requires javafx.graphics;
     requires java.desktop;
+    requires javafx.media;
 
     opens iut.gon.bomberman.client.controllers to javafx.fxml;
     exports iut.gon.bomberman.client;

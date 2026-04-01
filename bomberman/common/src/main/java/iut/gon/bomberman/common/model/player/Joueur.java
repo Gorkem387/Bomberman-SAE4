@@ -94,61 +94,51 @@ public class Joueur {
                 this.cooY = nextY;
             }
         }
-        int centerX = (int) Math.round(cooX);
-        int centerY = (int) Math.round(cooY);
 
-        if (laby.isInside(centerX, centerY)) {
-            CellType typeCase = laby.getCell(centerX, centerY);
-
-            if (typeCase == CellType.SPEED_BONUS) {
-                this.speed_multiplier += 0.2f;
-                laby.setCell(centerX, centerY, CellType.EMPTY);
-                System.out.println("[BONUS] Vitesse : " + speed_multiplier);
-            }
-            else if (typeCase == CellType.FIRE_BONUS) {
-                this.addExplosionRange();
-                laby.setCell(centerX, centerY, CellType.EMPTY);
-                System.out.println("[BONUS] Portée explosion : " + explosionRange);
-            }
-        }
         if (deltaX == 0 && deltaY == 0) direction = Direction.IDLE;
-
-        checkBonus(laby);
     }
 
-    public void checkBonus(Labyrinthe laby) {
+    public boolean checkBonus(Labyrinthe laby) {
         int centerX = (int) Math.round(cooX);
         int centerY = (int) Math.round(cooY);
 
         if (laby.isInside(centerX, centerY)) {
             CellType typeCase = laby.getCell(centerX, centerY);
 
-            if (typeCase == CellType.SPEED_BONUS) {
-                this.speed_multiplier += 0.2f;
-                laby.setCell(centerX, centerY, CellType.EMPTY);
-            }
-            else if (typeCase == CellType.FIRE_BONUS) {
-                this.addExplosionRange();
-                laby.setCell(centerX, centerY, CellType.EMPTY);
-            }
-            else if (typeCase == CellType.BOMB_BONUS){
-                if (nb_bombes_max < MAX_BOMBES){
-                    nb_bombes_max++;
-                    nb_bombes = Math.min(nb_bombes + 1, nb_bombes_max);
-                    System.out.println("[BONUS] Bombes max : " + nb_bombes_max);
+            // On vérifie si la case est un type de bonus
+            if (typeCase == CellType.SPEED_BONUS || typeCase == CellType.FIRE_BONUS ||
+                    typeCase == CellType.BOMB_BONUS || typeCase == CellType.HEAL_BONUS) {
+
+                if (typeCase == CellType.SPEED_BONUS) {
+                    this.speed_multiplier += 0.2f;
+                    System.out.println("[BONUS] Vitesse : " + speed_multiplier);
                 }
-                laby.setCell(centerX, centerY, CellType.EMPTY);
-            }
-            else if (typeCase == CellType.HEAL_BONUS){
-                int pvMax = 3;
-                if (pv < pvMax){
-                    pv++;
-                    System.out.println("[BONUS] PV récupéré : " + pv);
+                else if (typeCase == CellType.FIRE_BONUS) {
+                    this.addExplosionRange();
+                    System.out.println("[BONUS] Portée explosion : " + explosionRange);
                 }
+                else if (typeCase == CellType.BOMB_BONUS){
+                    if (nb_bombes_max < MAX_BOMBES){
+                        nb_bombes_max++;
+                        nb_bombes = Math.min(nb_bombes + 1, nb_bombes_max);
+                        System.out.println("[BONUS] Bombes max : " + nb_bombes_max);
+                    }
+                }
+                else if (typeCase == CellType.HEAL_BONUS){
+                    if (pv < 3){
+                        pv++;
+                        System.out.println("[BONUS] PV récupéré : " + pv);
+                    }
+                }
+
+                // On vide la case après avoir appliqué l'effet
                 laby.setCell(centerX, centerY, CellType.EMPTY);
+                return true;// On confirme qu'on a ramassé quelque chose
             }
         }
+        return false; // Rien ramassé
     }
+
 
     private boolean canMoveTo(double x, double y, double size, double offset, Labyrinthe laby, BombManager bm) {
         double left = x + offset;

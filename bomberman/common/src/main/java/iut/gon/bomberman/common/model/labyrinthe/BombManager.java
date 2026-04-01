@@ -49,7 +49,7 @@ public class BombManager {
      * @param labyrinthe Référence du labyrinthe pour les collisions.
      * @param joueurs Liste des joueurs présents pour tester les dégâts et la solidité.
      */
-    public void update(double deltaTime, Labyrinthe labyrinthe, List<Joueur> joueurs) {
+    public boolean update(double deltaTime, Labyrinthe labyrinthe, List<Joueur> joueurs) {
         // Gestion du timer de l'effet visuel de l'explosion
         if (!explosionCells.isEmpty()) {
             explosionTimer -= deltaTime;
@@ -79,6 +79,7 @@ public class BombManager {
             }
         }
 
+        boolean anExplosionOccurred = false;
         // Mise à jour des timers des bombes et déclenchement des explosions
         Iterator<Bomb> it = bombs.iterator();
         while (it.hasNext()) {
@@ -87,6 +88,7 @@ public class BombManager {
 
             if (justExploded) {
                 it.remove();
+                anExplosionOccurred = true;
 
                 // debug logs
                 long tempsActuel = System.currentTimeMillis();
@@ -105,6 +107,7 @@ public class BombManager {
                 }
             }
         }
+        return anExplosionOccurred;
     }
 
     /**

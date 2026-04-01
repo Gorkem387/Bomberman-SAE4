@@ -3,6 +3,7 @@ package iut.gon.bomberman.client.controllers;
 import iut.gon.bomberman.client.ai.AISTRATEGIES;
 import iut.gon.bomberman.client.ai.Ai;
 import iut.gon.bomberman.client.ai.HeatMap;
+import iut.gon.bomberman.client.sound.SoundManager;
 import iut.gon.bomberman.client.view.LabRenderer;
 import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.labyrinthe.DFSGenerator;
@@ -62,6 +63,8 @@ public class GameController {
     private boolean spaceWasPressed = false;
     private boolean escWasPressed = false;
     private boolean isPaused = false;
+    private boolean victorySoundPlayed = false;
+    private boolean defeatSoundPlayed = false;
 
     private double debugTimer = 0;
 
@@ -209,12 +212,29 @@ public class GameController {
                 long elapsed = System.currentTimeMillis() - deathAnimationStartTime;
                 if (elapsed >= DEATH_ANIMATION_DURATION) deathAnimationComplete = true;
             }
+
+            if (isVictory && !victorySoundPlayed) {
+                SoundManager.getInstance().playVictory();
+                victorySoundPlayed = true;
+            }
+            if (isGameOver && !defeatSoundPlayed) {
+                SoundManager.getInstance().playDefeat();
+                defeatSoundPlayed = true;
+            }
             return;
+        }
+
+        boolean anExplosionHappened = bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer, iaPlayer2, iaPlayer3));
+
+        if (anExplosionHappened) {
+            SoundManager.getInstance().playExplosion();
         }
 
         if (joueur.isAlive() && !isVictory) {
             handleInputs(deltaTime);
-
+            if (joueur.checkBonus(labyrinthe)) {
+                SoundManager.getInstance().playBonus();
+            }
         }
 
         if (iaPlayer.isAlive()) {
