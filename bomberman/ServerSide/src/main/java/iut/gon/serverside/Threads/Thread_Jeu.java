@@ -20,6 +20,9 @@ public class Thread_Jeu extends Thread {
         this.lobby = lobby;
     }
 
+    /**
+     * Execute le code du jeu côté serveur
+     */
     @Override
     public void run() {
         // 1. Initialisation de la partie pour tous les clients
@@ -57,6 +60,9 @@ public class Thread_Jeu extends Thread {
         }
     }
 
+    /**
+     * Arrête le jeu
+     */
     public void stopGame() {
         this.running = false;
     }

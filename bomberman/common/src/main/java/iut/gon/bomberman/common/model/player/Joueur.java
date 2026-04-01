@@ -69,7 +69,14 @@ public class Joueur {
         this.speed_multiplier = speed_multiplier;
     }
 
-    // Méthode move
+    /**
+     * Permet de déplacer le joueur dans le labyrinthe
+     * @param deltaX
+     * @param deltaY
+     * @param deltaTime
+     * @param laby
+     * @param bombManager
+     */
     public void move(double deltaX, double deltaY, double deltaTime, Labyrinthe laby, BombManager bombManager) {
         double vitesseBase = 4.0;
         double speed = vitesseBase * speed_multiplier * deltaTime;
@@ -98,6 +105,11 @@ public class Joueur {
         if (deltaX == 0 && deltaY == 0) direction = Direction.IDLE;
     }
 
+    /**
+     * Permet au joueur de recevoir un bonus
+     * @param laby
+     * @return
+     */
     public boolean checkBonus(Labyrinthe laby) {
         int centerX = (int) Math.round(cooX);
         int centerY = (int) Math.round(cooY);
@@ -139,7 +151,16 @@ public class Joueur {
         return false; // Rien ramassé
     }
 
-
+    /**
+     * Permet de tester si le déplacement du joueur est possible
+     * @param x
+     * @param y
+     * @param size
+     * @param offset
+     * @param laby
+     * @param bm
+     * @return
+     */
     private boolean canMoveTo(double x, double y, double size, double offset, Labyrinthe laby, BombManager bm) {
         double left = x + offset;
         double right = x + offset + size;

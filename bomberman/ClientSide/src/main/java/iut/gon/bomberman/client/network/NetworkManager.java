@@ -133,7 +133,7 @@ public class NetworkManager{
             copy.forEach(l -> l.onServerMessage(message));
         }
     }
-
+ // Getter et Setter
     public boolean isConnected() {
         return isConnected;
     }

@@ -9,7 +9,11 @@ import iut.gon.serverside.Threads.ClientHandler;
  * Gère le lancement manuel de la partie par le propriétaire.
  */
 public class StartGameHandler implements MessageHandler<StartGameRequest> {
-
+    /**
+     * Démarre le jeu après vérification
+     * @param message
+     * @param client
+     */
     @Override
     public void handle(StartGameRequest message, ClientHandler client) {
         Lobby lobby = LobbyManager.getInstance().getLobby(message.getLobbyId());

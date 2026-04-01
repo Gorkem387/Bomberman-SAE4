@@ -11,6 +11,7 @@ public class MoveRequest implements Message {
         this.direction = direction;
     }
 
+    // Getter
     @Override
     public MessageType getType() {
         return MessageType.MOVE_REQUEST;

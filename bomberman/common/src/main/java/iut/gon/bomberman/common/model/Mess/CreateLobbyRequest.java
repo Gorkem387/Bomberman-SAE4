@@ -18,7 +18,7 @@ public class CreateLobbyRequest implements Message {
         this.sizeX = sizeX;
         this.sizeY = sizeY;
     }
-
+    // Getter
     @Override
     public MessageType getType() {
         return MessageType.CREATE_LOBBY_REQUEST;

@@ -11,7 +11,11 @@ import iut.gon.serverside.Threads.ClientHandler;
  * Gère le changement de statut "Prêt / Pas prêt" d'un joueur.
  */
 public class ReadyStatusHandler implements MessageHandler<ReadyStatus> {
-
+    /**
+     * Met à jour l'état du joueur et informe tous les autres joueurs du lobby
+     * @param message
+     * @param client
+     */
     @Override
     public void handle(ReadyStatus message, ClientHandler client) {
         Lobby lobby = LobbyManager.getInstance().getLobby(message.getLobbyId());

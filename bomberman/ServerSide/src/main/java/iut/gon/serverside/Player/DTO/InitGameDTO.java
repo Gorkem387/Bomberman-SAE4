@@ -18,6 +18,11 @@ public class InitGameDTO implements IDTO{
 
     public InitGameDTO() {}
 
+    /**
+     * Permet d'envoyer les données d'un joueur aux clients
+     * @param out
+     * @throws IOException
+     */
     public void write(DataOutputStream out) throws IOException {
         out.writeInt(TYPE);
         out.writeUTF(pseudo);
@@ -38,6 +43,7 @@ public class InitGameDTO implements IDTO{
         return dto;
     }
 
+    // Getter
     public MessageType getType(){
         return MessageType.GAME_UPDATE;
     }

@@ -14,6 +14,7 @@ public class MinimDTO implements IDTO {
         this.y = y;
     }
 
+    // Getter
     public int getId() {
         return id;
     }

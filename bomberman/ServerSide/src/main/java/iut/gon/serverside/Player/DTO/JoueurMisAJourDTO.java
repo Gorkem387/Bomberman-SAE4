@@ -18,12 +18,22 @@ public class JoueurMisAJourDTO implements IDTO {
     public JoueurMisAJourDTO() {
     }
 
+    /**
+     * Met à jour la position du joueur
+     * @param id
+     * @param x
+     * @param y
+     */
     public JoueurMisAJourDTO(int id, int x, int y) {
         this.id = id;
         this.x = x;
         this.y = y;
     }
-
+    /**
+     * Permet d'envoyer les données d'un joueur aux clients
+     * @param out
+     * @throws IOException
+     */
     public void write(DataOutputStream out) throws IOException {
         out.writeInt(TYPE);
         out.writeInt(id);
@@ -37,6 +47,7 @@ public class JoueurMisAJourDTO implements IDTO {
         return new JoueurMisAJourDTO(in.readInt(), in.readInt(), in.readInt());
     }*/
 
+    // Getter
     public MessageType getType(){
         return MessageType.GAME_UPDATE;
     }

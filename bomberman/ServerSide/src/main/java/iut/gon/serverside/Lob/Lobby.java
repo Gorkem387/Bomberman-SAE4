@@ -39,12 +39,21 @@ public class Lobby {
             this.labyrinthe = new Labyrinthe(lab_size_x, lab_size_y);
         }
 
+    /**
+     * Permet d'ajouter un joueur sur une partie en ligne
+     * @param joueur
+     * @param handler
+     */
         public void addJoueur(Joueur joueur, ClientHandler handler) {
             joueursInvites.add(joueur);
             handlers.put(joueur.getId(), handler);
             broadcastUpdate();
         }
 
+    /**
+     * Permet d'enlever un joueur sur une partie en ligne
+     * @param joueur
+     */
         public void removeJoueur(Joueur joueur) {
             joueursInvites.remove(joueur);
             handlers.remove(joueur.getId());
@@ -91,6 +100,9 @@ public class Lobby {
             }
         }
 
+    /**
+     * Permet le démmarrage du jeu
+     */
         public void startGame() {
             if (!joueursInvites.isEmpty()) {
                 logger.log(LogTypes.SUCCESS,"Démarrage de la partie avec " + joueursInvites.size() + " joueurs.");
@@ -100,6 +112,11 @@ public class Lobby {
             }
         }
 
+    /**
+     * Permet au joueur de rejoindre un lobby
+     * @param client
+     * @return
+     */
         public boolean rejoindreLobby(ClientHandler client){
             Joueur j = client.getJoueur();
             if (joueursInvites.contains(j)) return true;
@@ -112,6 +129,11 @@ public class Lobby {
             return true;
         }
 
+    /**
+     * Modifie l'état du joueur s'il est prêt à rejoindre la partie
+     * @param client
+     * @param isReady
+     */
         public void setReadyStatus(ClientHandler client, Boolean isReady){
             Joueur j = client.getJoueur();
             if (j != null) {

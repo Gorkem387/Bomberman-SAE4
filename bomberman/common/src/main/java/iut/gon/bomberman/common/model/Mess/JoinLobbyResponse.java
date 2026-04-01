@@ -11,6 +11,7 @@ public class JoinLobbyResponse implements Message {
         this.lobbyId = lobbyId;
     }
 
+    // Getter
     @Override
     public MessageType getType() {
         return MessageType.JOIN_LOBBY_RESPONSE;

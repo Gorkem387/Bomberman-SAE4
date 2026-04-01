@@ -14,6 +14,11 @@ import iut.gon.serverside.Lob.Lobby;
  */
 public class CreateLobbyHandler implements MessageHandler<CreateLobbyRequest> {
 
+    /**
+     * Permet au joueur de créer un lobby
+     * @param message
+     * @param client
+     */
     @Override
     public void handle(CreateLobbyRequest message, ClientHandler client) {
         // --- MISE À JOUR : On utilise le pseudo de la requête ---
