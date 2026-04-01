@@ -16,7 +16,7 @@ public class LauncherController {
 
     @FXML
     public void handleLocalGame(ActionEvent actionEvent) {
-            loadGameView(actionEvent);
+            loadCustomizeView(actionEvent);
             System.out.println("Mode Local lancé.");
     }
 
@@ -55,12 +55,9 @@ public class LauncherController {
         }
     }
 
-    /**
-     * Méthode pour charger la vue du labyrinthe
-     */
-    private void loadGameView(ActionEvent event) {
+    private void loadCustomizeView(ActionEvent event){
         try {
-            String fxmlPath = "/iut/gon/bomberman/client/game-view.fxml";
+            String fxmlPath = "/iut/gon/bomberman/client/configPartieLocale.fxml";
 
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent gameRoot = loader.load();
@@ -69,7 +66,7 @@ public class LauncherController {
 
             Scene gameScene = new Scene(gameRoot);
             stage.setScene(gameScene);
-            stage.setTitle("Bomberman - Partie en cours");
+            stage.setTitle("Bomberman - Configuration Partie");
             stage.centerOnScreen();
             stage.show();
 

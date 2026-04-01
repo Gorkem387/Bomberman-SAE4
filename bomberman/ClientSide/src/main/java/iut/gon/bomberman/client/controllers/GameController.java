@@ -1,5 +1,6 @@
 package iut.gon.bomberman.client.controllers;
 
+import iut.gon.bomberman.client.ai.AISTRATEGIES;
 import iut.gon.bomberman.client.view.LabRenderer;
 import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.labyrinthe.DFSGenerator;
@@ -17,10 +18,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Objects;
+import java.util.*;
 
 public class GameController {
 
@@ -49,6 +47,7 @@ public class GameController {
     private boolean spaceWasPressed = false;
     private boolean escWasPressed = false;
 
+
     @FXML
     public void initialize() {
         // Charge l'image du cœur
@@ -72,7 +71,6 @@ public class GameController {
             System.err.println("Impossible de charger l'image de la bombe personnalisée");
         }
 
-        // ...existing code...
         DFSGenerator generator = new DFSGenerator();
         this.labyrinthe = generator.createLabyrinthe(21, 21);
 
@@ -119,6 +117,19 @@ public class GameController {
             }
         };
         gameLoop.start();
+    }
+
+    public void setConfig(int tailleMap, List<AISTRATEGIES> strategies) {
+
+        DFSGenerator generator = new DFSGenerator();
+        this.labyrinthe = generator.createLabyrinthe(tailleMap, tailleMap);
+
+        gameCanvas.setWidth(labyrinthe.getWidth() * 32);
+        gameCanvas.setHeight(labyrinthe.getHeight() * 32);
+
+        for (int i = 0; i < strategies.size(); i++) {
+            // Créer les IA
+        }
     }
 
     private void handleInputs() {
