@@ -85,7 +85,7 @@ public class LobbyController implements Initializable {
             Platform.runLater(() -> {
                 try {
                     System.out.println("Partie lance ! Chargement de la vue du jeu...");
-                    javafx.fxml.FXMLLoader loader = MainApp.setRootAndGetLoader("iut/gon/bomberman/client/game-view");
+                    javafx.fxml.FXMLLoader loader = MainApp.setRootAndGetLoader("iut/gon/bomberman/client/onlineGame-view");
                     OnlineGameController gameController = loader.getController();
                     InitGameMessage initMsg = (InitGameMessage) msg;
                     gameController.setLabyrinthe(initMsg.getLabyrinthe());
