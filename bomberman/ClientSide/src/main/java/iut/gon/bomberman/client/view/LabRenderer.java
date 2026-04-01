@@ -112,6 +112,11 @@ public class LabRenderer {
         double screenX = joueur.getX() * TILE_SIZE;
         double screenY = joueur.getY() * TILE_SIZE;
 
+        if (!joueur.isAlive()) {
+            drawDeathAnimation(gc, joueur, screenX, screenY);
+            return;
+        }
+
         // Déterminer la direction et l'état
         String dirSuffix = updateDirection(joueur.getDirection());
         boolean isIdle = joueur.getDirection() == Direction.IDLE;
