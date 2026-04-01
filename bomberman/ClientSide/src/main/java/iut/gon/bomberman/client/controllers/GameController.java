@@ -55,6 +55,12 @@ public class GameController {
     private long deathAnimationStartTime = -1;
     private static final long DEATH_ANIMATION_DURATION = 1000;
 
+    private boolean victorySoundPlayed = false;
+    private boolean defeatSoundPlayed = false;
+    private boolean victoryAnimationComplete = false;
+    private long victoryAnimationStartTime = -1;
+    private static final long VICTORY_ANIMATION_DURATION = 1500;
+
     private Image heartImage;
     private Image bombImage;
 
