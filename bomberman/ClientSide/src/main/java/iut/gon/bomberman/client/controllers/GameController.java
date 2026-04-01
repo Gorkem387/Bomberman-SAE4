@@ -36,7 +36,11 @@ public class GameController {
 
     private HeatMap heatMap;
     private Ai ia;
+    private Ai ia2;
+    private Ai ia3;
     private Joueur iaPlayer;
+    private Joueur iaPlayer2;
+    private Joueur iaPlayer3;
 
     private Joueur joueur;
     private BombManager bombManager;
@@ -102,7 +106,17 @@ public class GameController {
         this.heatMap = new HeatMap(21, 21);
         this.iaPlayer.setX(19);
         this.iaPlayer.setY(19);
-        this.ia = new Ai(iaPlayer, this.labyrinthe, AISTRATEGIES.SURVIVOR, this, heatMap, bombManager);
+        this.ia = new Ai(iaPlayer, this.labyrinthe, AISTRATEGIES.CHAOS, this, heatMap, bombManager);
+
+        this.iaPlayer2 = new Joueur(3, "IA 2");
+        this.iaPlayer2.setX(19);
+        this.iaPlayer2.setY(1);
+        this.ia2 = new Ai(iaPlayer2, this.labyrinthe, AISTRATEGIES.CHAOS, this, heatMap, bombManager);
+
+        this.iaPlayer3 = new Joueur(4, "IA 3");
+        this.iaPlayer3.setX(1);
+        this.iaPlayer3.setY(19);
+        this.ia3 = new Ai(iaPlayer3, this.labyrinthe, AISTRATEGIES.SURVIVOR, this, heatMap, bombManager);
 
         gameCanvas.setWidth(labyrinthe.getWidth() * 32);
         gameCanvas.setHeight(labyrinthe.getHeight() * 32);
@@ -167,7 +181,10 @@ public class GameController {
     }
 
     private boolean checkVictoryCondition() {
-        return joueur.isAlive() && !iaPlayer.isAlive();
+        return joueur.isAlive()
+                && !iaPlayer.isAlive()
+                && !iaPlayer2.isAlive()
+                && !iaPlayer3.isAlive();
     }
 
     private void update(double deltaTime) {
@@ -189,7 +206,7 @@ public class GameController {
             }
             return;
         }
-        
+
         if (joueur.isAlive() && !isVictory) {
             handleInputs(deltaTime);
 
@@ -201,6 +218,15 @@ public class GameController {
                 iaPlayer.setAlive(false);
             }
         }
+        if (iaPlayer2.isAlive()) {
+            ia2.update(deltaTime, new Joueur[]{iaPlayer2, joueur});
+            if (iaPlayer2.getPv() <= 0) iaPlayer2.setAlive(false);
+        }
+
+        if (iaPlayer3.isAlive()) {
+            ia3.update(deltaTime, new Joueur[]{iaPlayer3, joueur});
+            if (iaPlayer3.getPv() <= 0) iaPlayer3.setAlive(false);
+        }
 
         if (!isVictory && checkVictoryCondition()) {
             isVictory = true;
@@ -209,6 +235,8 @@ public class GameController {
         List<Joueur> targets = new ArrayList<>();
         if (joueur.isAlive()) targets.add(joueur);
         if (iaPlayer.isAlive()) targets.add(iaPlayer);
+        if (iaPlayer2.isAlive()) targets.add(iaPlayer2);
+        if (iaPlayer3.isAlive()) targets.add(iaPlayer3);
 
         // Bombes, les deux joueurs peuvent recevoir des dégâts
         bombManager.update(deltaTime, labyrinthe, targets);
@@ -244,6 +272,8 @@ public class GameController {
 
         renderer.drawPlayer(gc, joueur);
         renderer.drawPlayer(gc, iaPlayer);
+        renderer.drawPlayer(gc, iaPlayer2);
+        renderer.drawPlayer(gc, iaPlayer3);
 
         drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
         

@@ -18,6 +18,7 @@ public class Bomb implements Serializable {
     private boolean exploded;
     private boolean solid = false;
     Joueur joueur;
+    private long creationTime;
 
     /**
      * Constructeur de la bombe.
@@ -33,6 +34,7 @@ public class Bomb implements Serializable {
         this.timer = 3.0;
         this.exploded = false;
         this.joueur = joueur;
+        this.creationTime = System.currentTimeMillis();
     }
 
     /**
@@ -62,6 +64,10 @@ public class Bomb implements Serializable {
      * @return true si la bombe agit comme un mur.
      */
     public boolean isSolid() { return solid; }
+
+    public long getCreationTime() {
+        return creationTime;
+    }
 
     public void setSolid(boolean solid) { this.solid = solid; }
     public Joueur getJoueur() {
