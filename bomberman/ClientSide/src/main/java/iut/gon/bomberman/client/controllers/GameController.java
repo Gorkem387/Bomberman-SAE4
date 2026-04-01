@@ -190,9 +190,9 @@ public class GameController {
         renderer.draw(gc, labyrinthe);
         renderer.drawBombs(gc, bombManager.getBombs());
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
-        if (joueur.isAlive()) {
-            renderer.drawPlayer(gc, joueur);
-        }
+
+        renderer.drawPlayer(gc, joueur);
+
         drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
         
         // Afficher l'écran GAME OVER uniquement après que l'animation de mort soit complète
