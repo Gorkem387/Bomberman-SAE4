@@ -254,17 +254,17 @@ public class GameController {
         if (debugTimer >= 1.0) { // On affiche toutes les 1 seconde
             System.out.println("\nDEBUG VITESSE");
             // Calcul de la vitesse théorique (Base * Multiplier)
-            System.out.println(String.format("[%s] Multiplier: %.2f",
-                    joueur.getNom(), joueur.getSpeed_multiplier()));
+            System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
+                    joueur.getNom(), joueur.getSpeed_multiplier(), joueur.getExplosionRange()));
 
-            System.out.println(String.format("[%s] Multiplier: %.2f",
-                    iaPlayer.getNom(), iaPlayer.getSpeed_multiplier()));
+            System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
+                    iaPlayer.getNom(), iaPlayer.getSpeed_multiplier(), iaPlayer.getExplosionRange()));
 
-            System.out.println(String.format("[%s] Multiplier: %.2f",
-                    iaPlayer2.getNom(), iaPlayer2.getSpeed_multiplier()));
+            System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
+                    iaPlayer2.getNom(), iaPlayer2.getSpeed_multiplier(), iaPlayer2.getExplosionRange()));
 
-            System.out.println(String.format("[%s] Multiplier: %.2f",
-                    iaPlayer3.getNom(), iaPlayer3.getSpeed_multiplier()));
+            System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
+                    iaPlayer3.getNom(), iaPlayer3.getSpeed_multiplier(), iaPlayer3.getExplosionRange()));
             debugTimer = 0;
         }
     }

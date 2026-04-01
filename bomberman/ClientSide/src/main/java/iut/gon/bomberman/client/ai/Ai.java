@@ -92,6 +92,8 @@ public class Ai {
                 // Synchronise la position logique du joueur
                 player.setX(gridX);
                 player.setY(gridY);
+
+                player.checkBonus(labyrinth);
             } else {
                 // Avance vers la cible
                 visualX += (dx / dist) * step;
