@@ -107,17 +107,17 @@ public class GameController {
         this.heatMap = new HeatMap(21, 21);
         this.iaPlayer.setX(19);
         this.iaPlayer.setY(19);
-        this.ia = new Ai(iaPlayer, this.labyrinthe, AISTRATEGIES.CHAOS, this, heatMap, bombManager);
+        this.ia = new Ai(iaPlayer, this.labyrinthe, AISTRATEGIES.AGGRESSIVE, this, heatMap, bombManager);
 
         this.iaPlayer2 = new Joueur(3, "IA 2");
         this.iaPlayer2.setX(19);
         this.iaPlayer2.setY(1);
-        this.ia2 = new Ai(iaPlayer2, this.labyrinthe, AISTRATEGIES.CHAOS, this, heatMap, bombManager);
+        this.ia2 = new Ai(iaPlayer2, this.labyrinthe, AISTRATEGIES.AGGRESSIVE, this, heatMap, bombManager);
 
-        this.iaPlayer3 = new Joueur(3, "IA 2");
+        this.iaPlayer3 = new Joueur(4, "IA 3");
         this.iaPlayer3.setX(1);
         this.iaPlayer3.setY(19);
-        this.ia3 = new Ai(iaPlayer3, this.labyrinthe, AISTRATEGIES.SURVIVOR, this, heatMap, bombManager);
+        this.ia3 = new Ai(iaPlayer3, this.labyrinthe, AISTRATEGIES.AGGRESSIVE, this, heatMap, bombManager);
 
         gameCanvas.setWidth(labyrinthe.getWidth() * 32);
         gameCanvas.setHeight(labyrinthe.getHeight() * 32);
@@ -222,7 +222,7 @@ public class GameController {
         }
 
         // Bombes, les deux joueurs peuvent recevoir des dégâts
-        bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer));
+        bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer, iaPlayer2, iaPlayer3));
 
         if (uiController != null) {
             uiController.updatePlayerStats(joueur);
