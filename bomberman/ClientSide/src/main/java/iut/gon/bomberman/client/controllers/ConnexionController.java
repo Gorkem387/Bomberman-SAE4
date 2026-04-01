@@ -23,6 +23,9 @@ public class ConnexionController {
 
     @FXML
     public void initialize() {
+        //Reset les listeners si jamais returnToMenu() n'a pas été appelé (juste pour etre safe)
+        NetworkManager.getInstance().clearListeners();
+
         // Action lors du clic sur le bouton de connexion
         boutonConnexion.setOnAction(event -> handleConnexion());
 

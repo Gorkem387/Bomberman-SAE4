@@ -83,14 +83,31 @@ public class NetworkManager{
     }
 
     public void disconnect() {
+        isConnected = false;
+        // Close the socket FIRST - this unblocks the thread stuck on in.readObject()
         try {
-            if (socket != null) socket.close();
-            isConnected = false;
-            if (listenerThread != null) {
-                listenerThread.interrupt();
-            }
+            if (socket != null && !socket.isClosed()) socket.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        // Now the thread can actually exit - wait for it
+        try {
+            if (listenerThread != null) {
+                listenerThread.join(500);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        listenerThread = null;
+        socket = null;
+        in = null;
+        out = null;
+    }
+
+    public static synchronized void reset() {
+        if (network != null) {
+            network.disconnect();
+            network = null;
         }
     }
 
@@ -113,6 +130,10 @@ public class NetworkManager{
             List<ServerMessageListener> copy = new ArrayList<>(list);
             copy.forEach(l -> l.onServerMessage(message));
         }
+    }
+
+    public void clearListeners() {
+        listeners.clear();
     }
 
     public boolean isConnected() {
