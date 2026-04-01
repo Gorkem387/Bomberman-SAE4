@@ -103,6 +103,9 @@ public class LobbyController implements Initializable {
         NetworkManager.getInstance().send(new LobbyDetailsRequest(currentLobbyId));
     }
 
+    /**
+     * Fonction qui permet de gérer l'envoie de message entre joueur
+     */
     private void handleSendMessage() {
         String content = texteMessage.getText().trim();
         if (!content.isEmpty()) {
@@ -112,6 +115,10 @@ public class LobbyController implements Initializable {
         }
     }
 
+    /**
+     * Fonction qui redirige vers la liste des lobby
+     * et quitte le lobby choisi
+     */
     @FXML
     public void handleLeaveLobby() {
         try {
