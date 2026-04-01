@@ -181,19 +181,30 @@ public class LabRenderer {
     }
 
     private void loadSpritesIntoCache(String direction, Joueur joueur) {
-        Image[] frames = new Image[3];
-
         // On récupère le chemin du skin (ex: /.../assets/32/S_0.png)
         String fullPath = joueur.getSkinPath();
 
         // On extrait le dossier (on enlève "S_0.png" à la fin pour avoir le dossier "/.../assets/32/")
         String baseFolder = fullPath.substring(0, fullPath.lastIndexOf("/") + 1);
 
-        for (int i = 0; i < 3; i++) {
+        // Directions avec un seul frame (pas d'animation)
+        boolean isSingleFrame = direction.equals("R") || direction.equals("D");
+        int frameCount = isSingleFrame ? 1 : 3;
+
+        Image[] frames = new Image[3];
+
+        for (int i = 0; i < frameCount; i++) {
             // On construit le chemin : dossier + direction (N, S, E, W) + index
             String path = baseFolder + direction + "_" + i + ".png";
             frames[i] = load(path);
         }
+
+        // Si un seul frame, on le répète sur les 3 slots
+        if (isSingleFrame) {
+            frames[1] = frames[0];
+            frames[2] = frames[0];
+        }
+
         spriteCache.put(direction, frames);
     }
 

@@ -30,7 +30,7 @@ public class Joueur {
 
     private boolean alive = true;
 
-    private String skinPath = "/iut/gon.bomberman/client/assets/8/S_0.png";
+    private String skinPath = "/iut/gon/bomberman/client/assets/8/S_0.png";
 
     private int explosionRange = 2;
 
