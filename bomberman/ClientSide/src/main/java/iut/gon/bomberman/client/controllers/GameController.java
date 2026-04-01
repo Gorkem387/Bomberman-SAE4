@@ -39,7 +39,7 @@ public class GameController {
     private boolean isGameOver = false;
     private boolean deathAnimationComplete = false;
     private long deathAnimationStartTime = -1;
-    private static final long DEATH_ANIMATION_DURATION = 1000;
+    private static final long DEATH_ANIMATION_DURATION = 1500;
 
     private Image heartImage;
     private Image bombImage;
@@ -163,6 +163,9 @@ public class GameController {
         if (joueur.isAlive()) {
             handleInputs();
 
+            // Mise à jour de la physique (bombes, explosions, dégâts)
+            bombManager.update(deltaTime, labyrinthe, List.of(joueur));
+
             if (joueur.getPv() <= 0) {
                 joueur.setAlive(false);
                 this.isGameOver = true;
@@ -176,8 +179,7 @@ public class GameController {
                 }
             }
         }
-        // Mise à jour de la physique (bombes, explosions, dégâts)
-        bombManager.update(deltaTime, labyrinthe, List.of(joueur));
+
 
         if (uiController != null) {
             uiController.updatePlayerStats(joueur);
@@ -236,8 +238,8 @@ public class GameController {
 
         double elementY = barY + (barHeight - 25) / 2;
 
-        drawStatItem(gc, bombImage, bombs, barX + 15, elementY, "x");
-        drawStatItem(gc, heartImage, hearts, barX + 85, elementY, "x");
+        drawStatItem(gc, bombImage, bombs, barX + 15, elementY);
+        drawStatItem(gc, heartImage, hearts, barX + 85, elementY);
 
         gc.setFill(speed > 1.0f ? javafx.scene.paint.Color.GOLD : javafx.scene.paint.Color.LIGHTGRAY);
         gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 13));
@@ -257,87 +259,15 @@ public class GameController {
      * @param count Nombre à afficher
      * @param x Position X
      * @param y Position Y
-     * @param label Texte
      */
-    private void drawStatItem(GraphicsContext gc, Image image, int count, double x, double y, String label) {
+    private void drawStatItem(GraphicsContext gc, Image image, int count, double x, double y) {
         if (image == null) return;
 
         gc.drawImage(image, x, y, 25, 25);
 
         gc.setFill(javafx.scene.paint.Color.WHITE);
         gc.setFont(javafx.scene.text.Font.font("Arial", 16));
-        gc.fillText(label + " " + count, x + 30, y + 18);
-    }
-
-    /**
-     * Affiche les cœurs et les bombes côte à côte au centre du canvas
-     * @param gc GraphicsContext pour dessiner
-     * @param hearts Nombre de cœurs à afficher
-     */
-    private void drawHearts(GraphicsContext gc, int hearts) {
-        if (heartImage == null) return;
-
-        // Calcule le centre du canvas
-        double centerX = gameCanvas.getWidth() / 2.0;
-        double centerY = 15;
-
-        // Calcule la largeur totale des cœurs
-        int heartsWidth = hearts * 35;
-
-        // Position de départ des cœurs (alignés à droite du centre)
-        double xStart = centerX - heartsWidth - 20; // -20 pour l'espace entre cœurs et bombes
-
-        for (int i = 0; i < hearts; i++) {
-            gc.drawImage(heartImage, xStart + (i * 35), centerY);
-        }
-    }
-
-    /**
-     * Affiche les bombes disponibles du joueur avec un style amélioré
-     * @param gc GraphicsContext pour dessiner
-     * @param bombs Nombre de bombes à afficher
-     */
-    private void drawBombs(GraphicsContext gc, int bombs) {
-        if (bombImage == null) return;
-
-        // Calcule le centre du canvas
-        double centerX = gameCanvas.getWidth() / 2.0;
-        double centerY = 15;
-
-        // Position de départ des bombes (alignées à gauche du centre)
-        double xStart = centerX + 20; // +20 pour l'espace entre cœurs et bombes
-
-        for (int i = 0; i < bombs; i++) {
-            gc.drawImage(bombImage, xStart + (i * 35), centerY);
-        }
-    }
-
-    /**
-     * Dessine un fond semi-transparent avec bordure pour les statistiques
-     * @param gc GraphicsContext pour dessiner
-     * @param hearts Nombre de cœurs
-     * @param bombs Nombre de bombes
-     */
-    private void drawStatsBackground(GraphicsContext gc, int hearts, int bombs) {
-        double centerX = gameCanvas.getWidth() / 2.0;
-
-        // Calcule les dimensions du conteneur
-        int heartsWidth = hearts * 35;
-        int bombsWidth = bombs * 35;
-        int totalWidth = heartsWidth + bombsWidth + 60; // +60 pour l'espace entre et les padding
-        int height = 60;
-
-        double bgX = centerX - (totalWidth / 2.0);
-        double bgY = 5;
-
-        // Fond semi-transparent
-        gc.setFill(javafx.scene.paint.Color.rgb(0, 0, 0, 0.3));
-        gc.fillRoundRect(bgX, bgY, totalWidth, height, 10, 10);
-
-        // Bordure
-        gc.setStroke(javafx.scene.paint.Color.rgb(255, 255, 255, 0.6));
-        gc.setLineWidth(2);
-        gc.strokeRoundRect(bgX, bgY, totalWidth, height, 10, 10);
+        gc.fillText("x " + count, x + 30, y + 18);
     }
 
     /**
@@ -349,6 +279,7 @@ public class GameController {
         }
         
         try {
+            this.escWasPressed = false;
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/launcher.fxml"));
             Parent root = loader.load();
             Scene scene = new Scene(root);

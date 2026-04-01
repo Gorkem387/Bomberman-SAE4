@@ -8,10 +8,12 @@ import iut.gon.bomberman.common.model.player.Direction;
 import iut.gon.bomberman.common.model.player.Joueur;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.paint.Color;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.List;
+import java.util.Objects;
 
 public class LabRenderer {
 
@@ -26,8 +28,10 @@ public class LabRenderer {
 
     private final Map<String, Image[]> spriteCache = new HashMap<>();
     private int animationCounter = 0;
+    private int bombAnimationCounter = 0;
     private int deathAnimationCounter = 0;
     private boolean isDeathAnimationPlaying = false;
+    private Image[] bombSprites = null;
 
     public LabRenderer() {
         updateAssets();
@@ -41,52 +45,128 @@ public class LabRenderer {
         String bombPath = GameSettings.getSelectedBombPath();
         this.bombImg = load(bombPath);
 
+        // Charger les sprites de bombe avec le bon préfixe (B, B2, etc.)
+        loadBombSprites(bombPath);
+
         // Vide le cache pour forcer le rechargement du nouveau skin choisi
         spriteCache.clear();
         System.out.println("Renderer : Assets mis à jour (Bombe: " + bombPath + ")");
+    }
+
+    /**
+     * Fonction qui charge les sprites d'animation de la bombe avec détection dynamique du nombre
+     * Détecte le préfixe (B, B2, etc.) et charge tous les sprites disponibles
+     * @param bombPath chemin vers la bombe
+     */
+    private void loadBombSprites(String bombPath) {
+        int lastSlash = bombPath.lastIndexOf("/");
+        String assetsFolder = bombPath.substring(0, lastSlash + 1);
+
+        String filename = bombPath.substring(lastSlash + 1);  // "B_0.png" ou "B2_0.png"
+        String bombPrefix = filename.substring(0, filename.indexOf("_"));  // "B" ou "B2"
+        
+        System.out.println("Détection du préfixe de bombe: " + bombPrefix);
+
+        String spriteFolder = assetsFolder + (bombPrefix.equals("B") ? "b" : "B2") + "/";
+
+        int spriteCount = 0;
+        for (int i = 0; i < 30; i++) {
+            String testPath = spriteFolder + bombPrefix + "_" + i + ".png";
+            try (var stream = getClass().getResourceAsStream(testPath)) {
+                if (stream != null) {
+                    spriteCount++;
+                } else {
+                    break;
+                }
+            } catch (Exception e) {
+                break;
+            }
+        }
+        
+        if (spriteCount == 0) {
+            System.err.println("Aucun sprite de bombe trouvé avec le préfixe: " + bombPrefix);
+            bombSprites = new Image[]{bombImg};
+            return;
+        }
+
+        bombSprites = new Image[spriteCount];
+        for (int i = 0; i < spriteCount; i++) {
+            String spritePath = spriteFolder + bombPrefix + "_" + i + ".png";
+            Image img = load(spritePath);
+
+            bombSprites[i] = img;
+        }
     }
 
     private Image load(String path) {
         return new Image(Objects.requireNonNull(getClass().getResourceAsStream(path)));
     }
 
+    /**
+     * Dessine le labyrinthe et les bonus sur le canvas
+     * @param gc le contexte graphique du canvas
+     * @param lab le labyrinthe à dessiner
+     */
     public void draw(GraphicsContext gc, Labyrinthe lab) {
         for (int x = 0; x < lab.getWidth(); x++) {
             for (int y = 0; y < lab.getHeight(); y++) {
                 CellType type = lab.getCell(x, y);
                 gc.drawImage(groundImg, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                if (type == CellType.WALL) {
+
+                if (type == CellType.WALL)
                     gc.drawImage(wallImg, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                } else if (type == CellType.DESTRUCTIBLE) {
+
+                else if (type == CellType.DESTRUCTIBLE)
                     gc.drawImage(destructibleImg, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-                }
-                else if (type == CellType.SPEED_BONUS) {
-                    gc.setFill(javafx.scene.paint.Color.YELLOW);
-                    gc.fillOval(x * TILE_SIZE + 4, y * TILE_SIZE + 4, TILE_SIZE - 8, TILE_SIZE - 8);
-                    gc.setFill(javafx.scene.paint.Color.BLACK);
-                    gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 18));
-                    gc.fillText("S", x * TILE_SIZE + 10, y * TILE_SIZE + 22);
-                } else if (type == CellType.FIRE_BONUS) {
-                    gc.setFill(javafx.scene.paint.Color.RED);
-                    gc.fillOval(x * TILE_SIZE + 4, y * TILE_SIZE + 4, TILE_SIZE - 8, TILE_SIZE - 8);
-                    gc.setFill(javafx.scene.paint.Color.WHITE);
-                    gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 18));
-                    gc.fillText("F", x * TILE_SIZE + 10, y * TILE_SIZE + 22);
-                }
+
+                else if (type == CellType.SPEED_BONUS)
+                    drawBonus(gc, x, y, Color.YELLOW, Color.BLACK, "S");
+
+                else if (type == CellType.FIRE_BONUS)
+                    drawBonus(gc, x, y, Color.RED, Color.BLACK, "F");
             }
         }
     }
 
     /**
-     * Dessine les bombes sur le canvas
+     * Fonction pour afficher le bonus
+     * @param gc le contexte graphique du canvas
+     * @param x coordonées x de la case
+     * @param y coordonées y de la case
+     * @param color1 première couleur
+     * @param color2 deuxième couleur
+     * @param text texte à afficher
+     */
+    public void drawBonus(GraphicsContext gc, int x, int y, Color color1, Color color2, String text){
+        gc.setFill(color1);
+        gc.fillOval(x * TILE_SIZE + 4, y * TILE_SIZE + 4, TILE_SIZE - 8, TILE_SIZE - 8 );
+        gc.setFill(color2);
+        gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 18));
+        gc.fillText(text, x * TILE_SIZE + 10, y * TILE_SIZE + 22);
+    }
+
+    /**
+     * Dessine les bombes avec animation de sprites
+     * Supporte n'importe quel nombre de sprites
      * @param gc le contexte graphique du canvas
      * @param bombs la liste des bombes à dessiner
      */
     public void drawBombs(GraphicsContext gc, List<Bomb> bombs) {
+        bombAnimationCounter++;
+        
+        int frameIndex = (bombAnimationCounter / ANIMATION_SPEED) % (bombSprites != null ? bombSprites.length : 1);
+        
+        Image bombImageToUse = (bombSprites != null && bombSprites[frameIndex] != null)
+            ? bombSprites[frameIndex]
+            : bombImg;
+        
         for (Bomb bomb : bombs) {
             double sx = bomb.getX() * TILE_SIZE;
             double sy = bomb.getY() * TILE_SIZE;
-            gc.drawImage(bombImg, sx, sy, TILE_SIZE, TILE_SIZE);
+            
+            if (bombImageToUse != null) {
+                gc.drawImage(bombImageToUse, sx, sy, TILE_SIZE, TILE_SIZE);
+            }
         }
     }
 
@@ -146,12 +226,6 @@ public class LabRenderer {
                 (joueur.getY() + visualOffsetY) * TILE_SIZE,
                 TILE_SIZE, TILE_SIZE);
         gc.setStroke(javafx.scene.paint.Color.RED);
-        double hSize = 0.7;
-        double off = 0.15;
-        // Hitbox
-        gc.strokeRect((joueur.getX() + off) * TILE_SIZE,
-                (joueur.getY() + off) * TILE_SIZE,
-                hSize * TILE_SIZE, hSize * TILE_SIZE);
     }
 
     /**
@@ -221,9 +295,5 @@ public class LabRenderer {
             case RIGHT -> "E";//E_0
             case IDLE -> "R";//R_0
         };
-    }
-
-    public void stopAnimation() {
-        animationCounter = 0;
     }
 }
