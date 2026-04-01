@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import iut.gon.bomberman.common.model.Mess.Message;
+import iut.gon.bomberman.common.model.Mess.InitGameMessage;
 import iut.gon.bomberman.common.model.Mess.MessageType;
 import javafx.application.Platform;
 
@@ -24,6 +25,7 @@ public class NetworkManager{
     private int localPlayerId;
     private int currentLobbyId;
 
+    private InitGameMessage lastInitGameMessage;
 
     private NetworkManager (){}
 
@@ -98,6 +100,10 @@ public class NetworkManager{
     }
 
     private void notifyListeners(Message message) {
+        if (message instanceof InitGameMessage init) {
+            this.lastInitGameMessage = init;
+        }
+
         List<ServerMessageListener> list = listeners.get(message.getType());
         if (list != null) {
             List<ServerMessageListener> copy = new ArrayList<>(list);
@@ -131,5 +137,13 @@ public class NetworkManager{
 
     public void setCurrentLobbyId(int currentLobbyId) {
         this.currentLobbyId = currentLobbyId;
+    }
+
+    public InitGameMessage getLastInitGameMessage() {
+        return lastInitGameMessage;
+    }
+
+    public void clearLastInitGameMessage() {
+        this.lastInitGameMessage = null;
     }
 }

@@ -1,10 +1,16 @@
 package iut.gon.serverside.Threads;
 
+import iut.gon.bomberman.common.model.labyrinthe.Bomb;
+import iut.gon.bomberman.common.model.labyrinthe.BombManager;
+import iut.gon.bomberman.common.model.player.Joueur;
 import iut.gon.serverside.Lob.Lobby;
-import iut.gon.serverside.Logger.Logger;
-import iut.gon.serverside.Player.DTO.IDTO;
-import iut.gon.serverside.Player.DTO.InitGameDTO;
-import iut.gon.serverside.Player.DTO.JoueurMisAJourDTO;
+import iut.gon.bomberman.common.model.DTO.JoueurMisAJourDTO;
+import iut.gon.bomberman.common.model.DTO.MinimDTO;
+import iut.gon.bomberman.common.model.Mess.BombUpdate;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Gère la boucle de jeu (60 FPS) pour un lobby spécifique.
@@ -14,42 +20,51 @@ public class Thread_Jeu extends Thread {
 
     private boolean running = true;
     private final Lobby lobby;
-    private final Logger logger = Logger.getInstance();
+    private final BombManager bombManager; // Gestionnaire de bombes côté serveur
 
     public Thread_Jeu(Lobby lobby) {
         this.lobby = lobby;
+        this.bombManager = new BombManager();
     }
 
     @Override
     public void run() {
-        // 1. Initialisation de la partie pour tous les clients
-        InitGameDTO initDTO = new InitGameDTO();
-        initDTO.id = lobby.getId();
-        initDTO.pseudo = lobby.getNom();
-        initDTO.skin = 0;
-        initDTO.x = 0;
-        initDTO.y = 0;
+        long lastTime = System.nanoTime();
 
-        // Utilisation du broadcast du lobby (Remplace j.getClientHandler().send())
-        lobby.broadcast(initDTO);
-
-        // 2. Boucle de jeu (Synchronisation temps réel)
+        // Boucle de jeu (Synchronisation temps réel)
         while (running) {
-            // Dans cette architecture, chaque itération envoie l'état du monde
-            // (Pour l'instant on simule l'envoi pour le premier joueur)
-            if (!lobby.getJoueurs().isEmpty()) {
-                JoueurMisAJourDTO updateDTO = new JoueurMisAJourDTO(
-                        lobby.getJoueurs().get(0).getId(),
-                        (int) lobby.getJoueurs().get(0).getX(),
-                        (int) lobby.getJoueurs().get(0).getY()
+            long now = System.nanoTime();
+            double deltaTime = (now - lastTime) / 1_000_000_000.0;
+            lastTime = now;
+
+            // 1. Mise à jour de la physique (bombes, explosions, dégâts) sur le serveur
+            bombManager.update(deltaTime, lobby.getLabyrinthe(), lobby.getJoueurs());
+
+            // 2. Broadcast des positions des joueurs
+            JoueurMisAJourDTO updateDTO = new JoueurMisAJourDTO();
+            List<MinimDTO> positions = new ArrayList<>();
+            for (Joueur j : lobby.getJoueurs()) {
+                MinimDTO m = new MinimDTO(
+                    j.getId(),
+                    (int)(j.getX() * 100),
+                    (int)(j.getY() * 100)
                 );
-                
-                // Diffusion automatique à tout le monde via le Lobby
-                lobby.broadcast(updateDTO);
+
+                positions.add(m);
             }
+            updateDTO.positionsAll = positions;
+            lobby.broadcast(updateDTO);
+
+            // 3. Broadcast de l'état des bombes et explosions
+            List<BombUpdate.BombDTO> bombDTOs = bombManager.getBombs().stream()
+                    .map(b -> new BombUpdate.BombDTO(b.getX(), b.getY(), b.isSolid(), b.getJoueur() != null ? b.getJoueur().getId() : -1))
+                    .collect(Collectors.toList());
+            
+            BombUpdate bombUpdate = new BombUpdate(bombDTOs, new ArrayList<>(bombManager.getExplosionCells()));
+            lobby.broadcast(bombUpdate);
 
             try {
-                // Pause pour maintenir 60 FPS
+                // Pause pour maintenir environ 60 FPS (16ms)
                 Thread.sleep(16);
             } catch (InterruptedException e) {
                 running = false;
@@ -59,5 +74,9 @@ public class Thread_Jeu extends Thread {
 
     public void stopGame() {
         this.running = false;
+    }
+
+    public BombManager getBombManager() {
+        return bombManager;
     }
 }

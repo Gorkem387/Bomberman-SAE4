@@ -31,12 +31,12 @@ public class BombManager {
         int bx = (int) Math.round(joueur.getX());
         int by = (int) Math.round(joueur.getY());
         if (!labyrinthe.isWalkable(bx, by)) return false;
-
-        // Vérifie qu'il n'y a pas déjà une bombe ici
-        for (Bomb b : bombs) {
-            if (b.getX() == bx && b.getY() == by) return false;
+        synchronized (bombs) {
+            for (Bomb b : bombs) {
+                if (b.getX() == bx && b.getY() == by) return false;
+            }
+            bombs.add(new Bomb(bx, by, range, joueur));
         }
-        bombs.add(new Bomb(bx, by, range, joueur));
         joueur.setNb_bombes(joueur.getNb_bombes() - 1);
 
         System.out.println(String.format("[POSE] Bombe à (%d,%d) par %s", bx, by, joueur.getNom()));
@@ -50,54 +50,48 @@ public class BombManager {
      * @param joueurs Liste des joueurs présents pour tester les dégâts et la solidité.
      */
     public void update(double deltaTime, Labyrinthe labyrinthe, List<Joueur> joueurs) {
-        // Gestion du timer de l'effet visuel de l'explosion
-        if (!explosionCells.isEmpty()) {
-            explosionTimer -= deltaTime;
-            if (explosionTimer <= 0) {
-                explosionCells.clear();
+        synchronized (explosionCells) {
+            if (!explosionCells.isEmpty()) {
+                explosionTimer -= deltaTime;
+                if (explosionTimer <= 0) {
+                    explosionCells.clear();
+                }
             }
         }
-
-        // Gestion du passage "traversable -> solide" des bombes
-        for (Bomb bomb : bombs) {
-            if (!bomb.isSolid()) {
-                boolean playerOverlap = false;
-                for (Joueur j : joueurs) {
-                    double pSize = 0.9;
-                    if (j.getX() < bomb.getX() + 1 &&
-                            j.getX() + pSize > bomb.getX() &&
-                            j.getY() < bomb.getY() + 1 &&
-                            j.getY() + pSize > bomb.getY()) {
-                        playerOverlap = true;
-                        break;
+        synchronized (bombs) {
+            for (Bomb bomb : bombs) {
+                if (!bomb.isSolid()) {
+                    boolean playerOverlap = false;
+                    for (Joueur j : joueurs) {
+                        double pSize = 0.9;
+                        if (j.getX() < bomb.getX() + 1 &&
+                                j.getX() + pSize > bomb.getX() &&
+                                j.getY() < bomb.getY() + 1 &&
+                                j.getY() + pSize > bomb.getY()) {
+                            playerOverlap = true;
+                            break;
+                        }
+                    }
+                    // La bombe devient solide quand le joueur de la touche plus du tout
+                    if (!playerOverlap) {
+                        bomb.setSolid(true);
                     }
                 }
-                // La bombe devient solide quand le joueur de la touche plus du tout
-                if (!playerOverlap) {
-                    bomb.setSolid(true);
-                }
             }
-        }
 
-        // Mise à jour des timers des bombes et déclenchement des explosions
-        Iterator<Bomb> it = bombs.iterator();
-        while (it.hasNext()) {
-            Bomb bomb = it.next();
-            boolean justExploded = bomb.tick(deltaTime);
+            Iterator<Bomb> it = bombs.iterator();
+            while (it.hasNext()) {
+                Bomb bomb = it.next();
+                boolean justExploded = bomb.tick(deltaTime);
 
-            if (justExploded) {
-                it.remove();
+                if (justExploded) {
+                    it.remove();
+                    explode(bomb, labyrinthe, joueurs);
 
-                // debug logs
-                long tempsActuel = System.currentTimeMillis();
-                long dureeReelle = tempsActuel - bomb.getCreationTime();
-                System.out.println("------------------------------------");
-                System.out.println(String.format("[EXPLOSION] Bombe à (%d,%d)", bomb.getX(), bomb.getY()));
-                System.out.println(String.format(" > Temps écoulé : %d ms (Attendu: 3000 ms)", dureeReelle));
-                System.out.println("------------------------------------");
-
-                explode(bomb, labyrinthe, joueurs);
-
+                    if (!joueurs.isEmpty()) {
+                        Joueur j = joueurs.get(0);
+                        j.setNb_bombes(j.getNb_bombes() + 1);
+                    }
                 // On rend la bombe au proprio
                 Joueur proprio = bomb.getJoueur();
                 if (proprio != null) {
@@ -114,79 +108,57 @@ public class BombManager {
      * @param joueurs La liste des joueurs à tester pour les dégâts.
      */
     private void explode(Bomb bomb, Labyrinthe labyrinthe, List<Joueur> joueurs) {
-        explosionCells.clear();
-        explosionTimer = EXPLOSION_DURATION;
-        explosionCells.add(new int[]{bomb.getX(), bomb.getY()});
+        synchronized (explosionCells) {
+            explosionCells.clear();
+            explosionTimer = EXPLOSION_DURATION;
+            explosionCells.add(new int[]{bomb.getX(), bomb.getY()});
 
-        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+            int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
-        for (int[] dir : directions) {
-            for (int i = 1; i <= bomb.getRange(); i++) {
-                int cx = bomb.getX() + dir[0] * i;
-                int cy = bomb.getY() + dir[1] * i;
+            for (int[] dir : directions) {
+                for (int i = 1; i <= bomb.getRange(); i++) {
+                    int cx = bomb.getX() + dir[0] * i;
+                    int cy = bomb.getY() + dir[1] * i;
 
-                if (!labyrinthe.isInside(cx, cy)) break;
-                CellType cell = labyrinthe.getCell(cx, cy);
+                    if (!labyrinthe.isInside(cx, cy)) break;
 
-                // L'explosion est stoppée par les murs
-                if (cell == CellType.WALL) {
-                    break;
-                }
-                explosionCells.add(new int[]{cx, cy});
+                    CellType cell = labyrinthe.getCell(cx, cy);
 
-                // Si le mur est destructible, on gère l'apparition de bonus
-                if (cell == CellType.DESTRUCTIBLE) {
-                    double rand = Math.random();
-
-                    if (rand < 0.10) {
-                        // 10% fire
-                        labyrinthe.setCell(cx, cy, CellType.FIRE_BONUS);
+                    if (cell == CellType.WALL) {
+                        break;
                     }
-                    else if (rand < 0.30) {
-                        // 20% speed
-                        labyrinthe.setCell(cx, cy, CellType.SPEED_BONUS);
+
+                    explosionCells.add(new int[]{cx, cy});
+
+                    if (cell == CellType.DESTRUCTIBLE) {
+                        double rand = Math.random();
+
+                        if (rand < 0.10) {
+                            // 10% fire
+                            labyrinthe.setCell(cx, cy, CellType.FIRE_BONUS);
+                        }
+                        else if (rand < 0.30) {
+                            // 20% speed
+                            labyrinthe.setCell(cx, cy, CellType.SPEED_BONUS);
+                        }
+                        else {
+                            // 70% rien
+                            labyrinthe.setCell(cx, cy, CellType.EMPTY);
+                        }
+                        break;
                     }
-                    else if (rand < 0.35){
-                        // 5% bombe limite +1 ( limite 6 )
-                        labyrinthe.setCell(cx, cy, CellType.BOMB_BONUS);
-                    }
-                    else if (rand < 0.40){
-                        // 5% de pouvoir regénérer une vie
-                        labyrinthe.setCell(cx, cy, CellType.HEAL_BONUS);
-                    }
-                    else {
-                        // 60% rien
-                        labyrinthe.setCell(cx, cy, CellType.EMPTY);
-                    }
-                    break;
                 }
             }
-        }
-        // Gestion des collisions entre les joueurs et l'explosion
-        for (Joueur joueur : joueurs) {
-            if (!joueur.isAlive()) continue;
-            double pSize = 0.7;
-            double pOffset = 0.15;
-            double pLeft = joueur.getX() + pOffset;
-            double pRight = joueur.getX() + pOffset + pSize;
-            double pTop = joueur.getY() + pOffset;
-            double pBottom = joueur.getY() + pOffset + pSize;
 
-            for (int[] cell : explosionCells) {
-                boolean collisionX = pRight > cell[0] && pLeft < cell[0] + 1;
-                boolean collisionY = pBottom > cell[1] && pTop < cell[1] + 1;
 
-                if (collisionX && collisionY) {
-                    joueur.setPv(joueur.getPv() - 1);
-                    System.out.println(joueur.getNom() + " touché ! PV: " + joueur.getPv());
-
-                    // Vérifie si le joueur doit mourir
-                    if (joueur.getPv() <= 0) {
-                        joueur.setAlive(false);
-                        joueur.setNb_bombes(0); // il ne peut plus poser de bombes
-                        System.out.println(joueur.getNom() + " est MORT !");
+            for (Joueur joueur : joueurs) {
+                int jx = (int) joueur.getX();
+                int jy = (int) joueur.getY();
+                for (int[] cell : explosionCells) {
+                    if (cell[0] == jx && cell[1] == jy) {
+                        joueur.setPv(joueur.getPv() - 1);
+                        break;
                     }
-                    break;
                 }
             }
         }
@@ -199,14 +171,46 @@ public class BombManager {
      * @return true si une bombe solide bloque la case.
      */
     public boolean isBombAt(int x, int y) {
-        for (Bomb b : bombs) {
-            if (b.getX() == x && b.getY() == y && b.isSolid()) {
-                return true;
+        synchronized (bombs) {
+            for (Bomb b : bombs) {
+                if (b.getX() == x && b.getY() == y && b.isSolid()) {
+                    return true;
+                }
             }
         }
         return false;
     }
 
+    public List<Bomb> getBombs() {
+        synchronized (bombs) {
+            return new java.util.ArrayList<>(bombs);
+        }
+    }
+
+    public void setBombs(List<Bomb> newBombs) {
+        synchronized (bombs) {
+            this.bombs.clear();
+            this.bombs.addAll(newBombs);
+        }
+    }
+    public List<int[]> getExplosionCells() {
+        synchronized (explosionCells) {
+            return new java.util.ArrayList<>(explosionCells);
+        }
+    }
+
+    public void setExplosionCells(List<int[]> newCells) {
+        synchronized (explosionCells) {
+            this.explosionCells.clear();
+            this.explosionCells.addAll(newCells);
+        }
+    }
+
+    public boolean hasExplosion() {
+        synchronized (explosionCells) {
+            return !explosionCells.isEmpty();
+        }
+    }
     // Getters
     public List<Bomb> getBombs() { return bombs; }
     public List<int[]> getExplosionCells() { return explosionCells; }

@@ -22,7 +22,7 @@ public class ClientHandler extends Thread {
     private ObjectOutputStream out;
     private final MessageDispatcher dispatcher;
     private final Logger logger = Logger.getInstance();
-    
+
     private int playerId;
     private Joueur joueur;
     private int lobbyId = -1;
@@ -30,11 +30,22 @@ public class ClientHandler extends Thread {
     public ClientHandler(Socket socket, MessageDispatcher dispatcher) {
         this.socket = socket;
         this.dispatcher = dispatcher;
+        // Initialisation temporaire du Joueur avec un constructeur valide du module common
+        this.joueur = new Joueur(-1, "");
+    }
+
+    public ClientHandler(Socket socket, MessageDispatcher dispatcher, int lobbyId) {
+        this.socket = socket;
+        this.dispatcher = dispatcher;
+        // Initialisation temporaire du Joueur avec un constructeur valide du module common
+        this.joueur = new Joueur(-1, "");
+        this.lobbyId = lobbyId;
     }
 
     @Override
     public void run() {
         try {
+            // Utilisation de flux binaire pour les objets Message
             this.out = new ObjectOutputStream(socket.getOutputStream());
             this.out.flush();
             this.in = new ObjectInputStream(socket.getInputStream());
@@ -52,6 +63,10 @@ public class ClientHandler extends Thread {
         }
     }
 
+    /**
+     * Envoie un message sérialisé au client.
+     * @param message L'objet message à envoyer.
+     */
     public synchronized void send(Message message) {
         try {
             if (out != null) {
@@ -64,10 +79,13 @@ public class ClientHandler extends Thread {
         }
     }
 
+    /**
+     * Ferme proprement les flux et la socket.
+     */
     private void disconnect() {
         try {
             logger.log(LogTypes.INFO, "Déconnexion d'un client (" + (joueur != null ? joueur.getNom() : socket.getInetAddress()) + ").");
-            
+
             // Si le joueur était dans un lobby
             if (lobbyId != -1) {
                 LobbyManager lm = LobbyManager.getInstance();

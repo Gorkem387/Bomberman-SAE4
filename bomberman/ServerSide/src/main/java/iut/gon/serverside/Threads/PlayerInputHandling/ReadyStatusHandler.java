@@ -20,8 +20,12 @@ public class ReadyStatusHandler implements MessageHandler<ReadyStatus> {
             // Mise à jour de l'état du joueur
             client.getJoueur().setEtat(message.isReady() ? EtatJoueur.PRET : EtatJoueur.PAS_PRET);
             
+            // Si le joueur n'est plus prêt, on annule le décompte
+            if (!message.isReady()) {
+                lobby.cancelCountdown("Le joueur " + client.getJoueur().getNom() + " n'est plus prêt.");
+            }
+
             // Le serveur notifie TOUS les membres du lobby du changement d'état
-            // On délègue à LobbyDetailsHandler pour générer et diffuser les détails mis à jour
             LobbyDetailsHandler detailsHandler = new LobbyDetailsHandler();
             lobby.broadcast(detailsHandler.createResponse(lobby));
             
