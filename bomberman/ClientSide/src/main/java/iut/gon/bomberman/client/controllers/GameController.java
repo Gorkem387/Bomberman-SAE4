@@ -171,7 +171,7 @@ public class GameController {
     }
 
     private void update(double deltaTime) {
-        if (deathAnimationComplete && input.contains(KeyCode.ESCAPE) && !escWasPressed) {
+        if ((deathAnimationComplete || isVictory ) && input.contains(KeyCode.ESCAPE) && !escWasPressed) {
             escWasPressed = true;
             goBackToMenu();
             return;
@@ -204,7 +204,6 @@ public class GameController {
 
         if (!isVictory && checkVictoryCondition()) {
             isVictory = true;
-            gameLoop.stop();
         }
 
         List<Joueur> targets = new ArrayList<>();
