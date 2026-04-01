@@ -111,6 +111,26 @@ public class Joueur {
             }
         }
         if (deltaX == 0 && deltaY == 0) direction = Direction.IDLE;
+
+        checkBonus(laby);
+    }
+
+    public void checkBonus(Labyrinthe laby) {
+        int centerX = (int) Math.round(cooX);
+        int centerY = (int) Math.round(cooY);
+
+        if (laby.isInside(centerX, centerY)) {
+            CellType typeCase = laby.getCell(centerX, centerY);
+
+            if (typeCase == CellType.SPEED_BONUS) {
+                this.speed_multiplier += 0.2f;
+                laby.setCell(centerX, centerY, CellType.EMPTY);
+            }
+            else if (typeCase == CellType.FIRE_BONUS) {
+                this.addExplosionRange();
+                laby.setCell(centerX, centerY, CellType.EMPTY);
+            }
+        }
     }
 
     private boolean canMoveTo(double x, double y, double size, double offset, Labyrinthe laby, BombManager bm) {
