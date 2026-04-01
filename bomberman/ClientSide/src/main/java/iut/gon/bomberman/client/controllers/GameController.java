@@ -192,7 +192,7 @@ public class GameController {
         renderer.drawPlayer(gc, joueur);
 
         // Afficher l'interface de statistiques en haut
-        drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv());
+        drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
         
         // Afficher l'écran GAME OVER uniquement après que l'animation de mort soit complète
         if (isGameOver && deathAnimationComplete) {
