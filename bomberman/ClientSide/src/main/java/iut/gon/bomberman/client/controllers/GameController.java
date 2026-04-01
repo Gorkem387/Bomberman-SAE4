@@ -34,6 +34,9 @@ public class GameController {
     private BombManager bombManager;
     private AnimationTimer gameLoop;
     private boolean isGameOver = false;
+    private boolean deathAnimationComplete = false;
+    private long deathAnimationStartTime = -1;
+    private static final long DEATH_ANIMATION_DURATION = 1500; // 1.5 secondes en millisecondes
     
     private Image heartImage;
     private Image bombImage;
@@ -105,7 +108,11 @@ public class GameController {
                 lastNanoTime = now;
 
                 update(deltaTime);
-                render();
+                try {
+                    render();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         };
         gameLoop.start();
@@ -144,7 +151,8 @@ public class GameController {
     }
 
     private void update(double deltaTime) {
-        if (input.contains(KeyCode.ESCAPE) && !escWasPressed) {
+        // Permettre ESC uniquement après la fin de l'animation de mort
+        if (deathAnimationComplete && input.contains(KeyCode.ESCAPE) && !escWasPressed) {
             escWasPressed = true;
             goBackToMenu();
             return;
@@ -156,13 +164,25 @@ public class GameController {
             if (joueur.getPv() <= 0) {
                 joueur.setAlive(false);
                 this.isGameOver = true;
+                deathAnimationStartTime = System.currentTimeMillis();
+            }
+        } else {
+            // Vérifier si l'animation de mort est terminée
+            if (deathAnimationStartTime > 0) {
+                long elapsedTime = System.currentTimeMillis() - deathAnimationStartTime;
+                if (elapsedTime >= DEATH_ANIMATION_DURATION) {
+                    deathAnimationComplete = true;
+                }
             }
         }
-        // Mise à jour de la physique (bombes, explosions, dégâts)
-        bombManager.update(deltaTime, labyrinthe, List.of(joueur));
+        
+        // Mise à jour de la physique (bombes, explosions, dégâts) - Stop si le joueur est mort
+        if (joueur.isAlive()) {
+            bombManager.update(deltaTime, labyrinthe, List.of(joueur));
+        }
     }
 
-    private void render() {
+    private void render() throws InterruptedException {
         gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
 
         renderer.draw(gc, labyrinthe);
@@ -170,10 +190,16 @@ public class GameController {
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
         if (joueur.isAlive()) {
             renderer.drawPlayer(gc, joueur);
+        } else {
+            // Afficher l'animation de mort même si le joueur est mort
+            renderer.drawPlayer(gc, joueur);
         }
+        
+        // Afficher l'interface de statistiques en haut
         drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv());
         
-        if (isGameOver) {
+        // Afficher l'écran GAME OVER uniquement après que l'animation de mort soit complète
+        if (isGameOver && deathAnimationComplete) {
             drawGameOverScreen();
         }
     }

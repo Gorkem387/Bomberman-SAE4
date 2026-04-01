@@ -26,6 +26,8 @@ public class LabRenderer {
 
     private final Map<String, Image[]> spriteCache = new HashMap<>();
     private int animationCounter = 0;
+    private int deathAnimationCounter = 0;
+    private boolean isDeathAnimationPlaying = false;
 
     public LabRenderer() {
         updateAssets();
@@ -62,6 +64,11 @@ public class LabRenderer {
         }
     }
 
+    /**
+     * Dessine les bombes sur le canvas
+     * @param gc le contexte graphique du canvas
+     * @param bombs la liste des bombes à dessiner
+     */
     public void drawBombs(GraphicsContext gc, List<Bomb> bombs) {
         for (Bomb bomb : bombs) {
             double sx = bomb.getX() * TILE_SIZE;
@@ -70,16 +77,35 @@ public class LabRenderer {
         }
     }
 
+    /**
+     * Dessine les explosions sur le canvas
+     * @param gc le contexte graphique du canvas
+     * @param cells la liste des cellules d'explosion à dessiner
+     */
     public void drawExplosions(GraphicsContext gc, List<int[]> cells) {
         for (int[] cell : cells) {
             gc.drawImage(explosionImg, cell[0] * TILE_SIZE, cell[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         }
     }
 
+    /**
+     * Dessine un Joueur sur le canvas
+     * @param gc le contexte graphique du canvas
+     * @param joueur le joueur à dessiner
+     */
     public void drawPlayer(GraphicsContext gc, Joueur joueur) {
-        if (joueur == null || !joueur.isAlive()) return;
+        if (joueur == null) return;
 
-        // Déterminer la direction et l'état
+        double screenX = joueur.getX() * TILE_SIZE;
+        double screenY = joueur.getY() * TILE_SIZE;
+
+        // Si le joueur est mort, jouer l'animation de mort
+        if (!joueur.isAlive()) {
+            drawDeathAnimation(gc, joueur, screenX, screenY);
+            return;
+        }
+
+        // Logique normale d'animation de mouvement
         String dirSuffix = updateDirection(joueur.getDirection());
         boolean isIdle = joueur.getDirection() == Direction.IDLE;
 
@@ -100,10 +126,39 @@ public class LabRenderer {
 
         Image currentSprite = spriteCache.get(dirSuffix)[frameIndex];
 
-        // Dessiner
-        double screenX = joueur.getX() * TILE_SIZE;
-        double screenY = joueur.getY() * TILE_SIZE;
+        // Dessiner le sprite du joueur
         gc.drawImage(currentSprite, screenX, screenY, TILE_SIZE, TILE_SIZE);
+    }
+
+    /**
+     * Affiche l'animation de mort avec les sprites "D"
+     * L'animation se joue une seule fois puis reste sur le dernier frame
+     * @param gc le contexe graphique du canvas
+     * @param joueur le joueur dont la mort va être animé
+     * @param screenX position X sur l'écran
+     * @param screenY position Y sur l'écran
+     */
+    private void drawDeathAnimation(GraphicsContext gc, Joueur joueur, double screenX, double screenY) {
+        if (!isDeathAnimationPlaying) {
+            isDeathAnimationPlaying = true;
+            deathAnimationCounter = 0;
+        }
+
+        if (deathAnimationCounter < 30) {
+            deathAnimationCounter++;
+        }
+
+        String deathDirection = "D";
+        if (!spriteCache.containsKey(deathDirection)) {
+            loadSpritesIntoCache(deathDirection, joueur);
+        }
+
+        Image[] deathSprites = spriteCache.get(deathDirection);
+        
+        int frameIndex = Math.min((deathAnimationCounter / ANIMATION_SPEED), 2);
+        Image currentDeathSprite = deathSprites[frameIndex];
+
+        gc.drawImage(currentDeathSprite, screenX, screenY, TILE_SIZE, TILE_SIZE);
     }
 
     private void loadSpritesIntoCache(String direction, Joueur joueur) {
@@ -123,17 +178,18 @@ public class LabRenderer {
         spriteCache.put(direction, frames);
     }
 
+    /**
+     * Met à jour la direction du joueur actuel
+     * @param direction la direction d'un joueur
+     * @return String correspondant au préfix des sprit dans les ressources
+     * */
     public String updateDirection(Direction direction) {
         return switch (direction) {
-            case UP -> "N";
-            case DOWN -> "S";
-            case LEFT -> "W";
-            case RIGHT -> "E";
-            case IDLE -> "S";
+            case UP -> "N";//N_0
+            case DOWN -> "S";//S_0
+            case LEFT -> "W";//W_0
+            case RIGHT -> "E";//E_0
+            case IDLE -> "R";//R_0
         };
-    }
-
-    public void stopAnimation() {
-        animationCounter = 0;
     }
 }
