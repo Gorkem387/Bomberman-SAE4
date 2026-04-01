@@ -70,9 +70,9 @@ public class ClientHandler extends Thread {
     public synchronized void send(Message message) {
         try {
             if (out != null) {
+                out.reset();
                 out.writeObject(message);
                 out.flush();
-                out.reset();
             }
         } catch (IOException e) {
             logger.log(LogTypes.ERROR, "Erreur d'envoi de message au client.");
@@ -110,6 +110,7 @@ public class ClientHandler extends Thread {
             }
 
             this.lobbyId = -1;
+            this.joueur = null;
             ThreadPrincipal.removeClient(this);
             if (in != null) in.close();
             if (out != null) out.close();

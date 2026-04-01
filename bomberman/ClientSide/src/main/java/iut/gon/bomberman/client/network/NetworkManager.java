@@ -38,6 +38,10 @@ public class NetworkManager{
 
     public void connectToServer(String host, int port){
         try {
+            if (socket != null && !socket.isClosed()) {
+                socket.close();
+            }
+
             socket = new Socket(host, port);
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());

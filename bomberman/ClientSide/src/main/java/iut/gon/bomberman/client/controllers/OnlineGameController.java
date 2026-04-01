@@ -321,6 +321,8 @@ public class OnlineGameController {
         if (gameLoop != null) {
             gameLoop.stop();
         }
+        remotePlayers.clear();
+        NetworkManager.getInstance().clearLastInitGameMessage();
         NetworkManager.getInstance().disconnect();
         try {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/launcher.fxml"));
