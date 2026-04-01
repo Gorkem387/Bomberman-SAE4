@@ -37,6 +37,8 @@ public class GameController {
     private BombManager bombManager;
     private AnimationTimer gameLoop;
     private boolean isGameOver = false;
+    private boolean isVictory = false;
+    private List<Joueur> bots;
     private boolean deathAnimationComplete = false;
     private long deathAnimationStartTime = -1;
     private static final long DEATH_ANIMATION_DURATION = 1000;
@@ -88,6 +90,15 @@ public class GameController {
 
         this.joueur.setX(1);
         this.joueur.setY(1);
+
+        this.bots = new java.util.ArrayList<>();
+
+        // Exemple : Ajout d'un bot dans le coin opposé
+        Joueur bot1 = new Joueur(2, "Bot_Alpha");
+        bot1.setX(19);
+        bot1.setY(19);
+        bot1.setSkinPath("/iut/gon/bomberman/client/assets/4/S_0.png"); // Un skin différent
+        this.bots.add(bot1);
 
         gameCanvas.setWidth(labyrinthe.getWidth() * 32);
         gameCanvas.setHeight(labyrinthe.getHeight() * 32);
@@ -153,6 +164,19 @@ public class GameController {
         }
     }
 
+    private boolean checkVictoryCondition() {
+        if (bots == null || bots.isEmpty()) return false;
+
+        // On parcourt la liste des bots
+        for (Joueur bot : bots) {
+            if (bot.isAlive()) {
+                return false; // Il reste au moins un bot en vie, donc pas encore de victoire
+            }
+        }
+        // Tous les bots sont morts
+        return true;
+    }
+
     private void update(double deltaTime) {
         if (deathAnimationComplete && input.contains(KeyCode.ESCAPE) && !escWasPressed) {
             escWasPressed = true;
@@ -160,7 +184,7 @@ public class GameController {
             return;
         }
         
-        if (joueur.isAlive()) {
+        if (joueur.isAlive() && !isVictory) {
             handleInputs();
 
             if (joueur.getPv() <= 0) {
@@ -168,7 +192,12 @@ public class GameController {
                 this.isGameOver = true;
                 deathAnimationStartTime = System.currentTimeMillis();
             }
-        } else {
+
+            // Vérification de la condition de victoire (tous les bots morts)
+            if (checkVictoryCondition()) {
+                this.isVictory = true;
+            }
+        } else if (!joueur.isAlive()){
             if (deathAnimationStartTime > 0) {
                 long elapsedTime = System.currentTimeMillis() - deathAnimationStartTime;
                 if (elapsedTime >= DEATH_ANIMATION_DURATION) {
@@ -176,12 +205,21 @@ public class GameController {
                 }
             }
         }
-        // Mise à jour de la physique (bombes, explosions, dégâts)
-        bombManager.update(deltaTime, labyrinthe, List.of(joueur));
+
+        // On prépare la liste de toutes les cibles potentielles pour les bombes
+        List<Joueur> allTargets = new java.util.ArrayList<>();
+        if (joueur.isAlive()) allTargets.add(joueur);
+        for (Joueur bot : bots) {
+            if (bot.isAlive()) allTargets.add(bot);
+        }
+
+        // Mise à jour de la physique avec tous les joueurs
+        bombManager.update(deltaTime, labyrinthe, allTargets);
 
         if (uiController != null) {
             uiController.updatePlayerStats(joueur);
         }
+
     }
 
     private void render() throws InterruptedException {
@@ -193,10 +231,21 @@ public class GameController {
 
         renderer.drawPlayer(gc, joueur);
 
+        // Dessiner les bots
+        for (Joueur bot : bots) {
+            if (bot.isAlive()) {
+                renderer.drawPlayer(gc, bot);
+            }
+        }
+
         drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
         
+        // Afficher l'écran VICTORY
+        if (isVictory) {
+            drawVictoryOverScreen();
+        }
         // Afficher l'écran GAME OVER uniquement après que l'animation de mort soit complète
-        if (isGameOver && deathAnimationComplete) {
+        else if (isGameOver && deathAnimationComplete) {
             drawGameOverScreen();
         }
     }
@@ -212,6 +261,20 @@ public class GameController {
         gc.setFill(javafx.scene.paint.Color.WHITE);
         gc.setFont(javafx.scene.text.Font.font("Arial", 24));
         gc.fillText("Appuyez sur ESC pour retourner au menu", gameCanvas.getWidth()/2 - 200, gameCanvas.getHeight()/2 + 60);
+    }
+
+    private void drawVictoryOverScreen(){
+        gc.setFill(javafx.scene.paint.Color.rgb(0, 0, 0, 0.7));
+        gc.fillRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
+
+        gc.setFill(javafx.scene.paint.Color.GREEN);
+        gc.setFont(javafx.scene.text.Font.font("Arial", 50));
+        gc.fillText("VICTORY \uD83C\uDFC6", gameCanvas.getWidth()/2 - 140, gameCanvas.getHeight()/2);
+
+        gc.setFill(javafx.scene.paint.Color.WHITE);
+        gc.setFont(javafx.scene.text.Font.font("Arial", 24));
+        gc.fillText("Appuyez sur ESC pour retourner au menu", gameCanvas.getWidth()/2 - 200, gameCanvas.getHeight()/2 + 60);
+
     }
 
     /**
