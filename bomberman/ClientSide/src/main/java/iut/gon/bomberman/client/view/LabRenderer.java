@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.List;
 import javafx.scene.paint.Color;
 
 public class LabRenderer {
@@ -40,8 +39,29 @@ public class LabRenderer {
     private int deathAnimationCounter = 0;
     private boolean isDeathAnimationPlaying = false;
 
+    private int victoryAnimationCounter = 0;
+    private boolean isVictoryAnimationPlaying = false;
+
+    private int explosionAnimationCounter = 0;
+    private boolean wasExploding = false;
+    private Image[] explosionSprites = new Image[6];
+
     public LabRenderer() {
         updateAssets();
+        loadExplosionSprites();
+    }
+
+    private void loadExplosionSprites() {
+        for (int i = 0; i < 6; i++) {
+            int index = i + 9;
+            String path = "/iut/gon/bomberman/client/assets/explosion/explosion_0_" + index + ".png";
+            try {
+                explosionSprites[i] = load(path);
+            } catch (Exception e) {
+                System.err.println("Sprite explosion manquant: " + path);
+                explosionSprites[i] = explosionImg; // fallback
+            }
+        }
     }
 
     /**
@@ -184,8 +204,27 @@ public class LabRenderer {
      * @param cells la liste des cellules d'explosion à dessiner
      */
     public void drawExplosions(GraphicsContext gc, List<int[]> cells) {
+        if (cells.isEmpty()) {
+            wasExploding = false;
+            return;
+        }
+
+        if (!wasExploding) {
+            explosionAnimationCounter = 0;
+            wasExploding = true;
+        } else {
+            explosionAnimationCounter++;
+        }
+
+        int frameIndex = explosionAnimationCounter / ANIMATION_SPEED;
+        if (frameIndex >= explosionSprites.length) {
+            frameIndex = explosionSprites.length - 1;
+        }
+
+        Image currentExplosion = explosionSprites[frameIndex] != null ? explosionSprites[frameIndex] : explosionImg;
+
         for (int[] cell : cells) {
-            gc.drawImage(explosionImg, cell[0] * TILE_SIZE, cell[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            gc.drawImage(currentExplosion, cell[0] * TILE_SIZE, cell[1] * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         }
     }
 
@@ -194,7 +233,7 @@ public class LabRenderer {
      * @param gc le contexte graphique du canvas
      * @param joueur le joueur à dessiner
      */
-    public void drawPlayer(GraphicsContext gc, Joueur joueur) {
+    public void drawPlayer(GraphicsContext gc, Joueur joueur, boolean isVictory) {
         if (joueur == null) return;
 
         double screenX = joueur.getX() * TILE_SIZE;
@@ -202,6 +241,11 @@ public class LabRenderer {
 
         if (!joueur.isAlive()) {
             drawDeathAnimation(gc, joueur, screenX, screenY);
+            return;
+        }
+
+        if (isVictory) {
+            drawVictoryAnimation(gc, joueur, screenX, screenY);
             return;
         }
 
@@ -244,6 +288,10 @@ public class LabRenderer {
                 hSize * TILE_SIZE, hSize * TILE_SIZE);
     }
 
+    public void drawPlayer(GraphicsContext gc, Joueur joueur) {
+        drawPlayer(gc, joueur, false);
+    }
+
     /**
      * Affiche l'animation de mort avec les sprites "D"
      * L'animation se joue une seule fois puis reste sur le dernier frame
@@ -273,6 +321,27 @@ public class LabRenderer {
         Image currentDeathSprite = deathSprites[frameIndex];
 
         gc.drawImage(currentDeathSprite, screenX, screenY, TILE_SIZE, TILE_SIZE);
+    }
+
+    private void drawVictoryAnimation(GraphicsContext gc, Joueur joueur, double screenX, double screenY) {
+        if (!isVictoryAnimationPlaying) {
+            isVictoryAnimationPlaying = true;
+            victoryAnimationCounter = 0;
+        }
+
+        victoryAnimationCounter++;
+
+        String cacheKey = joueur.getId() + "_V";
+        if (!spriteCache.containsKey(cacheKey)) {
+            loadSpritesIntoCache(cacheKey, "V", joueur);
+        }
+
+        Image[] victorySprites = spriteCache.get(cacheKey);
+
+        int frameIndex = (victoryAnimationCounter / ANIMATION_SPEED) % 3;
+        Image currentVictorySprite = victorySprites[frameIndex];
+
+        gc.drawImage(currentVictorySprite, screenX, screenY, TILE_SIZE, TILE_SIZE);
     }
 
     private void loadSpritesIntoCache(String cacheKey, String direction, Joueur joueur) {
@@ -311,8 +380,5 @@ public class LabRenderer {
             case IDLE -> "R";//R_0
         };
     }
-
-    public void stopAnimation() {
-        animationCounter = 0;
-    }
 }
+
