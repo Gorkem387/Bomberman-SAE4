@@ -240,7 +240,7 @@ public class GameController {
             return;
         }
 
-        boolean anExplosionHappened = bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer, iaPlayer2, iaPlayer3));
+        boolean anExplosionHappened = bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer, iaPlayer2, iaPlayer3, iaPlayer4));
 
         if (anExplosionHappened) {
             SoundManager.getInstance().playExplosion();
