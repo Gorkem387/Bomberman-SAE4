@@ -34,7 +34,10 @@ public class GameController {
     private BombManager bombManager;
     private AnimationTimer gameLoop;
     private boolean isGameOver = false;
-    
+    private boolean deathAnimationComplete = false;
+    private long deathAnimationStartTime = -1;
+    private static final long DEATH_ANIMATION_DURATION = 1000;
+
     private Image heartImage;
     private Image bombImage;
 
@@ -105,7 +108,11 @@ public class GameController {
                 lastNanoTime = now;
 
                 update(deltaTime);
-                render();
+                try {
+                    render();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         };
         gameLoop.start();
@@ -143,8 +150,12 @@ public class GameController {
         }
     }
 
+    /**
+     * Met à jour l'état du jeu à chaque frame
+     * @param deltaTime Temps écoulé depuis la dernière mise à jour en secondes
+     */
     private void update(double deltaTime) {
-        if (input.contains(KeyCode.ESCAPE) && !escWasPressed) {
+        if (deathAnimationComplete && input.contains(KeyCode.ESCAPE) && !escWasPressed) {
             escWasPressed = true;
             goBackToMenu();
             return;
@@ -156,24 +167,35 @@ public class GameController {
             if (joueur.getPv() <= 0) {
                 joueur.setAlive(false);
                 this.isGameOver = true;
+                deathAnimationStartTime = System.currentTimeMillis();
+            }
+        } else {
+            if (deathAnimationStartTime > 0) {
+                long elapsedTime = System.currentTimeMillis() - deathAnimationStartTime;
+                if (elapsedTime >= DEATH_ANIMATION_DURATION) {
+                    deathAnimationComplete = true;
+                }
             }
         }
-        // Mise à jour de la physique (bombes, explosions, dégâts)
-        bombManager.update(deltaTime, labyrinthe, List.of(joueur));
+
+        if (joueur.isAlive()) {
+            bombManager.update(deltaTime, labyrinthe, List.of(joueur));
+        }
     }
 
-    private void render() {
+    private void render() throws InterruptedException {
         gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
 
         renderer.draw(gc, labyrinthe);
         renderer.drawBombs(gc, bombManager.getBombs());
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
-        if (joueur.isAlive()) {
-            renderer.drawPlayer(gc, joueur);
-        }
-        drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
+        renderer.drawPlayer(gc, joueur);
+
+        // Afficher l'interface de statistiques en haut
+        drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv());
         
-        if (isGameOver) {
+        // Afficher l'écran GAME OVER uniquement après que l'animation de mort soit complète
+        if (isGameOver && deathAnimationComplete) {
             drawGameOverScreen();
         }
     }
