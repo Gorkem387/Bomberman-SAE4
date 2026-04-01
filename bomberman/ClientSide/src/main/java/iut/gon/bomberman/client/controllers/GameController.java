@@ -57,6 +57,12 @@ public class GameController {
     private long deathAnimationStartTime = -1;
     private static final long DEATH_ANIMATION_DURATION = 1000;
 
+    private boolean victorySoundPlayed = false;
+    private boolean defeatSoundPlayed = false;
+    private boolean victoryAnimationComplete = false;
+    private long victoryAnimationStartTime = -1;
+    private static final long VICTORY_ANIMATION_DURATION = 1500;
+
     private Image heartImage;
     private Image bombImage;
 
@@ -65,8 +71,6 @@ public class GameController {
     private boolean spaceWasPressed = false;
     private boolean escWasPressed = false;
     private boolean isPaused = false;
-    private boolean victorySoundPlayed = false;
-    private boolean defeatSoundPlayed = false;
 
     private double debugTimer = 0;
 
@@ -229,10 +233,14 @@ public class GameController {
                 SoundManager.getInstance().playDefeat();
                 defeatSoundPlayed = true;
             }
+            if (isVictory && victoryAnimationStartTime > 0) {
+                long elapsed = System.currentTimeMillis() - victoryAnimationStartTime;
+                if (elapsed >= VICTORY_ANIMATION_DURATION) victoryAnimationComplete = true;
+            }
             return;
         }
 
-        boolean anExplosionHappened = bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer, iaPlayer2, iaPlayer3, iaPlayer4));
+        boolean anExplosionHappened = bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer, iaPlayer2, iaPlayer3));
 
         if (anExplosionHappened) {
             SoundManager.getInstance().playExplosion();
@@ -268,6 +276,7 @@ public class GameController {
 
         if (!isVictory && checkVictoryCondition()) {
             isVictory = true;
+            victoryAnimationStartTime = System.currentTimeMillis();
         }
 
         List<Joueur> targets = new ArrayList<>();
@@ -275,6 +284,9 @@ public class GameController {
         if (iaPlayer.isAlive()) targets.add(iaPlayer);
         if (iaPlayer2.isAlive()) targets.add(iaPlayer2);
         if (iaPlayer3.isAlive()) targets.add(iaPlayer3);
+
+        // Bombes, les deux joueurs peuvent recevoir des dégâts
+        bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer, iaPlayer2, iaPlayer3));
 
         if (!joueur.isAlive() && !isGameOver) {
             this.isGameOver = true;
@@ -326,7 +338,9 @@ public class GameController {
         
         // Afficher l'écran VICTORY
         if (isVictory) {
-            drawVictoryOverScreen();
+            if (victoryAnimationComplete) {
+                drawVictoryOverScreen();
+            }
         }
         // Afficher l'écran GAME OVER uniquement après que l'animation de mort soit complète
         else if (isGameOver) {
