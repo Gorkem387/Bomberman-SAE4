@@ -111,6 +111,7 @@ public class BombManager {
             }
         }
 
+
         for (Joueur joueur : joueurs) {
             int jx = (int) joueur.getX();
             int jy = (int) joueur.getY();

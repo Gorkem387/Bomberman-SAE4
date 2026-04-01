@@ -1,5 +1,6 @@
 package iut.gon.bomberman.client.view;
 
+import iut.gon.bomberman.client.GameSettings;
 import iut.gon.bomberman.common.model.labyrinthe.Bomb;
 import iut.gon.bomberman.common.model.labyrinthe.CellType;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
@@ -20,11 +21,28 @@ public class LabRenderer {
     private final Image wallImg         = load("/iut/gon/bomberman/client/assets/block_04.png");
     private final Image destructibleImg = load("/iut/gon/bomberman/client/assets/block_06.png");
     private final Image groundImg       = load("/iut/gon/bomberman/client/assets/ground_01.png");
-    private final Image bombImg         = load("/iut/gon/bomberman/client/assets/B_0.png");
     private final Image explosionImg    = load("/iut/gon/bomberman/client/assets/explosion_0_4.png");
+    private Image bombImg;
 
     private final Map<String, Image[]> spriteCache = new HashMap<>();
     private int animationCounter = 0;
+
+    public LabRenderer() {
+        updateAssets();
+    }
+
+    /**
+     * Recharge les images dynamiques (bombe et skin joueur)
+     */
+    public void updateAssets() {
+        // Recharge la bombe depuis les paramètres globaux
+        String bombPath = GameSettings.getSelectedBombPath();
+        this.bombImg = load(bombPath);
+
+        // Vide le cache pour forcer le rechargement du nouveau skin choisi
+        spriteCache.clear();
+        System.out.println("Renderer : Assets mis à jour (Bombe: " + bombPath + ")");
+    }
 
     private Image load(String path) {
         return new Image(Objects.requireNonNull(getClass().getResourceAsStream(path)));
@@ -35,24 +53,20 @@ public class LabRenderer {
             for (int y = 0; y < lab.getHeight(); y++) {
                 CellType type = lab.getCell(x, y);
                 gc.drawImage(groundImg, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-
                 if (type == CellType.WALL) {
                     gc.drawImage(wallImg, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                 } else if (type == CellType.DESTRUCTIBLE) {
                     gc.drawImage(destructibleImg, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
                 }
                 else if (type == CellType.SPEED_BONUS) {
-                    // Un petit socle jaune
                     gc.setFill(javafx.scene.paint.Color.YELLOW);
                     gc.fillOval(x * TILE_SIZE + 4, y * TILE_SIZE + 4, TILE_SIZE - 8, TILE_SIZE - 8);
                     gc.setFill(javafx.scene.paint.Color.BLACK);
                     gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 18));
                     gc.fillText("S", x * TILE_SIZE + 10, y * TILE_SIZE + 22);
-                }
-                else if (type == CellType.FIRE_BONUS) {
+                } else if (type == CellType.FIRE_BONUS) {
                     gc.setFill(javafx.scene.paint.Color.RED);
                     gc.fillOval(x * TILE_SIZE + 4, y * TILE_SIZE + 4, TILE_SIZE - 8, TILE_SIZE - 8);
-
                     gc.setFill(javafx.scene.paint.Color.WHITE);
                     gc.setFont(javafx.scene.text.Font.font("Arial", javafx.scene.text.FontWeight.BOLD, 18));
                     gc.fillText("F", x * TILE_SIZE + 10, y * TILE_SIZE + 22);
@@ -86,7 +100,7 @@ public class LabRenderer {
 
         int frameIndex = isIdle ? 0 : (animationCounter / ANIMATION_SPEED) % 3;
 
-        if (!spriteCache.containsKey(dirSuffix)) loadSpritesIntoCache(dirSuffix);
+        if (!spriteCache.containsKey(dirSuffix)) loadSpritesIntoCache(dirSuffix, joueur);
         Image currentSprite = spriteCache.get(dirSuffix)[frameIndex];
         double visualOffsetY = -0.25;
 
@@ -103,10 +117,18 @@ public class LabRenderer {
                 hSize * TILE_SIZE, hSize * TILE_SIZE);
     }
 
-    private void loadSpritesIntoCache(String direction) {
+    private void loadSpritesIntoCache(String direction, Joueur joueur) {
         Image[] frames = new Image[3];
+
+        // On récupère le chemin du skin (ex: /.../assets/32/S_0.png)
+        String fullPath = joueur.getSkinPath();
+
+        // On extrait le dossier (on enlève "S_0.png" à la fin pour avoir le dossier "/.../assets/32/")
+        String baseFolder = fullPath.substring(0, fullPath.lastIndexOf("/") + 1);
+
         for (int i = 0; i < 3; i++) {
-            String path = "/iut/gon/bomberman/client/assets/8/" + direction + "_" + i + ".png";
+            // On construit le chemin : dossier + direction (N, S, E, W) + index
+            String path = baseFolder + direction + "_" + i + ".png";
             frames[i] = load(path);
         }
         spriteCache.put(direction, frames);

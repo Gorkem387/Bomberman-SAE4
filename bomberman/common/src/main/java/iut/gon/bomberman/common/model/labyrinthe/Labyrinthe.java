@@ -40,6 +40,10 @@ public class Labyrinthe implements Serializable {
     public boolean isWalkable(int x, int y) {
         if (!isInside(x, y)) return false;
         CellType type = getCell(x, y);
-        return type == CellType.EMPTY || type == CellType.EXPLOSION || type == CellType.SPEED_BONUS || type == CellType.FIRE_BONUS;
+
+        return type == CellType.EMPTY
+                || type == CellType.EXPLOSION
+                || type == CellType.SPEED_BONUS
+                || type == CellType.FIRE_BONUS;
     }
 }

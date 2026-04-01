@@ -1,11 +1,11 @@
 package iut.gon.bomberman.common.model.player;
 
 
-import iut.gon.bomberman.common.model.labyrinthe.CellType;
 import iut.gon.bomberman.common.model.player.Effects.Bonus;
 import iut.gon.bomberman.common.model.player.EtatJoueur;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.labyrinthe.BombManager;
+import iut.gon.bomberman.common.model.labyrinthe.CellType;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.player.Effects.Bonus;
 import iut.gon.bomberman.common.model.player.EtatJoueur;
@@ -30,10 +30,12 @@ public class Joueur {
 
     private boolean alive = true;
 
-    // Directions
-    private Direction direction = Direction.DOWN;
+    private String skinPath = "/iut/gon.bomberman/client/assets/8/S_0.png";
 
     private int explosionRange = 2;
+
+    // Directions
+    private Direction direction = Direction.DOWN;
 
     ////////////////
     //CONSTRUCTEUR//
@@ -224,6 +226,14 @@ public class Joueur {
 
     public boolean isAlive() { return alive; }
     public void setAlive(boolean alive) { this.alive = alive; }
+
+    public String getSkinPath() {
+        return skinPath;
+    }
+
+    public void setSkinPath(String skinPath) {
+        this.skinPath = skinPath;
+    }
 
     public int getExplosionRange() {
         return explosionRange;
