@@ -21,6 +21,9 @@ public class ConnexionController {
     @FXML
     private Button boutonConnexion;
 
+    /**
+     * Méthode appelée automatiquement par JavaFX au chargement de la vue
+     */
     @FXML
     public void initialize() {
         // Action lors du clic sur le bouton de connexion

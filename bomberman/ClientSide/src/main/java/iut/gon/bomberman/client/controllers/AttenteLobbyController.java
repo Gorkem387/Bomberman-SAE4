@@ -24,6 +24,9 @@ public class AttenteLobbyController implements Initializable {
     @FXML private Pane pane;
     private final List<Integer> lobbyIds = new ArrayList<>();
 
+    /**
+     * Méthode appelée automatiquement par JavaFX au chargement de la vue
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // Redimensionnement dynamique

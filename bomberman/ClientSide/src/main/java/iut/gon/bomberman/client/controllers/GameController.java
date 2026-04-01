@@ -74,6 +74,9 @@ public class GameController {
 
     private double debugTimer = 0;
 
+    /**
+     * Méthode appelée automatiquement par JavaFX au chargement de la vue
+     */
     @FXML
     public void initialize() {
         // Charge l'image du cœur
@@ -162,6 +165,10 @@ public class GameController {
         gameLoop.start();
     }
 
+    /**
+     * Algorithme permettant de récupérer la direction choisi par le joueur.
+     * @param deltaTime
+     */
     private void handleInputs(double deltaTime) {
         double dx = 0;
         double dy = 0;
@@ -196,6 +203,10 @@ public class GameController {
         }
     }
 
+    /**
+     * L'algorithme permet de savoir si le joueur a gagné
+     * @return retourne true si le joueur gagne
+     */
     private boolean checkVictoryCondition() {
         return joueur.isAlive()
                 && !iaPlayer.isAlive()
@@ -203,6 +214,11 @@ public class GameController {
                 && !iaPlayer3.isAlive()
                 && !iaPlayer4.isAlive();
     }
+
+    /**
+     * Fonction permettant de gérer et de mettre à jour le jeu chez le client
+     * @param deltaTime
+     */
 
     private void update(double deltaTime) {
         if (input.contains(KeyCode.ESCAPE) && !escWasPressed) {
@@ -313,6 +329,11 @@ public class GameController {
         }
     }
 
+    /**
+     * Algorithme dédier à l'affichage du labyrinthe dans l'interface
+     * et afficher lorsque le joueur à gagné ou perdu.
+     */
+
     private void render() {
         if (joueur.isAlive() && isPaused) {
             drawPauseMenu();
@@ -347,6 +368,10 @@ public class GameController {
         }
     }
 
+    /**
+     * Fonction permettant d'afficher l'interface de défaite lorsque le joueur perd
+     */
+
     private void drawGameOverScreen() {
         gc.setFill(javafx.scene.paint.Color.rgb(0, 0, 0, 0.7));
         gc.fillRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
@@ -375,6 +400,10 @@ public class GameController {
         gc.setFont(Font.font("Arial", 24));
         gc.fillText("Appuyez sur ESC pour reprendre", gameCanvas.getWidth()/2 - 150, gameCanvas.getHeight()/2 + 60);
     }
+
+    /**
+     * Fonction permettant d'afficher l'interface de victoire lorsque le joueur gagne
+     */
 
     private void drawVictoryOverScreen(){
         gc.setFill(javafx.scene.paint.Color.rgb(0, 0, 0, 0.7));

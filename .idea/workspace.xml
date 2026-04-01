@@ -8,6 +8,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bomberman/ClientSide/src/main/java/iut/gon/bomberman/client/controllers/AttenteLobbyController.java" beforeDir="false" afterPath="$PROJECT_DIR$/bomberman/ClientSide/src/main/java/iut/gon/bomberman/client/controllers/AttenteLobbyController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bomberman/ClientSide/src/main/java/iut/gon/bomberman/client/controllers/ConnexionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/bomberman/ClientSide/src/main/java/iut/gon/bomberman/client/controllers/ConnexionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bomberman/ClientSide/src/main/java/iut/gon/bomberman/client/controllers/GameController.java" beforeDir="false" afterPath="$PROJECT_DIR$/bomberman/ClientSide/src/main/java/iut/gon/bomberman/client/controllers/GameController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -148,7 +149,7 @@
       <updated>1774878137094</updated>
       <workItem from="1774878138374" duration="6318000" />
       <workItem from="1775034575677" duration="9112000" />
-      <workItem from="1775058542465" duration="1447000" />
+      <workItem from="1775058542465" duration="4085000" />
     </task>
     <task id="LOCAL-00001" summary="[ADD] -fichier de sprite numéro 8&#10;- animation du joueur fini&#10;- animation pour le moment bloqué sur le skin 8">
       <option name="closed" value="true" />
