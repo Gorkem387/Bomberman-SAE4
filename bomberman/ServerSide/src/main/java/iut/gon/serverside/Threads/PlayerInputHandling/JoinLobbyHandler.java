@@ -22,8 +22,8 @@ public class JoinLobbyHandler implements MessageHandler<JoinLobbyRequest> {
             client.setLobbyId(lobby.getId());
 
             // Mettre à jour le nom du joueur côté serveur
-            if (client.joueur != null) {
-                client.joueur.setNom(message.getPlayerName());
+            if (client.getJoueur() != null) {
+                client.getJoueur().setNom(message.getPlayerName());
             }
 
             // On délègue au lobby l'ajout du joueur (pour gérer le nombre max, l'état, etc.)
@@ -31,10 +31,10 @@ public class JoinLobbyHandler implements MessageHandler<JoinLobbyRequest> {
 
             // Si ajouté avec succès, déterminer et stocker l'index du joueur dans le lobby
             if (succes) {
-                int index = lobby.getJoueurs().indexOf(client.joueur);
+                int index = lobby.getJoueurs().indexOf(client.getJoueur());
                 if (index >= 0) {
-                    client.playerId = index; // utilisé ailleurs comme index dans la liste joueursInvites
-                    client.joueur.setId(index);
+                    client.setPlayerId(index); // utilisé ailleurs comme index dans la liste joueursInvites
+                    client.getJoueur().setId(index);
                 }
             }
 

@@ -161,4 +161,8 @@ public class Lobby {
     public void setThread(Thread_Jeu threadJeu) {
         this.thread = threadJeu;
     }
+
+    public Joueur getProprietaire() {
+            return this.proprietaire;
+    }
 }
