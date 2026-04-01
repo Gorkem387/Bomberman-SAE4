@@ -7,8 +7,9 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import iut.gon.bomberman.common.model.Mess.Message;
 
-public class JoueurMisAJourDTO implements IDTO {
+public class JoueurMisAJourDTO implements IDTO, Message {
 
     public static final int TYPE = 2;
 

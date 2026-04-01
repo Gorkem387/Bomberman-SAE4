@@ -24,6 +24,7 @@ public class Joueur {
     private float speed_multiplier;
     private String nom;
     private int skinId;
+    private int explosionRange;
 
     ////////////////
     //CONSTRUCTEUR//
@@ -45,9 +46,10 @@ public class Joueur {
         this.nb_bombes = 3;
         this.bonus = new Bonus[3];
         this.speed_multiplier = 1.0f;
+        this.explosionRange = 1;
     }
 
-    public Joueur(int id, String nom, int cooX, int cooY, EtatJoueur etat, int pv, int nb_bombes_max, int nb_bombes, Bonus[] bonus, float speed_multiplier) {
+    public Joueur(int id, String nom, int cooX, int cooY, EtatJoueur etat, int pv, int nb_bombes_max, int nb_bombes, Bonus[] bonus, float speed_multiplier, int explosionRange) {
         this.id = id;
         this.nom = nom;
         this.cooX = 0;
@@ -58,6 +60,7 @@ public class Joueur {
         this.nb_bombes = nb_bombes;
         this.bonus = bonus;
         this.speed_multiplier = speed_multiplier;
+        this.explosionRange = explosionRange;
     }
 
     ///////////////////
@@ -100,7 +103,11 @@ public class Joueur {
     }
 
     public void setPv(int pv) {
-        this.pv = pv;
+        if (pv < 0) {
+            this.pv = 0;
+        } else {
+            this.pv = pv;
+        }
     }
 
     public int getNb_bombes_max() {
@@ -145,5 +152,17 @@ public class Joueur {
 
     public ClientHandler getClientHandler() {
         return clientHandler;
+    }
+
+    public int getExplosionRange() {
+        return explosionRange;
+    }
+
+    public void setExplosionRange(int explosionRange) {
+        this.explosionRange = explosionRange;
+    }
+
+    public void addExplosionRange() {
+        this.explosionRange++;
     }
 }

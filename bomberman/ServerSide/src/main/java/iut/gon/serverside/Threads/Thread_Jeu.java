@@ -47,7 +47,11 @@ public class Thread_Jeu extends Thread {
                 MinimDTO m = new MinimDTO(
                     j.getId(),
                     (int)(j.getX() * 100),
-                    (int)(j.getY() * 100)
+                    (int)(j.getY() * 100),
+                    j.getPv(),
+                    j.getNb_bombes(),
+                    j.getExplosionRange(),
+                    j.getSpeed_multiplier()
                 );
 
                 positions.add(m);
@@ -60,7 +64,13 @@ public class Thread_Jeu extends Thread {
                     .map(b -> new BombUpdate.BombDTO(b.getX(), b.getY(), b.isSolid(), b.getJoueur() != null ? b.getJoueur().getId() : -1))
                     .collect(Collectors.toList());
             
-            BombUpdate bombUpdate = new BombUpdate(bombDTOs, new ArrayList<>(bombManager.getExplosionCells()));
+            // Envoyer le labyrinthe actualisé seulement s'il y a des explosions actives (il a pu changer)
+            iut.gon.bomberman.common.model.labyrinthe.Labyrinthe currentLab = null;
+            if (!bombManager.getExplosionCells().isEmpty()) {
+                currentLab = lobby.getLabyrinthe();
+            }
+
+            BombUpdate bombUpdate = new BombUpdate(bombDTOs, new ArrayList<>(bombManager.getExplosionCells()), currentLab);
             lobby.broadcast(bombUpdate);
 
             try {

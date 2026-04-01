@@ -6,5 +6,5 @@ module common {
     exports iut.gon.bomberman.common.model.player.Effects;
     exports iut.gon.bomberman.common.model.DTO;
 
-    // Un module de base comme "common" ne doit pas dépendre des modules qui l'utilisent (dépendance circulaire)
+    // Un module de base comme "common" ne doit pas dépendre des modules qui l'utilisent (dépendance circulaire
 }

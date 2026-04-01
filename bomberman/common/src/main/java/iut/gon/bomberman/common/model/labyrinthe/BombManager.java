@@ -88,14 +88,11 @@ public class BombManager {
                     it.remove();
                     explode(bomb, labyrinthe, joueurs);
 
-                    if (!joueurs.isEmpty()) {
-                        Joueur j = joueurs.get(0);
-                        j.setNb_bombes(j.getNb_bombes() + 1);
+                    // On rend la bombe au proprio
+                    Joueur proprio = bomb.getJoueur();
+                    if (proprio != null) {
+                        proprio.setNb_bombes(proprio.getNb_bombes() + 1);
                     }
-                // On rend la bombe au proprio
-                Joueur proprio = bomb.getJoueur();
-                if (proprio != null) {
-                    proprio.setNb_bombes(proprio.getNb_bombes() + 1);
                 }
             }
         }
@@ -211,8 +208,4 @@ public class BombManager {
             return !explosionCells.isEmpty();
         }
     }
-    // Getters
-    public List<Bomb> getBombs() { return bombs; }
-    public List<int[]> getExplosionCells() { return explosionCells; }
-    public boolean hasExplosion() { return !explosionCells.isEmpty(); }
 }

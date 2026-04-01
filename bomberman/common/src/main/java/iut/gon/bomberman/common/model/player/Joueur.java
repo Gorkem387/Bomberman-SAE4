@@ -2,7 +2,6 @@ package iut.gon.bomberman.common.model.player;
 
 
 import iut.gon.bomberman.common.model.player.Effects.Bonus;
-import iut.gon.bomberman.common.model.player.EtatJoueur;
 import iut.gon.bomberman.common.model.labyrinthe.Labyrinthe;
 import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.labyrinthe.CellType;
@@ -208,7 +207,11 @@ public class Joueur {
     }
 
     public void setPv(int pv) {
-        this.pv = pv;
+        if (pv < 0) {
+            this.pv = 0;
+        } else {
+            this.pv = pv;
+        }
     }
 
     public int getNb_bombes_max() {
@@ -276,6 +279,10 @@ public class Joueur {
 
     public int getExplosionRange() {
         return explosionRange;
+    }
+
+    public void setExplosionRange(int explosionRange) {
+        this.explosionRange = explosionRange;
     }
 
     public void addExplosionRange() {
