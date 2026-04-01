@@ -102,18 +102,18 @@ public class GameController {
         this.joueur.setX(1);
         this.joueur.setY(1);
 
-        this.iaPlayer = new Joueur(2, "IA");
+        this.iaPlayer = new Joueur(2, "IA AGGRESSIVE");
         this.heatMap = new HeatMap(21, 21);
         this.iaPlayer.setX(19);
         this.iaPlayer.setY(19);
-        this.ia = new Ai(iaPlayer, this.labyrinthe, AISTRATEGIES.CHAOS, this, heatMap, bombManager);
+        this.ia = new Ai(iaPlayer, this.labyrinthe, AISTRATEGIES.AGGRESSIVE, this, heatMap, bombManager);
 
-        this.iaPlayer2 = new Joueur(3, "IA 2");
+        this.iaPlayer2 = new Joueur(3, "IA CHAOS");
         this.iaPlayer2.setX(19);
         this.iaPlayer2.setY(1);
         this.ia2 = new Ai(iaPlayer2, this.labyrinthe, AISTRATEGIES.CHAOS, this, heatMap, bombManager);
 
-        this.iaPlayer3 = new Joueur(4, "IA 3");
+        this.iaPlayer3 = new Joueur(4, "IA SURVIVOR");
         this.iaPlayer3.setX(1);
         this.iaPlayer3.setY(19);
         this.ia3 = new Ai(iaPlayer3, this.labyrinthe, AISTRATEGIES.SURVIVOR, this, heatMap, bombManager);
@@ -259,6 +259,12 @@ public class GameController {
 
             System.out.println(String.format("[%s] Multiplier: %.2f",
                     iaPlayer.getNom(), iaPlayer.getSpeed_multiplier()));
+
+            System.out.println(String.format("[%s] Multiplier: %.2f",
+                    iaPlayer2.getNom(), iaPlayer2.getSpeed_multiplier()));
+
+            System.out.println(String.format("[%s] Multiplier: %.2f",
+                    iaPlayer3.getNom(), iaPlayer3.getSpeed_multiplier()));
             debugTimer = 0;
         }
     }
@@ -319,9 +325,9 @@ public class GameController {
     /**
      * Affiche une barre bleu foncé arrondie en bas avec les bombes et les cœurs centrés
      *
-     * @param gc              GraphicsContext pour dessiner
-     * @param bombs           Nombre de bombes disponibles
-     * @param hearts          Nombre de cœurs disponibles
+     * @param gc GraphicsContext pour dessiner
+     * @param bombs Nombre de bombes disponibles
+     * @param hearts Nombre de cœurs disponibles
      */
     private void drawStatsBar(GraphicsContext gc, int bombs, int hearts, int range, float speed) {
         double barHeight = 35;
