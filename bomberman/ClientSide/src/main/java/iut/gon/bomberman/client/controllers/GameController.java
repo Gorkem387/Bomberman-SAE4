@@ -36,7 +36,7 @@ public class GameController {
     private boolean isGameOver = false;
     private boolean deathAnimationComplete = false;
     private long deathAnimationStartTime = -1;
-    private static final long DEATH_ANIMATION_DURATION = 1500; // 1.5 secondes en millisecondes
+    private static final long DEATH_ANIMATION_DURATION = 1000;
     
     private Image heartImage;
     private Image bombImage;
@@ -150,8 +150,11 @@ public class GameController {
         }
     }
 
+    /**
+     * Met à jour l'état du jeu à chaque frame
+     * @param deltaTime Temps écoulé depuis la dernière mise à jour en secondes
+     */
     private void update(double deltaTime) {
-        // Permettre ESC uniquement après la fin de l'animation de mort
         if (deathAnimationComplete && input.contains(KeyCode.ESCAPE) && !escWasPressed) {
             escWasPressed = true;
             goBackToMenu();
@@ -167,7 +170,6 @@ public class GameController {
                 deathAnimationStartTime = System.currentTimeMillis();
             }
         } else {
-            // Vérifier si l'animation de mort est terminée
             if (deathAnimationStartTime > 0) {
                 long elapsedTime = System.currentTimeMillis() - deathAnimationStartTime;
                 if (elapsedTime >= DEATH_ANIMATION_DURATION) {
@@ -176,7 +178,6 @@ public class GameController {
             }
         }
         
-        // Mise à jour de la physique (bombes, explosions, dégâts) - Stop si le joueur est mort
         if (joueur.isAlive()) {
             bombManager.update(deltaTime, labyrinthe, List.of(joueur));
         }
@@ -188,13 +189,8 @@ public class GameController {
         renderer.draw(gc, labyrinthe);
         renderer.drawBombs(gc, bombManager.getBombs());
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
-        if (joueur.isAlive()) {
-            renderer.drawPlayer(gc, joueur);
-        } else {
-            // Afficher l'animation de mort même si le joueur est mort
-            renderer.drawPlayer(gc, joueur);
-        }
-        
+        renderer.drawPlayer(gc, joueur);
+
         // Afficher l'interface de statistiques en haut
         drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv());
         
