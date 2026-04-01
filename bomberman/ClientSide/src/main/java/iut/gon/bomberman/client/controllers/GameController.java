@@ -1,5 +1,8 @@
 package iut.gon.bomberman.client.controllers;
 
+import iut.gon.bomberman.client.ai.AISTRATEGIES;
+import iut.gon.bomberman.client.ai.Ai;
+import iut.gon.bomberman.client.ai.HeatMap;
 import iut.gon.bomberman.client.view.LabRenderer;
 import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.labyrinthe.DFSGenerator;
@@ -17,10 +20,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Objects;
+import java.util.*;
 
 public class GameController {
 
@@ -33,6 +33,11 @@ public class GameController {
     private GraphicsContext gc;
     private final LabRenderer renderer = new LabRenderer();
     private Labyrinthe labyrinthe;
+
+    private HeatMap heatMap;
+    private Ai ia;
+    private Joueur iaPlayer;
+
     private Joueur joueur;
     private BombManager bombManager;
     private AnimationTimer gameLoop;
@@ -50,6 +55,8 @@ public class GameController {
     private long lastNanoTime = -1;
     private boolean spaceWasPressed = false;
     private boolean escWasPressed = false;
+
+    private double debugTimer = 0;
 
     @FXML
     public void initialize() {
@@ -91,14 +98,11 @@ public class GameController {
         this.joueur.setX(1);
         this.joueur.setY(1);
 
-        this.bots = new java.util.ArrayList<>();
-
-        // Exemple : Ajout d'un bot dans le coin opposé
-        Joueur bot1 = new Joueur(2, "Bot_Alpha");
-        bot1.setX(19);
-        bot1.setY(19);
-        bot1.setSkinPath("/iut/gon/bomberman/client/assets/4/S_0.png"); // Un skin différent
-        this.bots.add(bot1);
+        this.iaPlayer = new Joueur(2, "IA");
+        this.heatMap = new HeatMap(21, 21);
+        this.iaPlayer.setX(19);
+        this.iaPlayer.setY(19);
+        this.ia = new Ai(iaPlayer, this.labyrinthe, AISTRATEGIES.SURVIVOR, this, heatMap, bombManager);
 
         gameCanvas.setWidth(labyrinthe.getWidth() * 32);
         gameCanvas.setHeight(labyrinthe.getHeight() * 32);
@@ -122,20 +126,15 @@ public class GameController {
                 lastNanoTime = now;
 
                 update(deltaTime);
-                try {
-                    render();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                render();
             }
         };
         gameLoop.start();
     }
 
-    private void handleInputs() {
+    private void handleInputs(double deltaTime) {
         double dx = 0;
         double dy = 0;
-
 
         // Détection des directions
         if (input.contains(KeyCode.Z) || input.contains(KeyCode.UP)) {
@@ -155,7 +154,10 @@ public class GameController {
             joueur.setDirection(Direction.IDLE);
         }
         if (dx != 0 || dy != 0) {
-            joueur.move(dx, dy, labyrinthe, bombManager);
+            // deltaTime pour que la vitesse soit constante
+            joueur.move(dx, dy, deltaTime, labyrinthe, bombManager);
+        } else {
+            joueur.setDirection(Direction.IDLE);
         }
         // Pose de bombe (Verrouillage par spaceWasPressed pour éviter le spam)
         if (input.contains(KeyCode.SPACE) && !spaceWasPressed) {
@@ -165,16 +167,7 @@ public class GameController {
     }
 
     private boolean checkVictoryCondition() {
-        if (bots == null || bots.isEmpty()) return false;
-
-        // On parcourt la liste des bots
-        for (Joueur bot : bots) {
-            if (bot.isAlive()) {
-                return false; // Il reste au moins un bot en vie, donc pas encore de victoire
-            }
-        }
-        // Tous les bots sont morts
-        return true;
+        return joueur.isAlive() && !iaPlayer.isAlive();
     }
 
     private void update(double deltaTime) {
@@ -183,46 +176,62 @@ public class GameController {
             goBackToMenu();
             return;
         }
+
+        if (isVictory || isGameOver) {
+            if (isGameOver && deathAnimationStartTime > 0) {
+                long elapsed = System.currentTimeMillis() - deathAnimationStartTime;
+                if (elapsed >= DEATH_ANIMATION_DURATION) deathAnimationComplete = true;
+            }
+            return;
+        }
         
         if (joueur.isAlive() && !isVictory) {
-            handleInputs();
+            handleInputs(deltaTime);
 
             if (joueur.getPv() <= 0) {
                 joueur.setAlive(false);
                 this.isGameOver = true;
                 deathAnimationStartTime = System.currentTimeMillis();
             }
+        }
 
-            // Vérification de la condition de victoire (tous les bots morts)
-            if (checkVictoryCondition()) {
-                this.isVictory = true;
-            }
-        } else if (!joueur.isAlive()){
-            if (deathAnimationStartTime > 0) {
-                long elapsedTime = System.currentTimeMillis() - deathAnimationStartTime;
-                if (elapsedTime >= DEATH_ANIMATION_DURATION) {
-                    deathAnimationComplete = true;
-                }
+        if (iaPlayer.isAlive()) {
+            ia.update(deltaTime, new Joueur[]{iaPlayer, joueur});
+            if (iaPlayer.getPv() <= 0) {
+                iaPlayer.setAlive(false);
             }
         }
 
-        // On prépare la liste de toutes les cibles potentielles pour les bombes
-        List<Joueur> allTargets = new java.util.ArrayList<>();
-        if (joueur.isAlive()) allTargets.add(joueur);
-        for (Joueur bot : bots) {
-            if (bot.isAlive()) allTargets.add(bot);
+        if (!isVictory && checkVictoryCondition()) {
+            isVictory = true;
+            gameLoop.stop();
         }
 
-        // Mise à jour de la physique avec tous les joueurs
-        bombManager.update(deltaTime, labyrinthe, allTargets);
+        List<Joueur> targets = new ArrayList<>();
+        if (joueur.isAlive()) targets.add(joueur);
+        if (iaPlayer.isAlive()) targets.add(iaPlayer);
+
+        // Bombes, les deux joueurs peuvent recevoir des dégâts
+        bombManager.update(deltaTime, labyrinthe, targets);
 
         if (uiController != null) {
             uiController.updatePlayerStats(joueur);
         }
 
+        debugTimer += deltaTime;
+        if (debugTimer >= 1.0) { // On affiche toutes les 1 seconde
+            System.out.println("\nDEBUG VITESSE");
+            // Calcul de la vitesse théorique (Base * Multiplier)
+            System.out.println(String.format("[%s] Multiplier: %.2f",
+                    joueur.getNom(), joueur.getSpeed_multiplier()));
+
+            System.out.println(String.format("[%s] Multiplier: %.2f",
+                    iaPlayer.getNom(), iaPlayer.getSpeed_multiplier()));
+            debugTimer = 0;
+        }
     }
 
-    private void render() throws InterruptedException {
+    private void render() {
         gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
 
         renderer.draw(gc, labyrinthe);
@@ -230,13 +239,7 @@ public class GameController {
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
 
         renderer.drawPlayer(gc, joueur);
-
-        // Dessiner les bots
-        for (Joueur bot : bots) {
-            if (bot.isAlive()) {
-                renderer.drawPlayer(gc, bot);
-            }
-        }
+        renderer.drawPlayer(gc, iaPlayer);
 
         drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
         
