@@ -39,7 +39,7 @@ public class BombManager {
         bombs.add(new Bomb(bx, by, range, joueur));
         joueur.setNb_bombes(joueur.getNb_bombes() - 1);
 
-        System.out.println(String.format("[POSE] Bombe à (%d,%d) par %s", bx, by, joueur.getNom()));
+        System.out.printf("[POSE] Bombe à (%d,%d) par %s%n", bx, by, joueur.getNom());
         return true;
     }
 
@@ -94,15 +94,15 @@ public class BombManager {
                 long tempsActuel = System.currentTimeMillis();
                 long dureeReelle = tempsActuel - bomb.getCreationTime();
                 System.out.println("------------------------------------");
-                System.out.println(String.format("[EXPLOSION] Bombe à (%d,%d)", bomb.getX(), bomb.getY()));
-                System.out.println(String.format(" > Temps écoulé : %d ms (Attendu: 3000 ms)", dureeReelle));
+                System.out.printf("[EXPLOSION] Bombe à (%d,%d)%n", bomb.getX(), bomb.getY());
+                System.out.printf(" > Temps écoulé : %d ms (Attendu: 3000 ms)%n", dureeReelle);
                 System.out.println("------------------------------------");
 
                 explode(bomb, labyrinthe, joueurs);
 
                 // On rend la bombe au proprio
                 Joueur proprio = bomb.getJoueur();
-                if (proprio != null) {
+                if (proprio != null && proprio.isAlive()) {
                     proprio.setNb_bombes(proprio.getNb_bombes() + 1);
                 }
             }
