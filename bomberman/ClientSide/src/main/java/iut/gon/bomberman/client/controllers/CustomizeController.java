@@ -157,11 +157,25 @@ public class CustomizeController {
     }
 
     /**
+     * Méthode qui permet de retourner au menu
+     * @param event L'événement (clic bouton) qui déclenche le retour
+     */
+    private void returnToMenu(ActionEvent event) {
+        try {
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            // On appelle la méthode de démarrage de MainApp qui réinitialise tout proprement
+            new iut.gon.bomberman.client.MainApp().start(stage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Enregistre les choix de l'utilisateur dans la classe globale GameSettings
      * puis retourne au menu principal
      */
     @FXML
-    public void handleSave(ActionEvent event) throws IOException {
+    public void handleSave(ActionEvent event) {
         // Récupère les données correspondant aux noms sélectionnés
         SkinData selectedSkinData = skinRegistry.get(equippedSkin);
         SkinData selectedBombeData = bombeRegistry.get(equippedBombe);
@@ -176,20 +190,15 @@ public class CustomizeController {
         System.out.println("Sauvegarde effectuée dans GameSettings !");
         System.out.println("Skin : " + equippedSkin + " -> " + selectedSkinData.imagePath);
 
-        // Retour au menu
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/launcher.fxml"));
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root));
+        returnToMenu(event);
     }
 
     /**
      * Retourne au menu sans sauvegarder les modifications dans GameSettings
      */
     @FXML
-    public void handleBackToMenu(ActionEvent event) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/launcher.fxml"));
-        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-        stage.setScene(new Scene(root));
+    public void handleBackToMenu(ActionEvent event) {
+        returnToMenu(event);
     }
 
     /**
