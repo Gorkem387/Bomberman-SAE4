@@ -30,12 +30,13 @@ public class LabRenderer {
 
     private Image[] bombSprites;
     private int bombAnimationCounter = 0;
-    private int animationCounter = 0;
-    private int deathAnimationCounter = 0;
-    private boolean isDeathAnimationPlaying = false;
 
-    private int victoryAnimationCounter = 0;
-    private boolean isVictoryAnimationPlaying = false;
+    // Compteurs d'animation par joueur (clé = joueur.getId())
+    private final Map<Integer, Integer> animationCounters = new HashMap<>();
+    private final Map<Integer, Integer> deathAnimationCounters = new HashMap<>();
+    private final Map<Integer, Boolean> deathAnimationPlaying = new HashMap<>();
+    private final Map<Integer, Integer> victoryAnimationCounters = new HashMap<>();
+    private final Map<Integer, Boolean> victoryAnimationPlaying = new HashMap<>();
 
     private int explosionAnimationCounter = 0;
     private boolean wasExploding = false;
@@ -183,8 +184,8 @@ public class LabRenderer {
         int frameIndex = (bombAnimationCounter / ANIMATION_SPEED) % (bombSprites != null ? bombSprites.length : 1);
 
         Image bombImageToUse = (bombSprites != null && bombSprites[frameIndex] != null)
-            ? bombSprites[frameIndex]
-            : bombImg;
+                ? bombSprites[frameIndex]
+                : bombImg;
 
         for (Bomb bomb : bombs) {
             double sx = bomb.getX() * TILE_SIZE;
@@ -248,12 +249,14 @@ public class LabRenderer {
         String dirSuffix = updateDirection(joueur.getDirection());
         boolean isIdle = joueur.getDirection() == Direction.IDLE;
 
-        // Gérer le compteur d'animation
+        // Gérer le compteur d'animation par joueur
+        int playerId = joueur.getId();
         if (!isIdle) {
-            animationCounter++;
+            animationCounters.merge(playerId, 1, Integer::sum);
         } else {
-            animationCounter = 0;
+            animationCounters.put(playerId, 0);
         }
+        int animationCounter = animationCounters.getOrDefault(playerId, 0);
 
         double visualOffsetY = -0.25;
 
@@ -300,13 +303,17 @@ public class LabRenderer {
      * @param screenY position Y sur l'écran
      */
     private void drawDeathAnimation(GraphicsContext gc, Joueur joueur, double screenX, double screenY) {
-        if (!isDeathAnimationPlaying) {
-            isDeathAnimationPlaying = true;
-            deathAnimationCounter = 0;
+        int playerId = joueur.getId();
+
+        if (!deathAnimationPlaying.getOrDefault(playerId, false)) {
+            deathAnimationPlaying.put(playerId, true);
+            deathAnimationCounters.put(playerId, 0);
         }
 
-        if (deathAnimationCounter < 30) {
-            deathAnimationCounter++;
+        int counter = deathAnimationCounters.getOrDefault(playerId, 0);
+        if (counter < 30) {
+            deathAnimationCounters.put(playerId, counter + 1);
+            counter++;
         }
 
         String skinId = joueur.getSkinPath().replaceAll("[^0-9]", "").substring(0, 2);
@@ -318,19 +325,22 @@ public class LabRenderer {
 
         Image[] deathSprites = spriteCache.get(cacheKey);
 
-        int frameIndex = Math.min((deathAnimationCounter / ANIMATION_SPEED), 2);
+        int frameIndex = Math.min((counter / ANIMATION_SPEED), 2);
         Image currentDeathSprite = deathSprites[frameIndex];
 
         gc.drawImage(currentDeathSprite, screenX, screenY, TILE_SIZE, TILE_SIZE);
     }
 
     private void drawVictoryAnimation(GraphicsContext gc, Joueur joueur, double screenX, double screenY) {
-        if (!isVictoryAnimationPlaying) {
-            isVictoryAnimationPlaying = true;
-            victoryAnimationCounter = 0;
+        int playerId = joueur.getId();
+
+        if (!victoryAnimationPlaying.getOrDefault(playerId, false)) {
+            victoryAnimationPlaying.put(playerId, true);
+            victoryAnimationCounters.put(playerId, 0);
         }
 
-        victoryAnimationCounter++;
+        int counter = victoryAnimationCounters.getOrDefault(playerId, 0) + 1;
+        victoryAnimationCounters.put(playerId, counter);
 
         String skinId = joueur.getSkinPath().replaceAll("[^0-9]", "").substring(0, 2);
         String cacheKey = joueur.getId() + "_" + skinId + "_V";
@@ -341,7 +351,7 @@ public class LabRenderer {
 
         Image[] victorySprites = spriteCache.get(cacheKey);
 
-        int frameIndex = (victoryAnimationCounter / ANIMATION_SPEED) % 3;
+        int frameIndex = (counter / ANIMATION_SPEED) % 3;
         Image currentVictorySprite = victorySprites[frameIndex];
 
         gc.drawImage(currentVictorySprite, screenX, screenY, TILE_SIZE, TILE_SIZE);
@@ -384,4 +394,3 @@ public class LabRenderer {
         };
     }
 }
-

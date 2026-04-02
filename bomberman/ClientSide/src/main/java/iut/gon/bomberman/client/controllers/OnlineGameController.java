@@ -342,14 +342,14 @@ public class OnlineGameController {
 
         // Dessine Le joueur local seulement si l'ID est prêt
         if (localPlayer.getId() != -1 && localPlayer.isAlive()) {
-            renderer.drawPlayer(gc, localPlayer);
+            renderer.drawPlayer(gc, localPlayer, isVictory);
         }
 
         // Dessine les autres joueurs
         for (Joueur remote : remotePlayers.values()) {
             // Dessine pas le remote s'il a le même ID que nous
             if (remote.getId() != localPlayer.getId() && remote.isAlive()) {
-                renderer.drawPlayer(gc, remote);
+                renderer.drawPlayer(gc, remote, false);
             }
         }
 
