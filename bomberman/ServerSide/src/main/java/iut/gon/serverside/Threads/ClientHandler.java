@@ -1,5 +1,6 @@
 package iut.gon.serverside.Threads;
 
+import iut.gon.bomberman.common.model.Mess.LobbyListResponse;
 import iut.gon.bomberman.common.model.player.Joueur;
 import iut.gon.serverside.Lob.Lobby;
 import iut.gon.serverside.LobbyManager;
@@ -10,6 +11,8 @@ import iut.gon.serverside.Threads.PlayerInputHandling.MessageDispatcher;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Gère la communication réseau avec un client unique.
@@ -40,9 +43,6 @@ public class ClientHandler extends Thread {
         this.lobbyId = lobbyId;
     }
 
-    /**
-     * Démarre la conexion avec le client
-     */
     @Override
     public void run() {
         try {
@@ -64,8 +64,8 @@ public class ClientHandler extends Thread {
     }
 
     /**
-     * Envoie un message du serveur au client
-     * @param message
+     * Envoie un message sérialisé au client.
+     * @param message L'objet message à envoyer.
      */
     public synchronized void send(Message message) {
         try {
@@ -80,7 +80,8 @@ public class ClientHandler extends Thread {
     }
 
     /**
-     * Permet la déconnexion d'un client
+     * Ferme proprement les flux et la socket, nettoie le lobby associé,
+     * et notifie tous les clients de la liste de lobbies mise à jour.
      */
     private void disconnect() {
         try {
@@ -107,6 +108,9 @@ public class ClientHandler extends Thread {
                             lm.removeLobby(lobbyId);
                         }
                     }
+
+                    // Notifier tous les clients de la liste de lobbies mise à jour
+                    broadcastLobbyList();
                 }
             }
 
@@ -117,11 +121,20 @@ public class ClientHandler extends Thread {
             try { if (out != null) out.close(); } catch (IOException ignored) {}
             try { if (socket != null && !socket.isClosed()) socket.close(); } catch (IOException ignored) {}
         } catch (Exception e) {
-            logger.log(LogTypes.ERROR, "Erreur lors de la déconnexion.");
+            logger.log(LogTypes.ERROR, "Erreur inattendue lors de la déconnexion: " + e.getMessage());
         }
     }
 
-    // Getter et Setter
+    /**
+     * Envoie la liste des lobbies à jour à tous les clients connectés.
+     */
+    private void broadcastLobbyList() {
+        List<LobbyListResponse.LobbyDTO> lobbyDTOs = LobbyManager.getInstance().getLobbies().values().stream()
+                .map(l -> new LobbyListResponse.LobbyDTO(l.getId(), l.getNom(), l.getJoueurs().size(), l.getNbJMax()))
+                .collect(Collectors.toList());
+        ThreadPrincipal.broadcast(new LobbyListResponse(lobbyDTOs));
+    }
+
     public int getPlayerId() { return playerId; }
     public void setPlayerId(int playerId) { this.playerId = playerId; }
     public Joueur getJoueur() { return joueur; }
