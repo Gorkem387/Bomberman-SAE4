@@ -36,6 +36,11 @@ public class NetworkManager{
         return network;
     }
 
+    /**
+     * Fonction qui permet de créer un socket pour connecter le client au serveur
+     * @param host
+     * @param port
+     */
     public void connectToServer(String host, int port){
         try {
             if (socket != null && !socket.isClosed()) {
@@ -53,6 +58,10 @@ public class NetworkManager{
 
     }
 
+    /**
+     * Permet d'envoyer un message du client au serveur
+     * @param message
+     */
     public synchronized void send(Message message) {
         if (out != null && isConnected) {
             try{
@@ -64,6 +73,9 @@ public class NetworkManager{
         }
     }
 
+    /**
+     * Permet au client de recevoir et de traiter les messages envoyés par le serveur
+     */
     private void startListening() {
         listenerThread = new Thread(() -> {
             try {
@@ -82,6 +94,9 @@ public class NetworkManager{
         listenerThread.start();
     }
 
+    /**
+     * Permet au client de se déconnecter du serveur
+     */
     public void disconnect() {
         isConnected = false;
         // Close the socket FIRST - this unblocks the thread stuck on in.readObject()
@@ -111,15 +126,29 @@ public class NetworkManager{
         }
     }
 
+    /**
+     * Permet d'exécuter certaines fonctions selon le type de message reçut
+     * @param type
+     * @param l
+     */
     public void addServerMessageListener(MessageType type, ServerMessageListener l) {
         listeners.computeIfAbsent(type, k -> new ArrayList<>()).add(l);
     }
 
+    /**
+     * Permet de ne pas exécuter certaines fonctions selon le type de message reçut
+     * @param type
+     * @param l
+     */
     public void removeServerMessageListener(MessageType type, ServerMessageListener l) {
         List<ServerMessageListener> list = listeners.get(type);
         if (list != null) list.remove(l);
     }
 
+    /**
+     * Permet de prévenir de la reception d'un message
+     * @param message
+     */
     private void notifyListeners(Message message) {
         if (message instanceof InitGameMessage init) {
             this.lastInitGameMessage = init;
@@ -136,6 +165,7 @@ public class NetworkManager{
         listeners.clear();
     }
 
+ // Getter et Setter
     public boolean isConnected() {
         return isConnected;
     }

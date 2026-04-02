@@ -11,16 +11,23 @@ public class KruskalGenerator implements LabyrintheFactory {
     private int parent[];
     private int rank[];
 
-    // Remonte l'arbre jusqu'à la racine
+    /**
+     * Remonte l'arbre jusqu'à la racine
+     * @param x
+     * @return
+     */
     private int find(int x){
         if (parent[x] != x)
             parent[x] = find(parent[x]);
         return parent[x];
     }
 
-    /*
-    Essaye de fusionner les ensembles a et b
-    true -> Fusion | false -> Déjà même ensemble
+    /**
+     * Essaye de fusionner les ensembles a et b
+     * true -> Fusion | false -> Déjà même ensemble
+     * @param a
+     * @param b
+     * @return
      */
     public boolean union(int a, int b){
         // Les racines
@@ -40,7 +47,12 @@ public class KruskalGenerator implements LabyrintheFactory {
         return true;
     }
 
-    // Créer le labyrinthe
+    /**
+     * Créer le labyrinthe
+     * @param width
+     * @param height
+     * @return
+     */
     @Override
     public Labyrinthe createLabyrinthe(int width, int height) {
         Labyrinthe laby = new Labyrinthe(width, height);
@@ -72,7 +84,12 @@ public class KruskalGenerator implements LabyrintheFactory {
         return laby;
     }
 
-    // Construit la liste de tous les murs cassables du labyrinthe
+    /**
+     * Construit la liste de tous les murs cassables du labyrinthe
+     * @param cellCols
+     * @param cellRows
+     * @return
+     */
     private List<int[]> buildWallList(int cellCols, int cellRows) {
         List<int[]> walls = new ArrayList<>();
 
@@ -85,8 +102,12 @@ public class KruskalGenerator implements LabyrintheFactory {
 
         return walls;
     }
-
-    // Parcourt la liste de murs déjà mélangée et applique la règle de Kruskal
+    /**
+     * Parcourt la liste de murs déjà mélangée et applique la règle de Kruskal
+     * @param laby
+     * @param walls
+     * @param cellCols
+     */
     private void applyKruskal(Labyrinthe laby, List<int[]> walls, int cellCols) {
         for (int[] wall : walls) {
             int cx1 = wall[0], cy1 = wall[1];
@@ -103,7 +124,10 @@ public class KruskalGenerator implements LabyrintheFactory {
         }
     }
 
-    // Parcourt les murs restants (non destructibles) et convertit 40% en destructible
+    /**
+     * Parcourt les murs restants (non destructibles) et convertit 40% en destructible
+     * @param laby
+     */
     public void addDestructibleWalls(Labyrinthe laby) {
         for (int x = 1; x < laby.getWidth() - 1; x++) {
             for (int y = 1; y < laby.getHeight() - 1; y++) {
@@ -115,6 +139,13 @@ public class KruskalGenerator implements LabyrintheFactory {
         }
     }
 
+    /**
+     * Détermine si la case est une case d'apparition d'un joueur
+     * @param x
+     * @param y
+     * @param laby
+     * @return
+     */
     private boolean isSpawnArea(int x, int y, Labyrinthe laby) {
         return (x <= 2 && y <= 2) ||
                 (x >= laby.getWidth() - 3 && y >= laby.getHeight() - 3);

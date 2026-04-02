@@ -7,6 +7,7 @@ public class StartGameRequest implements Message {
         this.lobbyId = lobbyId;
     }
 
+    // Getter
     @Override
     public MessageType getType() {
         return MessageType.START_GAME_REQUEST;

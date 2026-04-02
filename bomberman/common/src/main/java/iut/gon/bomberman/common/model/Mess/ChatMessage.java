@@ -11,6 +11,8 @@ public class ChatMessage implements Message {
         this.lobbyId = lobbyId;
     }
 
+    // Getter
+
     @Override
     public MessageType getType() {
         return MessageType.CHAT_MESSAGE;

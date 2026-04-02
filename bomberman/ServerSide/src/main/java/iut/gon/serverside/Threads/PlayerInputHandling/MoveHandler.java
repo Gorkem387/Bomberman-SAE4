@@ -11,7 +11,11 @@ import iut.gon.bomberman.common.model.labyrinthe.BombManager;
  * Gère les demandes de déplacement des joueurs pendant la partie.
  */
 public class MoveHandler implements MessageHandler<MoveRequest> {
-
+    /**
+     * Met à jour la partie dans un lobby spécifique
+     * @param message
+     * @param client
+     */
     @Override
     public void handle(MoveRequest message, ClientHandler client) {
         Lobby lobby = LobbyManager.getInstance().getLobby(client.getLobbyId());

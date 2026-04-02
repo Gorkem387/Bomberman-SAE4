@@ -136,6 +136,9 @@ public class LobbyController implements Initializable {
         nm.removeServerMessageListener(MessageType.CHAT_MESSAGE, chatListener);
     }
 
+    /**
+     * Fonction qui permet de gérer l'envoie de message entre joueur
+     */
     private void handleSendMessage() {
         String content = texteMessage.getText().trim();
         if (!content.isEmpty()) {
@@ -145,6 +148,10 @@ public class LobbyController implements Initializable {
         }
     }
 
+    /**
+     * Fonction qui redirige vers la liste des lobby
+     * et quitte le lobby choisi
+     */
     @FXML
     public void handleLeaveLobby() {
         try {

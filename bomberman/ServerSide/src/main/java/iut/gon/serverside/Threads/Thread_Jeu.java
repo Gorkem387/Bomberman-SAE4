@@ -34,6 +34,9 @@ public class Thread_Jeu extends Thread {
         this.bombManager = new BombManager();
     }
 
+    /**
+     * Execute le code du jeu côté serveur
+     */
     @Override
     public void run() {
         long lastTime = System.nanoTime();
@@ -103,6 +106,9 @@ public class Thread_Jeu extends Thread {
         }
     }
 
+    /**
+     * Arrête le jeu
+     */
     public void stopGame() {
         this.running = false;
     }

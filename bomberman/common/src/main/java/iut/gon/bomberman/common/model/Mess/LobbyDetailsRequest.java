@@ -7,6 +7,7 @@ public class LobbyDetailsRequest implements Message {
         this.lobbyId = lobbyId;
     }
 
+    // Getter
     @Override
     public MessageType getType() {
         return MessageType.LOBBY_DETAILS_REQUEST;

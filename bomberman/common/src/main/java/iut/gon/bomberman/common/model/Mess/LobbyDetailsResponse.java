@@ -23,6 +23,7 @@ public class LobbyDetailsResponse implements Message {
         return MessageType.LOBBY_DETAILS_RESPONSE;
     }
 
+    // Getter
     public int getLobbyId() { return lobbyId; }
     public String getLobbyName() { return lobbyName; }
     public int getMaxPlayers() { return maxPlayers; }

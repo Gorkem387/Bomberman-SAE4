@@ -40,6 +40,9 @@ public class ClientHandler extends Thread {
         this.lobbyId = lobbyId;
     }
 
+    /**
+     * Démarre la conexion avec le client
+     */
     @Override
     public void run() {
         try {
@@ -60,6 +63,10 @@ public class ClientHandler extends Thread {
         }
     }
 
+    /**
+     * Envoie un message du serveur au client
+     * @param message
+     */
     public synchronized void send(Message message) {
         try {
             if (out != null) {
@@ -72,6 +79,9 @@ public class ClientHandler extends Thread {
         }
     }
 
+    /**
+     * Permet la déconnexion d'un client
+     */
     private void disconnect() {
         try {
             logger.log(LogTypes.INFO, "Déconnexion d'un client (" + (joueur != null ? joueur.getNom() : socket.getInetAddress()) + ").");
@@ -111,6 +121,7 @@ public class ClientHandler extends Thread {
         }
     }
 
+    // Getter et Setter
     public int getPlayerId() { return playerId; }
     public void setPlayerId(int playerId) { this.playerId = playerId; }
     public Joueur getJoueur() { return joueur; }

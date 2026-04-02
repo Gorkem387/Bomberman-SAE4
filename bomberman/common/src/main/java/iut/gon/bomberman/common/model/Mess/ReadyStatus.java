@@ -9,6 +9,7 @@ public class ReadyStatus implements Message {
         this.lobbyId = lobbyId;
     }
 
+    // Getter
     @Override
     public MessageType getType() {
         return MessageType.READY_STATUS;

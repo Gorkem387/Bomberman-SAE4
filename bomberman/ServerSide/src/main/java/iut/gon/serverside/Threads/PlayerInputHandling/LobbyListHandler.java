@@ -9,6 +9,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class LobbyListHandler implements MessageHandler<LobbyListRequest> {
+    /**
+     * Permet au client de recevoir la liste des lobby
+     * @param message
+     * @param client
+     */
     @Override
     public void handle(LobbyListRequest message, ClientHandler client) {
         List<LobbyListResponse.LobbyDTO> lobbyDTOs = LobbyManager.getInstance().getLobbies().values().stream()

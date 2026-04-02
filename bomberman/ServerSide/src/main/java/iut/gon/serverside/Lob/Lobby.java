@@ -49,12 +49,23 @@ public class Lobby {
                     return;
                 }
             }
+    /**
+     * Permet d'ajouter un joueur sur une partie en ligne
+     * @param joueur
+     * @param handler
+     */
+        public void addJoueur(Joueur joueur, ClientHandler handler) {
             joueursInvites.add(joueur);
             handlers.put(joueur.getId(), handler);
             broadcastUpdate();
         }
 
-        public synchronized void removeJoueur(Joueur joueur) {
+
+    /**
+     * Permet d'enlever un joueur sur une partie en ligne
+     * @param joueur
+     */
+            public synchronized void removeJoueur(Joueur joueur) {
             joueursInvites.remove(joueur);
             handlers.remove(joueur.getId());
             if (isCountdownRunning) {
@@ -117,7 +128,7 @@ public class Lobby {
             logger.log(LogTypes.INFO, "Début du décompte de 5 secondes pour le lobby " + id);
             isCountdownRunning = true;
             countdownSecondsRemaining = 5;
-            
+
             countdownTimer = new Timer();
             countdownTimer.scheduleAtFixedRate(new TimerTask() {
                 @Override
@@ -135,7 +146,7 @@ public class Lobby {
 
         public synchronized void cancelCountdown(String reason) {
             if (!isCountdownRunning) return;
-            
+
             isCountdownRunning = false;
             if (countdownTimer != null) {
                 countdownTimer.cancel();
@@ -151,7 +162,7 @@ public class Lobby {
 
             Set<Integer> vus = new HashSet<>();
             joueursInvites.removeIf(j -> j.getId() == -1 || !vus.add(j.getId()));
-            
+
             // 1. Générer le labyrinthe sur le serveur
             DFSGenerator generator = new DFSGenerator();
             generator.generateRecursive(this.labyrinthe, 1, 1);
@@ -178,11 +189,14 @@ public class Lobby {
 
             InitGameMessage mes = new InitGameMessage(id, this.labyrinthe, players);
             broadcast(mes);
-            
+
             // 4. Démarrer la boucle de jeu
             startGame();
         }
 
+    /**
+     * Permet le démmarrage du jeu
+     */
         public void startGame() {
             if (!joueursInvites.isEmpty()) {
                 logger.log(LogTypes.SUCCESS,"Lancement réel de la boucle de jeu pour le lobby " + id);
@@ -192,6 +206,11 @@ public class Lobby {
             }
         }
 
+    /**
+     * Permet au joueur de rejoindre un lobby
+     * @param client
+     * @return
+     */
         public boolean rejoindreLobby(ClientHandler client){
             if (this.etatLobby != EtatLobby.EN_ATTENTE) {
                 return false;
@@ -208,11 +227,17 @@ public class Lobby {
         }
 
         public synchronized void setReadyStatus(ClientHandler client, Boolean isReady){
+    /**
+     * Modifie l'état du joueur s'il est prêt à rejoindre la partie
+     * @param client
+     * @param isReady
+     */
+        public void setReadyStatus(ClientHandler client, Boolean isReady){
             Joueur j = client.getJoueur();
             if (j != null) {
                 j.setEtat(isReady ? EtatJoueur.PRET : EtatJoueur.PAS_PRET);
                 logger.log(LogTypes.INFO, "Joueur " + j.getNom() + " : " + j.getEtat());
-                
+
                 // Si un joueur passe en "Pas Prêt" pendant le décompte, on l'annule
                 if (!isReady && isCountdownRunning) {
                     cancelCountdown(j.getNom() + " n'est plus prêt.");

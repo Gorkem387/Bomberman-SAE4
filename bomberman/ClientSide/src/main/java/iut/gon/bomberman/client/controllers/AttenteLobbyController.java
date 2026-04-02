@@ -32,6 +32,9 @@ public class AttenteLobbyController implements Initializable {
     private ServerMessageListener lobbyListListener;
     private ServerMessageListener createLobbyListener;
 
+    /**
+     * Méthode appelée automatiquement par JavaFX au chargement de la vue
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // Redimensionnement dynamique
@@ -115,6 +118,10 @@ public class AttenteLobbyController implements Initializable {
         handleRefresh();
     }
 
+    /**
+     * Algorithme permettant au joueur de créer un lobby lorsque il appuie sur le bouton pour créer un lobby.
+     *
+     */
     private void cleanup() {
         NetworkManager nm = NetworkManager.getInstance();
         nm.removeServerMessageListener(MessageType.JOIN_LOBBY_RESPONSE, joinLobbyListener);
@@ -131,6 +138,9 @@ public class AttenteLobbyController implements Initializable {
         }
     }
 
+    /**
+     * Algorithme permettant de mettre à jours la liste des lobby
+     */
     @FXML
     public void handleRefresh() {
         NetworkManager.getInstance().send(new LobbyListRequest());
