@@ -3,6 +3,7 @@ package iut.gon.bomberman.client.controllers;
 import iut.gon.bomberman.client.ai.AISTRATEGIES;
 import iut.gon.bomberman.client.ai.Ai;
 import iut.gon.bomberman.client.ai.HeatMap;
+import iut.gon.bomberman.client.network.NetworkManager;
 import iut.gon.bomberman.client.sound.SoundManager;
 import iut.gon.bomberman.client.ai.AISTRATEGIES;
 import iut.gon.bomberman.client.ai.Ai;
@@ -134,11 +135,7 @@ public class GameController {
                 lastNanoTime = now;
 
                 update(deltaTime);
-                try {
-                    render();
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+                render();
             }
         };
         gameLoop.start();
@@ -294,20 +291,6 @@ public class GameController {
                 bot.getPlayer().setAlive(false);
             }
         }
-        if (iaPlayer2.isAlive()) {
-            ia2.update(deltaTime, new Joueur[]{iaPlayer2, joueur});
-            if (iaPlayer2.getPv() <= 0) iaPlayer2.setAlive(false);
-        }
-
-        if (iaPlayer3.isAlive()) {
-            ia3.update(deltaTime, new Joueur[]{iaPlayer3, joueur});
-            if (iaPlayer3.getPv() <= 0) iaPlayer3.setAlive(false);
-        }
-
-        if (iaPlayer4.isAlive()) {
-            ia4.update(deltaTime, new Joueur[]{iaPlayer4, joueur});
-            if (iaPlayer4.getPv() <= 0) iaPlayer4.setAlive(false);
-        }
 
         if (!isVictory && checkVictoryCondition()) {
             isVictory = true;
@@ -321,10 +304,17 @@ public class GameController {
             if (bot.getPlayer().isAlive()) targets.add(bot.getPlayer());
         }
 
+        //check si le joueur ou les bots sont morts, et les tue si c'est le cas
         if (joueur.getPv() <= 0 && joueur.isAlive()) {
             joueur.setAlive(false);
         }
+        for(Ai bots : listBots){
+            if (bots.getPlayer().getPv() <= 0 && bots.getPlayer().isAlive()) {
+                bots.getPlayer().setAlive(false);
+            }
+        }
 
+        //game over
         if (!joueur.isAlive() && !isGameOver) {
             this.isGameOver = true;
             deathAnimationStartTime = System.currentTimeMillis();
@@ -351,15 +341,15 @@ public class GameController {
         }
     }
 
-    private void render() throws InterruptedException {
 
-        //check si on doit mettre le jeux en pauseet afficher le menu correspondant
     /**
      * Algorithme dédier à l'affichage du labyrinthe dans l'interface
      * et afficher lorsque le joueur à gagné ou perdu.
      */
 
     private void render() {
+        //check si on doit mettre le jeux en pauset afficher le menu correspondant
+
         if (joueur.isAlive() && isPaused) {
             drawPauseMenu();
             return;
@@ -372,7 +362,7 @@ public class GameController {
         renderer.drawBombs(gc, bombManager.getBombs());
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
 
-        renderer.drawPlayer(gc, joueur);
+        renderer.drawPlayer(gc, joueur, isVictory);
 
         for (Ai bot : listBots){
             renderer.drawPlayer(gc, bot.getPlayer());
@@ -578,17 +568,11 @@ public class GameController {
         if (gameLoop != null) {
             gameLoop.stop();
         }
-        
         try {
             this.escWasPressed = false;
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/launcher.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            
-            Stage stage = (Stage) gameCanvas.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle("Bomberman - Menu Principal");
-            stage.show();
+            NetworkManager.reset();
+            javafx.stage.Stage stage = (javafx.stage.Stage) gameCanvas.getScene().getWindow();
+            new iut.gon.bomberman.client.MainApp().start(stage);
         } catch (Exception e) {
             System.err.println("Erreur lors du retour au menu : " + e.getMessage());
         }

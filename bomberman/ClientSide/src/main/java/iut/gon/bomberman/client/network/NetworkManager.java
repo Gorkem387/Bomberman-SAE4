@@ -85,6 +85,9 @@ public class NetworkManager{
                         Platform.runLater(() -> notifyListeners(message));
                     }
                 }
+            } catch (java.net.SocketException e) {
+                // Déconnexion normale - le socket a été fermé volontairement
+                isConnected = false;
             } catch (IOException | ClassNotFoundException e) {
                 isConnected = false;
                 e.printStackTrace();

@@ -99,6 +99,12 @@ public class Ai {
      * @param players   Liste des joueurs présents dans la partie
      */
     public void update(double deltaTime, Joueur[] players) {
+        // Si l'IA est morte, on ne fait rien
+        if (!player.isAlive()) {
+            player.setDirection(Direction.IDLE);
+            return;
+        }
+
         // Mise à jour des timers de cooldown
         bombTimer    -= deltaTime;
         decisionTimer -= deltaTime;
