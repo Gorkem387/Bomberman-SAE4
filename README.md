@@ -4,7 +4,7 @@
 
 Cette application est une reproduction modifiée du jeu vidéo Bomberman.
 
-
+Des sons ont été mis en place pour certaines actions
 
 Le jeu se déroule dans un labyrinthe parfait, de 2 à 5 joueurs sont à l'intérieur, l'objectif est d'être le dernier le en vie.
 
