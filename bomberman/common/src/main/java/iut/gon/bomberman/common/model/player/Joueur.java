@@ -63,6 +63,11 @@ public class Joueur {
         this.nom = nom;
         this.cooX = cooX;
         this.cooY = cooY;
+        this.pv = 3;
+        this.nb_bombes_max = 3;
+        this.nb_bombes = 3;
+        this.bonus = new Bonus[3];
+        this.speed_multiplier = 1.0f;
     }
 
 

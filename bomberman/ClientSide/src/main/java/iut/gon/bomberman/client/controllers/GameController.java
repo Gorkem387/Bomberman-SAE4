@@ -40,22 +40,11 @@ public class GameController {
     private final LabRenderer renderer = new LabRenderer();
     private Labyrinthe labyrinthe;
 
-    private HeatMap heatMap;
-    private Ai ia;
-    private Ai ia2;
-    private Ai ia3;
-    private Ai ia4;
-    private Joueur iaPlayer;
-    private Joueur iaPlayer2;
-    private Joueur iaPlayer3;
-    private Joueur iaPlayer4;
-
     private Joueur joueur;
     private BombManager bombManager;
     private AnimationTimer gameLoop;
     private boolean isGameOver = false;
     private boolean isVictory = false;
-    private List<Joueur> bots;
     private boolean deathAnimationComplete = false;
     private long deathAnimationStartTime = -1;
     private static final long DEATH_ANIMATION_DURATION = 1000;
@@ -177,7 +166,7 @@ public class GameController {
                     placementY = placementX = (int) ((double) tailleMap / 2 + 0.5);
                     break;
             }
-            listBots.add(new Ai(new Joueur(i + 1, "Bot " + i, placementX, placementY), labyrinthe, strategies.get(i), this, heatMap));
+            listBots.add(new Ai(new Joueur(i + 1, "Bot " + i, placementX, placementY), labyrinthe, strategies.get(i), this, heatMap, bombManager));
         }
     }
 
@@ -217,11 +206,13 @@ public class GameController {
     }
 
     private boolean checkVictoryCondition() {
-        return joueur.isAlive()
-                && !iaPlayer.isAlive()
-                && !iaPlayer2.isAlive()
-                && !iaPlayer3.isAlive()
-                && !iaPlayer4.isAlive();
+       if(!joueur.isAlive())return false;
+
+       for (Ai bot : listBots){
+           if (bot.getPlayer().isAlive()) return false;
+       }
+
+       return true;
     }
 
     private void update(double deltaTime) {
@@ -260,7 +251,14 @@ public class GameController {
             return;
         }
 
-        boolean anExplosionHappened = bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer, iaPlayer2, iaPlayer3, iaPlayer4));
+        //prepare liste pour bombManager
+            List<Joueur> players = new ArrayList<>();
+
+            players.add(joueur);
+            listBots.forEach(bot -> players.add(bot.getPlayer()));
+
+
+        boolean anExplosionHappened = bombManager.update(deltaTime, labyrinthe, players);
 
         if (anExplosionHappened) {
             SoundManager.getInstance().playExplosion();
@@ -273,25 +271,12 @@ public class GameController {
             }
         }
 
-        if (iaPlayer.isAlive()) {
-            ia.update(deltaTime, new Joueur[]{iaPlayer, joueur});
-            if (iaPlayer.getPv() <= 0) {
-                iaPlayer.setAlive(false);
+        //tue l'ia si ses pv sont à 0 ou moins, et update son comportement
+        for(Ai bot : listBots){
+            bot.update(deltaTime, new Joueur[]{bot.getPlayer(), joueur});
+            if (bot.getPlayer().getPv() <= 0) {
+                bot.getPlayer().setAlive(false);
             }
-        }
-        if (iaPlayer2.isAlive()) {
-            ia2.update(deltaTime, new Joueur[]{iaPlayer2, joueur});
-            if (iaPlayer2.getPv() <= 0) iaPlayer2.setAlive(false);
-        }
-
-        if (iaPlayer3.isAlive()) {
-            ia3.update(deltaTime, new Joueur[]{iaPlayer3, joueur});
-            if (iaPlayer3.getPv() <= 0) iaPlayer3.setAlive(false);
-        }
-
-        if (iaPlayer4.isAlive()) {
-            ia4.update(deltaTime, new Joueur[]{iaPlayer4, joueur});
-            if (iaPlayer4.getPv() <= 0) iaPlayer4.setAlive(false);
         }
 
         if (!isVictory && checkVictoryCondition()) {
@@ -301,10 +286,10 @@ public class GameController {
 
         List<Joueur> targets = new ArrayList<>();
         if (joueur.isAlive()) targets.add(joueur);
-        if (iaPlayer.isAlive()) targets.add(iaPlayer);
-        if (iaPlayer2.isAlive()) targets.add(iaPlayer2);
-        if (iaPlayer3.isAlive()) targets.add(iaPlayer3);
-        if (iaPlayer4.isAlive()) targets.add(iaPlayer4);
+
+        for(Ai bot : listBots){
+            if (bot.getPlayer().isAlive()) targets.add(bot.getPlayer());
+        }
 
         if (joueur.getPv() <= 0 && joueur.isAlive()) {
             joueur.setAlive(false);
@@ -327,28 +312,24 @@ public class GameController {
             System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
                     joueur.getNom(), joueur.getSpeed_multiplier(), joueur.getExplosionRange()));
 
-            System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
-                    iaPlayer.getNom(), iaPlayer.getSpeed_multiplier(), iaPlayer.getExplosionRange()));
+            for(Ai bot : listBots){
+                System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
+                        bot.getPlayer().getNom(), bot.getPlayer().getSpeed_multiplier(), bot.getPlayer().getExplosionRange()));
+            }
 
-            System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
-                    iaPlayer2.getNom(), iaPlayer2.getSpeed_multiplier(), iaPlayer2.getExplosionRange()));
-
-            System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
-                    iaPlayer3.getNom(), iaPlayer3.getSpeed_multiplier(), iaPlayer3.getExplosionRange()));
-
-            System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
-                    iaPlayer4.getNom(), iaPlayer4.getSpeed_multiplier(), iaPlayer4.getExplosionRange()));
             debugTimer = 0;
         }
     }
 
-    private void render() {
+    private void render() throws InterruptedException {
+
+        //check si on doit mettre le jeux en pauseet afficher le menu correspondant
         if (joueur.isAlive() && isPaused) {
             drawPauseMenu();
             return;
         }
 
-    private void render() throws InterruptedException {
+
         gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
 
         renderer.draw(gc, labyrinthe);

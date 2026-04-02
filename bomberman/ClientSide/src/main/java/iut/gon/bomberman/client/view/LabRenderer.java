@@ -28,11 +28,6 @@ public class LabRenderer {
     // Cache clé = "playerId_direction" pour éviter que deux joueurs s'écrasent
     private final Map<String, Image[]> spriteCache = new HashMap<>();
 
-    // Un compteur d'animation PAR joueur (clé = id)
-    private final Map<Integer, Integer> animCounters      = new HashMap<>();
-    private final Map<Integer, Integer> deathCounters     = new HashMap<>();
-    private final Map<Integer, Boolean> deathAnimPlaying  = new HashMap<>();
-
     private Image[] bombSprites;
     private int bombAnimationCounter = 0;
     private int animationCounter = 0;
@@ -265,7 +260,8 @@ public class LabRenderer {
         // Calculer l'index du frame (0, 1, 2)
         int frameIndex = isIdle ? 0 : (animationCounter / ANIMATION_SPEED) % 3;
 
-        String cacheKey = joueur.getId() + "_" + dirSuffix;
+        String skinId = joueur.getSkinPath().replaceAll("[^0-9]", "").substring(0, 2); // extrait le numéro du dossier
+        String cacheKey = joueur.getId() + "_" + skinId + "_" + dirSuffix;
 
         // Charger/Récupérer les sprites depuis le cache
         if (!spriteCache.containsKey(cacheKey)) {
@@ -310,7 +306,9 @@ public class LabRenderer {
             deathAnimationCounter++;
         }
 
-        String cacheKey = joueur.getId() + "_D";
+        String skinId = joueur.getSkinPath().replaceAll("[^0-9]", "").substring(0, 2);
+        String cacheKey = joueur.getId() + "_" + skinId + "_D";
+
         if (!spriteCache.containsKey(cacheKey)) {
             loadSpritesIntoCache(cacheKey, "D",joueur);
         }
@@ -331,7 +329,9 @@ public class LabRenderer {
 
         victoryAnimationCounter++;
 
-        String cacheKey = joueur.getId() + "_V";
+        String skinId = joueur.getSkinPath().replaceAll("[^0-9]", "").substring(0, 2);
+        String cacheKey = joueur.getId() + "_" + skinId + "_V";
+
         if (!spriteCache.containsKey(cacheKey)) {
             loadSpritesIntoCache(cacheKey, "V", joueur);
         }
@@ -347,7 +347,7 @@ public class LabRenderer {
     private void loadSpritesIntoCache(String cacheKey, String direction, Joueur joueur) {
         // On récupère le chemin du skin (ex: /.../assets/32/S_0.png)
         String fullPath = joueur.getSkinPath();
-
+        System.out.println("Loading " + fullPath + " from " + cacheKey + "SkinPath : " + joueur.getSkinPath());
         // On extrait le dossier (on enlève "S_0.png" à la fin pour avoir le dossier "/.../assets/32/")
         String baseFolder = fullPath.substring(0, fullPath.lastIndexOf("/") + 1);
 
