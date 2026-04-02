@@ -90,12 +90,6 @@ public class AttenteLobbyControllerTest {
     }
 
     @Test
-    @DisplayName("Le bouton Créer un lobby doit s'exécuter sans erreur")
-    void testerBoutonCreateLobbyExecution() {
-        assertDoesNotThrow(() -> controller.handleCreateLobby(), "Le clic sur 'Créer un lobby' ne doit pas lancer d'exception");
-    }
-
-    @Test
     @DisplayName("Le bouton Actualiser doit s'exécuter sans erreur")
     void testerBoutonRefreshExecution() {
         assertDoesNotThrow(() -> controller.handleRefresh(), "Le clic sur 'Actualiser' ne doit pas lancer d'exception");

@@ -149,6 +149,9 @@ public class BombManager {
                     }
                 }
             }
+            if (anExplosionOccurred) {
+                checkExplosionDamage(joueurs);
+            }
             return anExplosionOccurred;
         }
     }

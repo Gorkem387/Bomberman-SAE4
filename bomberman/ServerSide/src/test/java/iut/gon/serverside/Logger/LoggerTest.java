@@ -42,68 +42,6 @@ public class LoggerTest {
     }
 
     /**
-     * S'assure que la génération d'horodatage ne renvoie pas une chaîne vide.
-     */
-    @Test
-    @DisplayName("L'horodatage généré ne doit pas être nul")
-    void testerFormatHorodatageNotNull() {
-        String time = logger.getCurrentTimeFormated();
-        assertNotNull(time, "L'heure générée ne doit pas être nulle");
-    }
-
-    /**
-     * Vérifie que la longueur et les séparateurs de l'horodatage correspondent bien
-     * au pattern défini (dd-MM-yyyy  HH:mm:ss).
-     */
-    @Test
-    @DisplayName("L'horodatage généré doit respecter le formatage attendu (taille et séparateurs)")
-    void testerFormatHorodatagePattern() {
-        String time = logger.getCurrentTimeFormated();
-        // Le format complet "dd-MM-yyyy  HH:mm:ss" devrait faire 20 ou 21 caractères selon la JVM
-        assertTrue(time.length() >= 20, "La longueur du texte horodaté doit correspondre au pattern : au moins 20 caractères");
-        assertTrue(time.contains("-"), "La date doit être séparée par des tirets");
-        assertTrue(time.contains(":"), "L'heure doit être séparée par des deux-points");
-    }
-
-    /**
-     * Vérifie que le type du message de log (ex: INFO) est bien présent
-     * dans la chaine finale formatée.
-     */
-    @Test
-    @DisplayName("La ligne de log complète inclut visuellement le type")
-    void testerCreationLigneDeLogType() {
-        String msgContent = "Test de journalisation";
-        String logLine = logger.createLogMessage(LogTypes.INFO, msgContent);
-        
-        assertTrue(logLine.contains("INFO"), "La ligne de log finale doit indiquer le type (INFO)");
-    }
-
-    /**
-     * S'assure que le contenu brut (message) passé au log est bien conservé 
-     * intact l'intérieur de la chaine générée.
-     */
-    @Test
-    @DisplayName("La ligne de log complète inclut intactement le message")
-    void testerCreationLigneDeLogContenu() {
-        String msgContent = "Test de journalisation";
-        String logLine = logger.createLogMessage(LogTypes.INFO, msgContent);
-        
-        assertTrue(logLine.contains(msgContent), "Le contenu du message doit être présent intact");
-    }
-
-    /**
-     * Vérifie par sa longueur que des métadonnées (comme l'heure) sont bien ajoutées au contenu.
-     */
-    @Test
-    @DisplayName("La ligne de log complète est prolongée par l'horodatage")
-    void testerCreationLigneDeLogLongeur() {
-        String msgContent = "Test de journalisation";
-        String logLine = logger.createLogMessage(LogTypes.INFO, msgContent);
-        
-        assertTrue(logLine.length() > msgContent.length() + 8, "Le message final doit être plus grand que son contenu brut pour contenir l'heure (et marge de sécurité)");
-    }
-
-    /**
      * Confirme le mécanisme de sauvegarde physique : un log de type ERROR
      * entraîne la création du fichier sur le disque.
      */

@@ -1,10 +1,10 @@
-package iut.gon.serverside.Player.DTO;
+package iut.gon.bomberman.common.model.DTO;
 
 import iut.gon.bomberman.common.model.Mess.MessageType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests unitaires pour l'objet de liste d'attente (MinimDTO).

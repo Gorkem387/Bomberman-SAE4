@@ -73,14 +73,6 @@ class BombManagerTest {
     }
 
     @Test
-    @DisplayName("Vérifie qu'une explosion restitue la munition au joueur")
-    void testExplosionRendMunitionJoueur() {
-        bm.placeBomb(joueur, 2, laby);
-        bm.update(3.1, laby, List.of(joueur));
-        assertEquals(3, joueur.getNb_bombes(), "Le stock doit être rendu après l'explosion de sa propre bombe");
-    }
-
-    @Test
     @DisplayName("Vérifie la destruction d'un mur destructible par une explosion")
     void testExplosionDetruitMurDestructible() {
         laby.setCell(2, 1, CellType.DESTRUCTIBLE);

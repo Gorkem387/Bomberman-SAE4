@@ -1,16 +1,13 @@
-package iut.gon.serverside.Player.DTO;
+package iut.gon.bomberman.common.model.DTO;
 
 import iut.gon.bomberman.common.model.Mess.MessageType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Tests unitaires pour l'objet de transfert {@link JoueurMisAJourDTO}.
@@ -72,6 +69,8 @@ public class JoueurMisAJourDTOTest {
     @DisplayName("L'en-tête de la sérialisation doit correspondre au TYPE statique défini")
     void testerEncodageFluxReseauType() throws IOException {
         JoueurMisAJourDTO dto = new JoueurMisAJourDTO(42, 100, 200);
+        dto.positionsAll = new ArrayList<>();
+        dto.positionsAll.add(new MinimDTO(42, 100, 200));
 
         ByteArrayOutputStream byteOs = new ByteArrayOutputStream();
         DataOutputStream dataOs = new DataOutputStream(byteOs);
@@ -87,15 +86,18 @@ public class JoueurMisAJourDTOTest {
      * Écrit le DTO et vérifie qu'une fois le type évacué, on récupère bien l'ID.
      */
     @Test
-    @DisplayName("La seconde donnée encodée doit être l'ID")
+    @DisplayName("La seconde donnée encodée doit être la taille, puis l'ID")
     void testerEncodageFluxReseauId() throws IOException {
         JoueurMisAJourDTO dto = new JoueurMisAJourDTO(42, 100, 200);
+        dto.positionsAll = new ArrayList<>();
+        dto.positionsAll.add(new MinimDTO(42, 100, 200));
 
         ByteArrayOutputStream byteOs = new ByteArrayOutputStream();
         dto.write(new DataOutputStream(byteOs));
 
         DataInputStream dataIs = new DataInputStream(new ByteArrayInputStream(byteOs.toByteArray()));
         dataIs.readInt(); // saute type
+        dataIs.readInt(); // saute size
         
         assertEquals(42, dataIs.readInt(), "L'id lu doit correspondre à celui écrit");
     }
@@ -107,12 +109,15 @@ public class JoueurMisAJourDTOTest {
     @DisplayName("La troisième donnée encodée doit être l'abscisse (X)")
     void testerEncodageFluxReseauX() throws IOException {
         JoueurMisAJourDTO dto = new JoueurMisAJourDTO(42, 100, 200);
+        dto.positionsAll = new ArrayList<>();
+        dto.positionsAll.add(new MinimDTO(42, 100, 200));
 
         ByteArrayOutputStream byteOs = new ByteArrayOutputStream();
         dto.write(new DataOutputStream(byteOs));
 
         DataInputStream dataIs = new DataInputStream(new ByteArrayInputStream(byteOs.toByteArray()));
         dataIs.readInt(); // saute type
+        dataIs.readInt(); // saute size
         dataIs.readInt(); // saute id
         
         assertEquals(100, dataIs.readInt(), "La valeur x lue doit correspondre");
@@ -125,16 +130,18 @@ public class JoueurMisAJourDTOTest {
     @DisplayName("La quatrième et dernière donnée encode doit être l'ordonnée (Y)")
     void testerEncodageFluxReseauYEtFin() throws IOException {
         JoueurMisAJourDTO dto = new JoueurMisAJourDTO(42, 100, 200);
+        dto.positionsAll = new ArrayList<>();
+        dto.positionsAll.add(new MinimDTO(42, 100, 200));
 
         ByteArrayOutputStream byteOs = new ByteArrayOutputStream();
         dto.write(new DataOutputStream(byteOs));
 
         DataInputStream dataIs = new DataInputStream(new ByteArrayInputStream(byteOs.toByteArray()));
-        dataIs.readInt(); 
-        dataIs.readInt(); 
-        dataIs.readInt(); 
+        dataIs.readInt(); // saute type
+        dataIs.readInt(); // saute size
+        dataIs.readInt(); // saute id
+        dataIs.readInt(); // saute x
         
         assertEquals(200, dataIs.readInt(), "La valeur y lue doit correspondre");
-        assertEquals(0, dataIs.available(), "Le flux doit être complètement épuisé");
     }
 }

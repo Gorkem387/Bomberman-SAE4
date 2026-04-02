@@ -7,6 +7,5 @@ module iut.gon.serverside {
     exports iut.gon.serverside.Threads;
     exports iut.gon.serverside.Threads.PlayerInputHandling;
     exports iut.gon.serverside.Logger;
-    exports iut.gon.serverside.Player.DTO;
     exports iut.gon.serverside.Lob;
 }

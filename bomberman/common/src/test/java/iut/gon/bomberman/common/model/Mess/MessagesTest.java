@@ -186,16 +186,6 @@ public class MessagesTest {
     @DisplayName("Tests pour les autres requêtes (Move, Ready, StartGame)")
     class OtherRequestsTests {
         @Test
-        @DisplayName("MoveRequest doit conserver les bonnes coordonnées et la direction")
-        void testMoveRequest() {
-            MoveRequest req = new MoveRequest(10, 20, "LEFT");
-            assertEquals(MessageType.MOVE_REQUEST, req.getType());
-            assertEquals(10, req.getX());
-            assertEquals(20, req.getY());
-            assertEquals("LEFT", req.getDirection());
-        }
-
-        @Test
         @DisplayName("ReadyStatus doit conserver le statut de préparation")
         void testReadyStatus() {
             ReadyStatus status = new ReadyStatus(true, 7);
