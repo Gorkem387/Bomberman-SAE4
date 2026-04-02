@@ -67,7 +67,8 @@ public class Thread_Jeu extends Thread {
                     j.getPv(),
                     j.getNb_bombes(),
                     j.getExplosionRange(),
-                    j.getSpeed_multiplier()
+                    j.getSpeed_multiplier(),
+                        j.getDirection().ordinal()
                 );
 
                 positions.add(m);
