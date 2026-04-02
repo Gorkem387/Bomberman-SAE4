@@ -99,7 +99,7 @@ public class ClientHandler extends Thread {
                             Thread.currentThread().interrupt();
                         }
                     }
-                    if (lobby.getProprietaire() != null && lobby.getProprietaire().equals(this.joueur)) {
+                    if (lobby.getProprietaire() != null && lobby.getProprietaire().getId() == this.joueur.getId()) {
                         logger.log(LogTypes.WARNING, "Le propriétaire a quitté. Suppression du lobby: " + lobby.getNom());
                         lm.removeLobby(lobbyId);
                     } else {
