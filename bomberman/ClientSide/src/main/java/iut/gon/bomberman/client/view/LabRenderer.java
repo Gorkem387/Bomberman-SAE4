@@ -279,9 +279,12 @@ public class LabRenderer {
         double hSize = 0.7;
         double off = 0.15;
         // Hitbox
+        /*
         gc.strokeRect((joueur.getX() + off) * TILE_SIZE,
                 (joueur.getY() + off) * TILE_SIZE,
                 hSize * TILE_SIZE, hSize * TILE_SIZE);
+
+         */
     }
 
     public void drawPlayer(GraphicsContext gc, Joueur joueur) {
