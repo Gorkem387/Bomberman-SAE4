@@ -20,9 +20,12 @@ import java.util.ResourceBundle;
 
 public class AttenteLobbyController implements Initializable {
 
-    @FXML private ListView<String> listeLobby;
-    @FXML private MenuBar menu;
-    @FXML private Pane pane;
+    @FXML
+    private ListView<String> listeLobby;
+    @FXML
+    private MenuBar menu;
+    @FXML
+    private Pane pane;
     private final List<Integer> lobbyIds = new ArrayList<>();
 
     private ServerMessageListener joinLobbyListener;
@@ -31,16 +34,20 @@ public class AttenteLobbyController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // Redimensionnement dynamique
         menu.prefWidthProperty().bind(pane.widthProperty());
         listeLobby.prefWidthProperty().bind(pane.widthProperty());
         listeLobby.prefHeightProperty().bind(pane.heightProperty());
 
+        // Événement double-clic pour rejoindre un lobby
         listeLobby.setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
                 int selectedIndex = listeLobby.getSelectionModel().getSelectedIndex();
                 if (selectedIndex >= 0) {
                     int selectedLobbyId = lobbyIds.get(selectedIndex);
                     NetworkManager nm = NetworkManager.getInstance();
+
+                    // Si on est déjà dedans, on affiche juste la page
                     if (nm.getCurrentLobbyId() == selectedLobbyId) {
                         try {
                             cleanup();
@@ -49,12 +56,14 @@ public class AttenteLobbyController implements Initializable {
                             ex.printStackTrace();
                         }
                     } else {
+                        // Sinon on demande à rejoindre
                         nm.send(new JoinLobbyRequest(selectedLobbyId, nm.getLocalPlayerName()));
                     }
                 }
             }
         });
 
+        // Listeners de messages
         NetworkManager nm = NetworkManager.getInstance();
 
         joinLobbyListener = msg -> {
@@ -115,15 +124,11 @@ public class AttenteLobbyController implements Initializable {
 
     @FXML
     public void handleCreateLobby() {
-        NetworkManager nm = NetworkManager.getInstance();
-        nm.send(new CreateLobbyRequest(
-                nm.getLocalPlayerName() + "'s Lobby",
-                nm.getLocalPlayerName(),
-                4,
-                TypeLab.DEEPSEARCH,
-                21,
-                21
-        ));
+        try {
+            MainApp.setRoot("fxml/configPartieEnLigne");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

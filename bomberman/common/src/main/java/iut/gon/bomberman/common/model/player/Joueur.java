@@ -58,6 +58,13 @@ public class Joueur {
         this.speed_multiplier = 1.0f;
     }
 
+    public Joueur(int id, String nom, double cooX, double cooY){
+        this.id = id;
+        this.nom = nom;
+        this.cooX = cooX;
+        this.cooY = cooY;
+    }
+
 
     public Joueur(int id, String nom, double cooX, double cooY, EtatJoueur etat, int pv, int nb_bombes_max, int nb_bombes, Bonus[] bonus, float speed_multiplier) {
         this.id = id;

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+            prefHeight="500.0" prefWidth="650.0"
+            style="-fx-background-color: white;"
+            xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="iut.gon.bomberman.client.controllers.ConfigPartieEnLigneController">
+
+    <top>
+        <VBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets top="30.0" bottom="20.0"/>
+            </padding>
+            <children>
+                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Configuration de la partie">
+                    <font>
+                        <Font name="System Bold" size="28.0" />
+                    </font>
+                </Text>
+                <Text fill="#7c7c7c" text="Personnalisez les paramètres de votre match en ligne" />
+            </children>
+        </VBox>
+    </top>
+
+    <center>
+        <VBox maxWidth="500.0" spacing="30.0" alignment="TOP_CENTER" BorderPane.alignment="CENTER">
+            <padding>
+                <Insets left="20.0" right="20.0" top="20.0" />
+            </padding>
+            <children>
+                <VBox spacing="10.0" alignment="CENTER_LEFT">
+                    <children>
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Taille de la carte">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Text>
+                        <HBox alignment="CENTER_LEFT">
+                            <children>
+                                <fx:define>
+                                    <ToggleGroup fx:id="tailleGroup" />
+                                </fx:define>
+                                <ToggleButton fx:id="cartePetite" prefWidth="100.0" text="Petite" toggleGroup="$tailleGroup" style="-fx-cursor: hand;" />
+                                <ToggleButton fx:id="carteMoyenne" prefWidth="100.0" selected="true" text="Moyenne" toggleGroup="$tailleGroup" style="-fx-cursor: hand;" />
+                                <ToggleButton fx:id="carteGrande" prefWidth="100.0" text="Grande" toggleGroup="$tailleGroup" style="-fx-cursor: hand;" />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+
+                <VBox spacing="10.0" alignment="CENTER_LEFT">
+                    <children>
+                        <HBox alignment="BOTTOM_LEFT" spacing="10.0">
+                            <children>
+                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Nombre de personnes dans le lobby">
+                                    <font>
+                                        <Font name="System Bold" size="14.0" />
+                                    </font>
+                                </Text>
+                                <Text fx:id="nbJoueur" fill="#2196f3" strokeType="OUTSIDE" strokeWidth="0.0" text="2">
+                                    <font>
+                                        <Font name="System Bold" size="16.0" />
+                                    </font>
+                                </Text>
+                            </children>
+                        </HBox>
+                        <Slider fx:id="nombreJoueurs" blockIncrement="1.0" majorTickUnit="1.0" max="5.0" min="2.0"
+                                minorTickCount="0" showTickLabels="true" showTickMarks="true"
+                                snapToTicks="true" value="2.0" style="-fx-cursor: hand;" />
+                    </children>
+                </VBox>
+
+                <Button fx:id="creerLobby" mnemonicParsing="false" prefHeight="45.0" prefWidth="240.0"
+                        text="Créer le lobby"
+                        style="-fx-background-radius: 25; -fx-cursor: hand; -fx-font-weight: bold; -fx-font-size: 14;">
+                    <VBox.margin>
+                        <Insets top="20.0" />
+                    </VBox.margin>
+                </Button>
+            </children>
+        </VBox>
+    </center>
+
+</BorderPane>

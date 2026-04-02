@@ -4,6 +4,9 @@ import iut.gon.bomberman.client.ai.AISTRATEGIES;
 import iut.gon.bomberman.client.ai.Ai;
 import iut.gon.bomberman.client.ai.HeatMap;
 import iut.gon.bomberman.client.sound.SoundManager;
+import iut.gon.bomberman.client.ai.AISTRATEGIES;
+import iut.gon.bomberman.client.ai.Ai;
+import iut.gon.bomberman.client.ai.HeatMap;
 import iut.gon.bomberman.client.view.LabRenderer;
 import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.labyrinthe.DFSGenerator;
@@ -73,6 +76,9 @@ public class GameController {
     private boolean isPaused = false;
 
     private double debugTimer = 0;
+    private ArrayList<Ai> listBots = new ArrayList<Ai>();
+
+
 
     @FXML
     public void initialize() {
@@ -97,6 +103,7 @@ public class GameController {
             System.err.println("Impossible de charger l'image de la bombe personnalisée");
         }
 
+        // ...existing code...
         DFSGenerator generator = new DFSGenerator();
         this.labyrinthe = generator.createLabyrinthe(21, 21);
 
@@ -112,27 +119,6 @@ public class GameController {
 
         this.joueur.setX(1);
         this.joueur.setY(1);
-
-        this.iaPlayer = new Joueur(2, "IA AGGRESSIVE");
-        this.heatMap = new HeatMap(21, 21);
-        this.iaPlayer.setX(19);
-        this.iaPlayer.setY(19);
-        this.ia = new Ai(iaPlayer, this.labyrinthe, AISTRATEGIES.AGGRESSIVE, this, heatMap, bombManager);
-
-        this.iaPlayer2 = new Joueur(3, "IA CHAOS");
-        this.iaPlayer2.setX(19);
-        this.iaPlayer2.setY(1);
-        this.ia2 = new Ai(iaPlayer2, this.labyrinthe, AISTRATEGIES.CHAOS, this, heatMap, bombManager);
-
-        this.iaPlayer3 = new Joueur(4, "IA SURVIVOR");
-        this.iaPlayer3.setX(1);
-        this.iaPlayer3.setY(19);
-        this.ia3 = new Ai(iaPlayer3, this.labyrinthe, AISTRATEGIES.SURVIVOR, this, heatMap, bombManager);
-
-        this.iaPlayer4 = new Joueur(5, "IA SURVIVOR");
-        this.iaPlayer4.setX(9);
-        this.iaPlayer4.setY(9);
-        this.ia4 = new Ai(iaPlayer4, this.labyrinthe, AISTRATEGIES.SURVIVOR, this, heatMap, bombManager);
 
         gameCanvas.setWidth(labyrinthe.getWidth() * 32);
         gameCanvas.setHeight(labyrinthe.getHeight() * 32);
@@ -156,15 +142,49 @@ public class GameController {
                 lastNanoTime = now;
 
                 update(deltaTime);
-                render();
+                try {
+                    render();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         };
         gameLoop.start();
     }
 
+    public void setConfig(int tailleMap, List<AISTRATEGIES> strategies) {
+
+        DFSGenerator generator = new DFSGenerator();
+        this.labyrinthe = generator.createLabyrinthe(tailleMap, tailleMap);
+
+        gameCanvas.setWidth(labyrinthe.getWidth() * 32);
+        gameCanvas.setHeight(labyrinthe.getHeight() * 32);
+
+        HeatMap heatMap = new HeatMap(tailleMap, tailleMap);
+
+        for (int i = 0; i < strategies.size(); i++) {
+            int placementX = tailleMap - 2;
+            int placementY = tailleMap - 2;
+
+            switch (i){
+                case 1:
+                    placementX = 1;
+                    break;
+                case 2:
+                    placementY = 1;
+                    break;
+                case 3:
+                    placementY = placementX = (int) ((double) tailleMap / 2 + 0.5);
+                    break;
+            }
+            listBots.add(new Ai(new Joueur(i + 1, "Bot " + i, placementX, placementY), labyrinthe, strategies.get(i), this, heatMap));
+        }
+    }
+
     private void handleInputs(double deltaTime) {
         double dx = 0;
         double dy = 0;
+
 
         // Détection des directions
         if (input.contains(KeyCode.Z) || input.contains(KeyCode.UP)) {
@@ -295,6 +315,7 @@ public class GameController {
             deathAnimationStartTime = System.currentTimeMillis();
         }
 
+
         if (uiController != null) {
             uiController.updatePlayerStats(joueur);
         }
@@ -327,6 +348,7 @@ public class GameController {
             return;
         }
 
+    private void render() throws InterruptedException {
         gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
 
         renderer.draw(gc, labyrinthe);
@@ -334,10 +356,10 @@ public class GameController {
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
 
         renderer.drawPlayer(gc, joueur);
-        renderer.drawPlayer(gc, iaPlayer);
-        renderer.drawPlayer(gc, iaPlayer2);
-        renderer.drawPlayer(gc, iaPlayer3);
-        renderer.drawPlayer(gc, iaPlayer4);
+
+        for (Ai bot : listBots){
+            renderer.drawPlayer(gc, bot.getPlayer());
+        }
 
         drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
         
@@ -533,6 +555,7 @@ public class GameController {
         }
         
         try {
+            this.escWasPressed = false;
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/launcher.fxml"));
             Parent root = loader.load();
             Scene scene = new Scene(root);
