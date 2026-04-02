@@ -68,7 +68,7 @@ public class BombManager {
         bombs.add(new Bomb(bx, by, range, joueur));
         joueur.setNb_bombes(joueur.getNb_bombes() - 1);
 
-        System.out.println(String.format("[POSE] Bombe à (%d,%d) par %s", bx, by, joueur.getNom()));
+        System.out.printf("[POSE] Bombe à (%d,%d) par %s%n", bx, by, joueur.getNom());
         return true;
     }
 
@@ -144,7 +144,7 @@ public class BombManager {
 
                     // Ajoute le retour de bombe dans la file d'attente avec délai
                     Joueur proprio = bomb.getJoueur();
-                    if (proprio != null) {
+                    if (proprio != null && proprio.isAlive()) {
                         pendingReturns.add(new BombReturn(proprio, bombReturnDelay));
                     }
                 }
@@ -218,6 +218,8 @@ public class BombManager {
                     joueur.registerDamage();
                     if (joueur.getPv() <= 0) {
                         joueur.setAlive(false);
+                        joueur.setNb_bombes(0); // il ne peut plus poser de bombes
+                        System.out.println(joueur.getNom() + " est MORT !");
                     }
                     break;
                 }

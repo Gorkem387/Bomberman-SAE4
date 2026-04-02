@@ -6,6 +6,10 @@ module iut.gon.bomberman.client {
     requires java.desktop;
     requires javafx.media;
 
-    opens iut.gon.bomberman.client.controllers to javafx.fxml;
+    opens iut.gon.bomberman.client.controllers;
     exports iut.gon.bomberman.client;
+    exports iut.gon.bomberman.client.ai;
+    exports iut.gon.bomberman.client.controllers;
+    exports iut.gon.bomberman.client.network;
+    exports iut.gon.bomberman.client.sound;
 }
