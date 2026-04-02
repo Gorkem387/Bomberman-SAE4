@@ -229,7 +229,7 @@ public class LabRenderer {
      * @param gc le contexte graphique du canvas
      * @param joueur le joueur à dessiner
      */
-    public void drawPlayer(GraphicsContext gc, Joueur joueur, boolean isVictory) {
+    public void drawPlayer(GraphicsContext gc, Joueur joueur, boolean isVictory, boolean isLocal) {
         if (joueur == null) return;
 
         double screenX = joueur.getX() * TILE_SIZE;
@@ -273,25 +273,35 @@ public class LabRenderer {
 
         Image currentSprite = spriteCache.get(cacheKey)[frameIndex];
 
+        double drawX = joueur.getX() * TILE_SIZE;
+        double drawY = (joueur.getY() + visualOffsetY) * TILE_SIZE;
 
-        gc.drawImage(currentSprite,
-                joueur.getX() * TILE_SIZE,
-                (joueur.getY() + visualOffsetY) * TILE_SIZE,
-                TILE_SIZE, TILE_SIZE);
-        gc.setStroke(javafx.scene.paint.Color.RED);
-        double hSize = 0.7;
-        double off = 0.15;
-        // Hitbox
-        /*
-        gc.strokeRect((joueur.getX() + off) * TILE_SIZE,
-                (joueur.getY() + off) * TILE_SIZE,
-                hSize * TILE_SIZE, hSize * TILE_SIZE);
+        gc.drawImage(currentSprite, drawX, drawY, TILE_SIZE, TILE_SIZE);
 
-         */
+        if (isLocal) {
+            drawLocalIndicator(gc, drawX, drawY);
+        }
+    }
+
+    private void drawLocalIndicator(GraphicsContext gc, double x, double y) {
+        gc.setFill(Color.YELLOW);
+        double width = 12;
+        double height = 4;
+        // Petit rectangle jaune au dessus de la tête
+        gc.fillRect(x + (TILE_SIZE - width) / 2, y - 8, width, height);
+
+        // Petite flèche pointant vers le bas
+        double tx = x + TILE_SIZE / 2;
+        double ty = y - 3;
+        gc.fillPolygon(new double[]{tx - 5, tx + 5, tx}, new double[]{ty - 3, ty - 3, ty + 2}, 3);
+    }
+
+    public void drawPlayer(GraphicsContext gc, Joueur joueur, boolean isVictory) {
+        drawPlayer(gc, joueur, isVictory, false);
     }
 
     public void drawPlayer(GraphicsContext gc, Joueur joueur) {
-        drawPlayer(gc, joueur, false);
+        drawPlayer(gc, joueur, false, false);
     }
 
     /**
