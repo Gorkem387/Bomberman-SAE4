@@ -6,6 +6,7 @@ import iut.gon.bomberman.common.model.Mess.MessageType;
 import iut.gon.bomberman.common.model.Mess.MoveRequest;
 import iut.gon.bomberman.common.model.Mess.PlaceBombRequest;
 import iut.gon.bomberman.common.model.Mess.BombUpdate;
+import iut.gon.bomberman.common.model.Mess.ChatMessage;
 import iut.gon.bomberman.common.model.labyrinthe.Bomb;
 import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.labyrinthe.DFSGenerator;
@@ -17,7 +18,12 @@ import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.VBox;
 
 import iut.gon.bomberman.common.model.DTO.*;
 import iut.gon.bomberman.common.model.Mess.*;
@@ -25,12 +31,18 @@ import java.util.*;
 
 public class OnlineGameController {
 
-    @FXML
-    private Canvas gameCanvas;
+    @FXML private Canvas gameCanvas;
+    @FXML private VBox chatPanel;
+    @FXML private ScrollPane chatScrollPane;
+    @FXML private VBox chatMessages;
+    @FXML private TextField chatInput;
+    @FXML private Button sendButton;
 
     private GraphicsContext gc;
     private final LabRenderer renderer = new LabRenderer();
     private Labyrinthe labyrinthe;
+
+    // Joueur local et joueurs distants
     private Joueur localPlayer;
     private final Map<Integer, Joueur> remotePlayers = new HashMap<>();
     private BombManager bombManager; // Utilisé ici comme conteneur pour le rendu
@@ -45,15 +57,22 @@ public class OnlineGameController {
     private final Set<KeyCode> input = new HashSet<>();
     private long lastNanoTime = -1;
     private boolean spaceWasPressed = false;
+    private double lastDx = 0;
+    private double lastDy = 0;
 
     private javafx.scene.image.Image heartImage;
     private javafx.scene.image.Image bombImage;
 
+    /**
+     * Méthode appelée automatiquement par JavaFX au chargement de la vue.
+     * Initialise les ressources graphiques, le joueur local, les listeners réseau et la boucle de jeu.
+     */
     @FXML
     public void initialize() {
         this.gc = gameCanvas.getGraphicsContext2D();
         this.bombManager = new BombManager();
 
+        // Charge l'image du cœur
         try {
             String resourcePath = Objects.requireNonNull(
                 getClass().getResource("/iut/gon/bomberman/client/assets/heart.png")
@@ -63,6 +82,7 @@ public class OnlineGameController {
             System.err.println("Impossible de charger l'image du cœur : " + e.getMessage());
         }
 
+        // Charge l'image de la bombe personnalisée
         try {
             String bombPath = iut.gon.bomberman.client.GameSettings.getSelectedBombPath();
             String resourcePath = Objects.requireNonNull(
@@ -73,48 +93,84 @@ public class OnlineGameController {
             System.err.println("Impossible de charger l'image de la bombe personnalisée");
         }
 
+        // Initialise le joueur local avec les infos du NetworkManager
         NetworkManager nm = NetworkManager.getInstance();
         this.localPlayer = new Joueur(nm.getLocalPlayerId(), nm.getLocalPlayerName());
 
+        // Inputs clavier sur le canvas uniquement
         gameCanvas.setFocusTraversable(true);
-        gameCanvas.setOnKeyPressed(e -> input.add(e.getCode()));
+        gameCanvas.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER || e.getCode() == KeyCode.T) {
+                Platform.runLater(() -> chatInput.requestFocus());
+            } else {
+                input.add(e.getCode());
+            }
+        });
         gameCanvas.setOnKeyReleased(e -> {
             input.remove(e.getCode());
             if (e.getCode() == KeyCode.SPACE) spaceWasPressed = false;
             if (e.getCode() == KeyCode.ESCAPE) escWasPressed = false;
         });
 
-        // --- SYNCHRONISATION DES JOUEURS ---
+        // Vider les touches quand le canvas reprend le focus
+        gameCanvas.focusedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                input.clear();
+                spaceWasPressed = false;
+                escWasPressed = false;
+            }
+        });
+
+        // Chat : Entrée pour envoyer
+        chatInput.setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                sendChatMessage();
+                Platform.runLater(() -> gameCanvas.requestFocus());
+            } else if (e.getCode() == KeyCode.ESCAPE) {
+                chatInput.clear();
+                Platform.runLater(() -> gameCanvas.requestFocus());
+            }
+        });
+
+        // Recevoir les messages chat du serveur
+        nm.addServerMessageListener(MessageType.CHAT_MESSAGE, msg -> {
+            if (msg instanceof ChatMessage chat) {
+                Platform.runLater(() -> addChatMessage(chat.getSenderName(), chat.getContent()));
+            }
+        });
+
+        // Synchronisation des joueurs
         nm.addServerMessageListener(MessageType.GAME_UPDATE, msg -> {
             if (msg instanceof JoueurMisAJourDTO update) {
                 Platform.runLater(() -> {
                     for (MinimDTO pos : update.positionsAll) {
                         if (pos.getId() == localPlayer.getId()) {
+                            // Mise à jour du joueur local
                             if (localPlayer.isAlive()) {
+                                double prevX = localPlayer.getX();
+                                double prevY = localPlayer.getY();
                                 localPlayer.setX(pos.getX() / 100.0);
                                 localPlayer.setY(pos.getY() / 100.0);
                                 localPlayer.setPv(pos.getPv());
                                 localPlayer.setNb_bombes(pos.getNb_bombes());
                                 localPlayer.setExplosionRange(pos.getRange());
                                 localPlayer.setSpeed_multiplier(pos.getSpeed());
-
-                                if (localPlayer.getPv() <= 0) {
-                                    localPlayer.setAlive(false);
-                                }
+                                localPlayer.setDirection(inferDirection(localPlayer.getX() - prevX, localPlayer.getY() - prevY));
+                                if (localPlayer.getPv() <= 0) localPlayer.setAlive(false);
                             }
                         } else {
                             Joueur remote = remotePlayers.computeIfAbsent(pos.getId(), id -> new Joueur(id, "Player_" + id));
                             if (remote.isAlive()) {
+                                double prevX = remote.getX();
+                                double prevY = remote.getY();
                                 remote.setX(pos.getX() / 100.0);
                                 remote.setY(pos.getY() / 100.0);
                                 remote.setPv(pos.getPv());
                                 remote.setNb_bombes(pos.getNb_bombes());
                                 remote.setExplosionRange(pos.getRange());
                                 remote.setSpeed_multiplier(pos.getSpeed());
-
-                                if (remote.getPv() <= 0) {
-                                    remote.setAlive(false);
-                                }
+                                remote.setDirection(inferDirection(remote.getX() - prevX, remote.getY() - prevY));
+                                if (remote.getPv() <= 0) remote.setAlive(false);
                             }
                         }
                     }
@@ -174,20 +230,60 @@ public class OnlineGameController {
             }
         };
         gameLoop.start();
+
+        // Focus canvas au démarrage
+        Platform.runLater(() -> gameCanvas.requestFocus());
     }
 
-    private void handleInputs() {
-        double dx = 0;
-        double dy = 0;
+    @FXML
+    private void onSendButtonClicked() {
+        sendChatMessage();
+        Platform.runLater(() -> gameCanvas.requestFocus());
+    }
 
-        if (input.contains(KeyCode.Z) || input.contains(KeyCode.UP)) dy--;
-        if (input.contains(KeyCode.S) || input.contains(KeyCode.DOWN)) dy++;
-        if (input.contains(KeyCode.Q) || input.contains(KeyCode.LEFT)) dx--;
+    private void sendChatMessage() {
+        String text = chatInput.getText().trim();
+        if (!text.isEmpty()) {
+            NetworkManager nm = NetworkManager.getInstance();
+            nm.send(new ChatMessage(nm.getLocalPlayerName(), text, nm.getCurrentLobbyId()));
+            chatInput.clear();
+        }
+    }
+
+    private void addChatMessage(String sender, String content) {
+        Label lbl = new Label("[" + sender + "] " + content);
+        lbl.setStyle(
+                "-fx-text-fill: white;" +
+                        "-fx-font-size: 12px;" +
+                        "-fx-background-color: #1a1a3a;" +
+                        "-fx-padding: 3 6 3 6;" +
+                        "-fx-background-radius: 4;"
+        );
+        lbl.setWrapText(true);
+        lbl.setMaxWidth(230);
+        chatMessages.getChildren().add(lbl);
+        if (chatMessages.getChildren().size() > 100) chatMessages.getChildren().remove(0);
+        Platform.runLater(() -> chatScrollPane.setVvalue(1.0));
+    }
+
+    /**
+     * Algorithme permettant de récupérer les directions choisies par le joueur
+     * et d'envoyer les requêtes de mouvement/bombe au serveur.
+     */
+    private void handleInputs() {
+        if (!gameCanvas.isFocused()) return;
+
+        double dx = 0, dy = 0;
+        if (input.contains(KeyCode.Z) || input.contains(KeyCode.UP))    dy--;
+        if (input.contains(KeyCode.S) || input.contains(KeyCode.DOWN))  dy++;
+        if (input.contains(KeyCode.Q) || input.contains(KeyCode.LEFT))  dx--;
         if (input.contains(KeyCode.D) || input.contains(KeyCode.RIGHT)) dx++;
 
-        if (dx != 0 || dy != 0) {
+        if (dx != 0 || dy != 0 || lastDx != 0 || lastDy != 0) {
             NetworkManager.getInstance().send(new MoveRequest(dx, dy));
         }
+        lastDx = dx;
+        lastDy = dy;
 
         if (input.contains(KeyCode.SPACE) && !spaceWasPressed) {
             spaceWasPressed = true;
@@ -195,6 +291,11 @@ public class OnlineGameController {
         }
     }
 
+    /**
+     * Fonction permettant de gérer et de mettre à jour le jeu chez le client.
+     * Gère la touche ESC, les états de fin de partie et les inputs du joueur.
+     * @param deltaTime Temps écoulé depuis la dernière frame
+     */
     private void update(double deltaTime) {
         if (input.contains(KeyCode.ESCAPE) && !escWasPressed) {
             escWasPressed = true;
@@ -204,6 +305,7 @@ public class OnlineGameController {
             }
         }
 
+        // Si la partie est terminée, on attend la fin de l'animation de mort
         if (isVictory || isGameOver) {
             if (isGameOver && deathAnimationStartTime > 0) {
                 long elapsed = System.currentTimeMillis() - deathAnimationStartTime;
@@ -212,6 +314,7 @@ public class OnlineGameController {
             return;
         }
 
+        // Déclenche le game over si le joueur local vient de mourir
         if (!localPlayer.isAlive() && !isGameOver) {
             this.isGameOver = true;
             deathAnimationStartTime = System.currentTimeMillis();
@@ -222,6 +325,10 @@ public class OnlineGameController {
         }
     }
 
+    /**
+     * Algorithme dédié à l'affichage du labyrinthe, des joueurs et des effets dans l'interface,
+     * et affiche l'écran de victoire ou de défaite selon l'état de la partie.
+     */
     private void render() {
         if (labyrinthe == null) return;
 
@@ -270,6 +377,16 @@ public class OnlineGameController {
         gc.fillText("Appuyez sur ESC pour retourner au menu", gameCanvas.getWidth() / 2 - 200, gameCanvas.getHeight() / 2 + 60);
     }
 
+    /**
+     * Affiche une barre bleue foncée arrondie en bas du canvas avec les statistiques du joueur :
+     * bombes disponibles, points de vie, portée des explosions et multiplicateur de vitesse.
+     *
+     * @param gc    GraphicsContext pour dessiner
+     * @param bombs Nombre de bombes disponibles
+     * @param hearts Nombre de points de vie
+     * @param range Portée des explosions
+     * @param speed Multiplicateur de vitesse
+     */
     private void drawStatsBar(GraphicsContext gc, int bombs, int hearts, int range, float speed) {
         double barHeight = 35;
         double barY = gameCanvas.getHeight() - barHeight - 5;
@@ -298,6 +415,15 @@ public class OnlineGameController {
         gc.fillText("RANGE: " + range, barX + 240, barY + 23);
     }
 
+    /**
+     * Affiche un élément de statistique (image + compteur).
+     * @param gc    GraphicsContext
+     * @param image Image à afficher
+     * @param count Nombre à afficher
+     * @param x     Position X
+     * @param y     Position Y
+     * @param label Texte préfixe
+     */
     private void drawStatItem(GraphicsContext gc, javafx.scene.image.Image image, int count, double x, double y, String label) {
         if (image == null) return;
         gc.drawImage(image, x, y, 25, 25);
@@ -321,18 +447,10 @@ public class OnlineGameController {
         if (gameLoop != null) {
             gameLoop.stop();
         }
-        remotePlayers.clear();
-        NetworkManager.getInstance().clearLastInitGameMessage();
-        NetworkManager.getInstance().disconnect();
+        NetworkManager.reset(); // remet le singleton à zéro comme au premier lancement
         try {
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/fxml/launcher.fxml"));
-            javafx.scene.Parent root = loader.load();
-            javafx.scene.Scene scene = new javafx.scene.Scene(root);
-
             javafx.stage.Stage stage = (javafx.stage.Stage) gameCanvas.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle("Bomberman - Menu Principal");
-            stage.show();
+            new iut.gon.bomberman.client.MainApp().start(stage);
         } catch (Exception e) {
             System.err.println("Erreur lors du retour au menu : " + e.getMessage());
         }
@@ -347,6 +465,11 @@ public class OnlineGameController {
         });
     }
 
+    /**
+     * Initialise les joueurs à partir des données reçues du serveur lors du INIT_GAME.
+     * Identifie le joueur local par son nom et place les autres en joueurs distants.
+     * @param players Liste des joueurs initialisés par le serveur
+     */
     public void initPlayers(List<InitGameMessage.PlayerInitDTO> players) {
         String myName = NetworkManager.getInstance().getLocalPlayerName();
 
@@ -369,5 +492,12 @@ public class OnlineGameController {
                 remote.setAlive(true);
             }
         }
+    }
+
+    private Direction inferDirection(double dx, double dy) {
+        double threshold = 0.0001;
+        if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) return Direction.IDLE;
+        if (Math.abs(dx) >= Math.abs(dy)) return dx > 0 ? Direction.RIGHT : Direction.LEFT;
+        return dy > 0 ? Direction.DOWN : Direction.UP;
     }
 }

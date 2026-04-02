@@ -12,7 +12,11 @@ import iut.gon.serverside.Lob.Lobby;
  * Gère l'entrée d'un joueur dans un salon existant.
  */
 public class JoinLobbyHandler implements MessageHandler<JoinLobbyRequest> {
-
+    /**
+     * Permet au joueur de rejoindre un lobby
+     * @param message
+     * @param client
+     */
     @Override
     public void handle(JoinLobbyRequest message, ClientHandler client) {
         Lobby lobby = LobbyManager.getInstance().getLobby(message.getLobbyId());
@@ -22,7 +26,10 @@ public class JoinLobbyHandler implements MessageHandler<JoinLobbyRequest> {
             client.setLobbyId(lobby.getId());
 
             // Mettre à jour le nom du joueur côté serveur
-            if (client.getJoueur() != null) {
+            if (client.getJoueur() == null) {
+                Joueur j = new Joueur(Math.abs(client.hashCode()), message.getPlayerName());
+                client.setJoueur(j);
+            } else {
                 client.getJoueur().setNom(message.getPlayerName());
                 // On lui donne un ID unique temporaire (positif)
                 client.getJoueur().setId(Math.abs(client.hashCode()));

@@ -11,15 +11,24 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.net.URL;
 
 public class LauncherController {
 
+    /**
+     * Fonction redirigeant le joueur vers le jeu en local
+     * @param actionEvent
+     */
     @FXML
     public void handleLocalGame(ActionEvent actionEvent) {
-            loadGameView(actionEvent);
+            loadCustomizeView(actionEvent);
             System.out.println("Mode Local lancé.");
     }
 
+    /**
+     * Fonction permettant de rediriger le joueur vers l'écran de connexion
+     * @param actionEvent
+     */
     @FXML
     public void handleOnlineGame(ActionEvent actionEvent) {
         try {
@@ -31,11 +40,19 @@ public class LauncherController {
         }
     }
 
+    /**
+     * Fonction permettant de fermer l'application
+     * @param actionEvent
+     */
     @FXML
     public void handleExit(ActionEvent actionEvent) {
         Platform.exit();
     }
 
+    /**
+     * Fonction permettant de personnaliser le personnage
+     * @param actionEvent
+     */
     public void handleCustomize(ActionEvent actionEvent) {
         // Renvoie vers la personnalisation du personnage, ...
         try {
@@ -55,26 +72,26 @@ public class LauncherController {
         }
     }
 
-    /**
-     * Méthode pour charger la vue du labyrinthe
-     */
-    private void loadGameView(ActionEvent event) {
+    private void loadCustomizeView(ActionEvent event) {
         try {
-            String fxmlPath = "/iut/gon/bomberman/client/game-view.fxml";
+            String fxmlPath = "/fxml/configPartieLocale.fxml";
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            URL resource = getClass().getResource(fxmlPath);
+            if (resource == null) {
+                System.err.println("FXML introuvable : " + fxmlPath);
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(resource);
             Parent gameRoot = loader.load();
 
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-
-            Scene gameScene = new Scene(gameRoot);
-            stage.setScene(gameScene);
-            stage.setTitle("Bomberman - Partie en cours");
+            stage.setScene(new Scene(gameRoot));
+            stage.setTitle("Bomberman - Configuration Partie");
             stage.centerOnScreen();
             stage.show();
 
         } catch (IOException e) {
-            System.err.println("Erreur : Impossible de charger la vue du jeu !");
             e.printStackTrace();
         }
     }

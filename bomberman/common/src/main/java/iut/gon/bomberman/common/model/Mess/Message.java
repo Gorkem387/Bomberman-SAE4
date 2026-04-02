@@ -7,5 +7,7 @@ import java.io.Serializable;
  * Doit être présente dans le module Common dans une architecture multi-module.
  */
 public interface Message extends Serializable {
+
+    // Getter
     MessageType getType();
 }

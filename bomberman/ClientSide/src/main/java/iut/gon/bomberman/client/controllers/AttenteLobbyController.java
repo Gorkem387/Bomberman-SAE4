@@ -2,6 +2,7 @@ package iut.gon.bomberman.client.controllers;
 
 import iut.gon.bomberman.client.MainApp;
 import iut.gon.bomberman.client.network.NetworkManager;
+import iut.gon.bomberman.client.network.ServerMessageListener;
 import iut.gon.bomberman.common.model.Mess.*;
 import iut.gon.bomberman.common.model.labyrinthe.TypeLab;
 import javafx.application.Platform;
@@ -19,11 +20,21 @@ import java.util.ResourceBundle;
 
 public class AttenteLobbyController implements Initializable {
 
-    @FXML private ListView<String> listeLobby;
-    @FXML private MenuBar menu;
-    @FXML private Pane pane;
+    @FXML
+    private ListView<String> listeLobby;
+    @FXML
+    private MenuBar menu;
+    @FXML
+    private Pane pane;
     private final List<Integer> lobbyIds = new ArrayList<>();
 
+    private ServerMessageListener joinLobbyListener;
+    private ServerMessageListener lobbyListListener;
+    private ServerMessageListener createLobbyListener;
+
+    /**
+     * Méthode appelée automatiquement par JavaFX au chargement de la vue
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // Redimensionnement dynamique
@@ -42,6 +53,7 @@ public class AttenteLobbyController implements Initializable {
                     // Si on est déjà dedans, on affiche juste la page
                     if (nm.getCurrentLobbyId() == selectedLobbyId) {
                         try {
+                            cleanup();
                             MainApp.setRoot("fxml/lobby");
                         } catch (IOException ex) {
                             ex.printStackTrace();
@@ -57,17 +69,22 @@ public class AttenteLobbyController implements Initializable {
         // Listeners de messages
         NetworkManager nm = NetworkManager.getInstance();
 
-        nm.addServerMessageListener(MessageType.JOIN_LOBBY_RESPONSE, msg -> {
+        joinLobbyListener = msg -> {
             JoinLobbyResponse r = (JoinLobbyResponse) msg;
             if (r.isSuccess()) {
                 nm.setCurrentLobbyId(r.getLobbyId());
                 Platform.runLater(() -> {
-                    try { MainApp.setRoot("fxml/lobby"); } catch (IOException ex) { ex.printStackTrace(); }
+                    try {
+                        cleanup();
+                        MainApp.setRoot("fxml/lobby");
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                 });
             }
-        });
+        };
 
-        nm.addServerMessageListener(MessageType.LOBBY_LIST_RESPONSE, msg -> {
+        lobbyListListener = msg -> {
             LobbyListResponse r = (LobbyListResponse) msg;
             Platform.runLater(() -> {
                 listeLobby.getItems().clear();
@@ -77,35 +94,53 @@ public class AttenteLobbyController implements Initializable {
                     lobbyIds.add(lobby.id);
                 }
             });
-        });
+        };
 
-        nm.addServerMessageListener(MessageType.CREATE_LOBBY_RESPONSE, msg -> {
+        createLobbyListener = msg -> {
             CreateLobbyResponse r = (CreateLobbyResponse) msg;
             if (r.isSuccess()) {
                 nm.setCurrentLobbyId(r.getLobbyId());
                 Platform.runLater(() -> {
-                    try { MainApp.setRoot("fxml/lobby"); } catch (IOException ex) { ex.printStackTrace(); }
+                    try {
+                        cleanup();
+                        MainApp.setRoot("fxml/lobby");
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                 });
             }
-        });
+        };
+
+        nm.addServerMessageListener(MessageType.JOIN_LOBBY_RESPONSE, joinLobbyListener);
+        nm.addServerMessageListener(MessageType.LOBBY_LIST_RESPONSE, lobbyListListener);
+        nm.addServerMessageListener(MessageType.CREATE_LOBBY_RESPONSE, createLobbyListener);
 
         handleRefresh();
     }
 
-    @FXML
-    public void handleCreateLobby() {
+    /**
+     * Algorithme permettant au joueur de créer un lobby lorsque il appuie sur le bouton pour créer un lobby.
+     *
+     */
+    private void cleanup() {
         NetworkManager nm = NetworkManager.getInstance();
-        // --- MISE À JOUR : On passe maintenant le pseudo du joueur local ---
-        nm.send(new CreateLobbyRequest(
-                nm.getLocalPlayerName() + "'s Lobby", 
-                nm.getLocalPlayerName(), // Pseudo de l'owner
-                4, 
-                TypeLab.DEEPSEARCH,
-                21, 
-                21
-        ));
+        nm.removeServerMessageListener(MessageType.JOIN_LOBBY_RESPONSE, joinLobbyListener);
+        nm.removeServerMessageListener(MessageType.LOBBY_LIST_RESPONSE, lobbyListListener);
+        nm.removeServerMessageListener(MessageType.CREATE_LOBBY_RESPONSE, createLobbyListener);
     }
 
+    @FXML
+    public void handleCreateLobby() {
+        try {
+            MainApp.setRoot("fxml/configPartieEnLigne");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Algorithme permettant de mettre à jours la liste des lobby
+     */
     @FXML
     public void handleRefresh() {
         NetworkManager.getInstance().send(new LobbyListRequest());

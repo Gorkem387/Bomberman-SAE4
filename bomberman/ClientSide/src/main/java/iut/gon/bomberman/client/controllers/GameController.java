@@ -3,7 +3,11 @@ package iut.gon.bomberman.client.controllers;
 import iut.gon.bomberman.client.ai.AISTRATEGIES;
 import iut.gon.bomberman.client.ai.Ai;
 import iut.gon.bomberman.client.ai.HeatMap;
+import iut.gon.bomberman.client.network.NetworkManager;
 import iut.gon.bomberman.client.sound.SoundManager;
+import iut.gon.bomberman.client.ai.AISTRATEGIES;
+import iut.gon.bomberman.client.ai.Ai;
+import iut.gon.bomberman.client.ai.HeatMap;
 import iut.gon.bomberman.client.view.LabRenderer;
 import iut.gon.bomberman.common.model.labyrinthe.BombManager;
 import iut.gon.bomberman.common.model.labyrinthe.DFSGenerator;
@@ -37,22 +41,11 @@ public class GameController {
     private final LabRenderer renderer = new LabRenderer();
     private Labyrinthe labyrinthe;
 
-    private HeatMap heatMap;
-    private Ai ia;
-    private Ai ia2;
-    private Ai ia3;
-    private Ai ia4;
-    private Joueur iaPlayer;
-    private Joueur iaPlayer2;
-    private Joueur iaPlayer3;
-    private Joueur iaPlayer4;
-
     private Joueur joueur;
     private BombManager bombManager;
     private AnimationTimer gameLoop;
     private boolean isGameOver = false;
     private boolean isVictory = false;
-    private List<Joueur> bots;
     private boolean deathAnimationComplete = false;
     private long deathAnimationStartTime = -1;
     private static final long DEATH_ANIMATION_DURATION = 1000;
@@ -73,7 +66,13 @@ public class GameController {
     private boolean isPaused = false;
 
     private double debugTimer = 0;
+    private ArrayList<Ai> listBots = new ArrayList<Ai>();
 
+
+
+    /**
+     * Méthode appelée automatiquement par JavaFX au chargement de la vue
+     */
     @FXML
     public void initialize() {
         // Charge l'image du cœur
@@ -97,6 +96,7 @@ public class GameController {
             System.err.println("Impossible de charger l'image de la bombe personnalisée");
         }
 
+        // ...existing code...
         DFSGenerator generator = new DFSGenerator();
         this.labyrinthe = generator.createLabyrinthe(21, 21);
 
@@ -112,27 +112,6 @@ public class GameController {
 
         this.joueur.setX(1);
         this.joueur.setY(1);
-
-        this.iaPlayer = new Joueur(2, "IA AGGRESSIVE");
-        this.heatMap = new HeatMap(21, 21);
-        this.iaPlayer.setX(19);
-        this.iaPlayer.setY(19);
-        this.ia = new Ai(iaPlayer, this.labyrinthe, AISTRATEGIES.AGGRESSIVE, this, heatMap, bombManager);
-
-        this.iaPlayer2 = new Joueur(3, "IA CHAOS");
-        this.iaPlayer2.setX(19);
-        this.iaPlayer2.setY(1);
-        this.ia2 = new Ai(iaPlayer2, this.labyrinthe, AISTRATEGIES.CHAOS, this, heatMap, bombManager);
-
-        this.iaPlayer3 = new Joueur(4, "IA SURVIVOR");
-        this.iaPlayer3.setX(1);
-        this.iaPlayer3.setY(19);
-        this.ia3 = new Ai(iaPlayer3, this.labyrinthe, AISTRATEGIES.SURVIVOR, this, heatMap, bombManager);
-
-        this.iaPlayer4 = new Joueur(5, "IA SURVIVOR");
-        this.iaPlayer4.setX(9);
-        this.iaPlayer4.setY(9);
-        this.ia4 = new Ai(iaPlayer4, this.labyrinthe, AISTRATEGIES.SURVIVOR, this, heatMap, bombManager);
 
         gameCanvas.setWidth(labyrinthe.getWidth() * 32);
         gameCanvas.setHeight(labyrinthe.getHeight() * 32);
@@ -162,9 +141,43 @@ public class GameController {
         gameLoop.start();
     }
 
+    public void setConfig(int tailleMap, List<AISTRATEGIES> strategies) {
+
+        DFSGenerator generator = new DFSGenerator();
+        this.labyrinthe = generator.createLabyrinthe(tailleMap, tailleMap);
+
+        gameCanvas.setWidth(labyrinthe.getWidth() * 32);
+        gameCanvas.setHeight(labyrinthe.getHeight() * 32);
+
+        HeatMap heatMap = new HeatMap(tailleMap, tailleMap);
+
+        for (int i = 0; i < strategies.size(); i++) {
+            int placementX = tailleMap - 2;
+            int placementY = tailleMap - 2;
+
+            switch (i){
+                case 1:
+                    placementX = 1;
+                    break;
+                case 2:
+                    placementY = 1;
+                    break;
+                case 3:
+                    placementY = placementX = (int) ((double) tailleMap / 2 + 0.5);
+                    break;
+            }
+            listBots.add(new Ai(new Joueur(i + 1, "Bot " + i, placementX, placementY), labyrinthe, strategies.get(i), this, heatMap, bombManager));
+        }
+    }
+
+    /**
+     * Algorithme permettant de récupérer la direction choisi par le joueur.
+     * @param deltaTime
+     */
     private void handleInputs(double deltaTime) {
         double dx = 0;
         double dy = 0;
+
 
         // Détection des directions
         if (input.contains(KeyCode.Z) || input.contains(KeyCode.UP)) {
@@ -196,13 +209,24 @@ public class GameController {
         }
     }
 
+    /**
+     * L'algorithme permet de savoir si le joueur a gagné
+     * @return retourne true si le joueur gagne
+     */
     private boolean checkVictoryCondition() {
-        return joueur.isAlive()
-                && !iaPlayer.isAlive()
-                && !iaPlayer2.isAlive()
-                && !iaPlayer3.isAlive()
-                && !iaPlayer4.isAlive();
+       if(!joueur.isAlive())return false;
+
+       for (Ai bot : listBots){
+           if (bot.getPlayer().isAlive()) return false;
+       }
+
+       return true;
     }
+
+    /**
+     * Fonction permettant de gérer et de mettre à jour le jeu chez le client
+     * @param deltaTime
+     */
 
     private void update(double deltaTime) {
         if (input.contains(KeyCode.ESCAPE) && !escWasPressed) {
@@ -240,7 +264,14 @@ public class GameController {
             return;
         }
 
-        boolean anExplosionHappened = bombManager.update(deltaTime, labyrinthe, List.of(joueur, iaPlayer, iaPlayer2, iaPlayer3, iaPlayer4));
+        //prepare liste pour bombManager
+            List<Joueur> players = new ArrayList<>();
+
+            players.add(joueur);
+            listBots.forEach(bot -> players.add(bot.getPlayer()));
+
+
+        boolean anExplosionHappened = bombManager.update(deltaTime, labyrinthe, players);
 
         if (anExplosionHappened) {
             SoundManager.getInstance().playExplosion();
@@ -253,25 +284,12 @@ public class GameController {
             }
         }
 
-        if (iaPlayer.isAlive()) {
-            ia.update(deltaTime, new Joueur[]{iaPlayer, joueur});
-            if (iaPlayer.getPv() <= 0) {
-                iaPlayer.setAlive(false);
+        //tue l'ia si ses pv sont à 0 ou moins, et update son comportement
+        for(Ai bot : listBots){
+            bot.update(deltaTime, new Joueur[]{bot.getPlayer(), joueur});
+            if (bot.getPlayer().getPv() <= 0) {
+                bot.getPlayer().setAlive(false);
             }
-        }
-        if (iaPlayer2.isAlive()) {
-            ia2.update(deltaTime, new Joueur[]{iaPlayer2, joueur});
-            if (iaPlayer2.getPv() <= 0) iaPlayer2.setAlive(false);
-        }
-
-        if (iaPlayer3.isAlive()) {
-            ia3.update(deltaTime, new Joueur[]{iaPlayer3, joueur});
-            if (iaPlayer3.getPv() <= 0) iaPlayer3.setAlive(false);
-        }
-
-        if (iaPlayer4.isAlive()) {
-            ia4.update(deltaTime, new Joueur[]{iaPlayer4, joueur});
-            if (iaPlayer4.getPv() <= 0) iaPlayer4.setAlive(false);
         }
 
         if (!isVictory && checkVictoryCondition()) {
@@ -281,19 +299,27 @@ public class GameController {
 
         List<Joueur> targets = new ArrayList<>();
         if (joueur.isAlive()) targets.add(joueur);
-        if (iaPlayer.isAlive()) targets.add(iaPlayer);
-        if (iaPlayer2.isAlive()) targets.add(iaPlayer2);
-        if (iaPlayer3.isAlive()) targets.add(iaPlayer3);
-        if (iaPlayer4.isAlive()) targets.add(iaPlayer4);
 
+        for(Ai bot : listBots){
+            if (bot.getPlayer().isAlive()) targets.add(bot.getPlayer());
+        }
+
+        //check si le joueur ou les bots sont morts, et les tue si c'est le cas
         if (joueur.getPv() <= 0 && joueur.isAlive()) {
             joueur.setAlive(false);
         }
+        for(Ai bots : listBots){
+            if (bots.getPlayer().getPv() <= 0 && bots.getPlayer().isAlive()) {
+                bots.getPlayer().setAlive(false);
+            }
+        }
 
+        //game over
         if (!joueur.isAlive() && !isGameOver) {
             this.isGameOver = true;
             deathAnimationStartTime = System.currentTimeMillis();
         }
+
 
         if (uiController != null) {
             uiController.updatePlayerStats(joueur);
@@ -306,26 +332,29 @@ public class GameController {
             System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
                     joueur.getNom(), joueur.getSpeed_multiplier(), joueur.getExplosionRange()));
 
-            System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
-                    iaPlayer.getNom(), iaPlayer.getSpeed_multiplier(), iaPlayer.getExplosionRange()));
+            for(Ai bot : listBots){
+                System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
+                        bot.getPlayer().getNom(), bot.getPlayer().getSpeed_multiplier(), bot.getPlayer().getExplosionRange()));
+            }
 
-            System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
-                    iaPlayer2.getNom(), iaPlayer2.getSpeed_multiplier(), iaPlayer2.getExplosionRange()));
-
-            System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
-                    iaPlayer3.getNom(), iaPlayer3.getSpeed_multiplier(), iaPlayer3.getExplosionRange()));
-
-            System.out.println(String.format("[%s] Speed: %.2f | Range: %d",
-                    iaPlayer4.getNom(), iaPlayer4.getSpeed_multiplier(), iaPlayer4.getExplosionRange()));
             debugTimer = 0;
         }
     }
 
+
+    /**
+     * Algorithme dédier à l'affichage du labyrinthe dans l'interface
+     * et afficher lorsque le joueur à gagné ou perdu.
+     */
+
     private void render() {
+        //check si on doit mettre le jeux en pauset afficher le menu correspondant
+
         if (joueur.isAlive() && isPaused) {
             drawPauseMenu();
             return;
         }
+
 
         gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
 
@@ -333,11 +362,11 @@ public class GameController {
         renderer.drawBombs(gc, bombManager.getBombs());
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
 
-        renderer.drawPlayer(gc, joueur);
-        renderer.drawPlayer(gc, iaPlayer);
-        renderer.drawPlayer(gc, iaPlayer2);
-        renderer.drawPlayer(gc, iaPlayer3);
-        renderer.drawPlayer(gc, iaPlayer4);
+        renderer.drawPlayer(gc, joueur, isVictory);
+
+        for (Ai bot : listBots){
+            renderer.drawPlayer(gc, bot.getPlayer());
+        }
 
         drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());
         
@@ -354,6 +383,10 @@ public class GameController {
             }
         }
     }
+
+    /**
+     * Fonction permettant d'afficher l'interface de défaite lorsque le joueur perd
+     */
 
     private void drawGameOverScreen() {
         gc.setFill(javafx.scene.paint.Color.rgb(0, 0, 0, 0.7));
@@ -383,6 +416,10 @@ public class GameController {
         gc.setFont(Font.font("Arial", 24));
         gc.fillText("Appuyez sur ESC pour reprendre", gameCanvas.getWidth()/2 - 150, gameCanvas.getHeight()/2 + 60);
     }
+
+    /**
+     * Fonction permettant d'afficher l'interface de victoire lorsque le joueur gagne
+     */
 
     private void drawVictoryOverScreen(){
         gc.setFill(javafx.scene.paint.Color.rgb(0, 0, 0, 0.7));
@@ -531,16 +568,11 @@ public class GameController {
         if (gameLoop != null) {
             gameLoop.stop();
         }
-        
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/launcher.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            
-            Stage stage = (Stage) gameCanvas.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle("Bomberman - Menu Principal");
-            stage.show();
+            this.escWasPressed = false;
+            NetworkManager.reset();
+            javafx.stage.Stage stage = (javafx.stage.Stage) gameCanvas.getScene().getWindow();
+            new iut.gon.bomberman.client.MainApp().start(stage);
         } catch (Exception e) {
             System.err.println("Erreur lors du retour au menu : " + e.getMessage());
         }

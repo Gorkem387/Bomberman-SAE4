@@ -11,6 +11,7 @@ public class CreateLobbyResponse implements Message {
         this.lobbyId = lobbyId;
     }
 
+    // Getter
     @Override
     public MessageType getType() {
         return MessageType.CREATE_LOBBY_RESPONSE;

@@ -26,13 +26,33 @@ public class SoundManager {
         return instance;
     }
 
+    /**
+     * Permet d'ajouter du son au jeu
+     * @param fileName
+     * @return
+     */
     private AudioClip loadSound(String fileName) {
         String path = "/iut/gon/bomberman/client/assets/sounds/" + fileName;
         return new AudioClip(Objects.requireNonNull(getClass().getResource(path)).toExternalForm());
     }
 
+    /**
+     * Joue le son pour l'explosion
+     */
     public void playExplosion() { explosionSound.play(); }
+
+    /**
+     * Joue le son pour les bonus
+     */
     public void playBonus() { bonusSound.play(); }
+
+    /**
+     * Joue le son lorsque le joueur gagne
+     */
     public void playVictory() { victorySound.play(); }
+
+    /**
+     * Joue le son lorsque le joueur perd
+     */
     public void playDefeat() { defeatSound.play(); }
 }

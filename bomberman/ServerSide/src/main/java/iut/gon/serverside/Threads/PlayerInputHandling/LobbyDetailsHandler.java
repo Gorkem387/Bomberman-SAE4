@@ -12,7 +12,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class LobbyDetailsHandler implements MessageHandler<LobbyDetailsRequest> {
-    
+
+    /**
+     * Permet de notifier les joueurs sur le lobby
+     * @param message
+     * @param client
+     */
     @Override
     public void handle(LobbyDetailsRequest message, ClientHandler client) {
         Lobby lobby = LobbyManager.getInstance().getLobby(message.getLobbyId());

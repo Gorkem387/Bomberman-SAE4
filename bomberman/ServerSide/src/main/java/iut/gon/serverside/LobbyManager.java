@@ -34,6 +34,16 @@ public class LobbyManager {
         return instance;
     }
 
+    /**
+     * Créer un lobby côté serveur
+     * @param owner
+     * @param nom_lobby
+     * @param nbJMax
+     * @param labyrinthe_type
+     * @param lab_size_x
+     * @param lab_size_y
+     * @return
+     */
     public synchronized Lobby createLobby(Joueur owner, String nom_lobby, int nbJMax, TypeLab labyrinthe_type, int lab_size_x, int lab_size_y) {
         int id = nextLobbyId++;
         Lobby lobby = new Lobby(id, nom_lobby, owner, nbJMax, labyrinthe_type, lab_size_x, lab_size_y);
@@ -41,10 +51,15 @@ public class LobbyManager {
         return lobby;
     }
 
+    /**
+     * Supprime le lobby
+     * @param lobbyId
+     */
     public synchronized void removeLobby(int lobbyId) {
         lobbies.remove(lobbyId);
     }
 
+    // Getter
     public synchronized Lobby getLobby(int id){
         return lobbies.get(id);
     }

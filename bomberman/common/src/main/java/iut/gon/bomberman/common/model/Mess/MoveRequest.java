@@ -9,6 +9,7 @@ public class MoveRequest implements Message {
         this.dy = dy;
     }
 
+    // Getter
     @Override
     public MessageType getType() {
         return MessageType.MOVE_REQUEST;

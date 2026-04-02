@@ -19,7 +19,12 @@ import java.util.stream.Collectors;
  */
 public class Thread_Jeu extends Thread {
 
-    private boolean running = true;
+    // "volatile" est nécessaire car "running" est lu par Thread_Jeu et écrit par ClientHandler,
+    // qui tournent sur deux threads différents. Sans volatile, Java ne garantit pas que la valeur
+    // mise à jour par un thread soit immédiatement visible par l'autre (le CPU peut garder
+    // une copie en cache). Avec volatile, toute écriture est instantanément visible par tous les threads.
+    private volatile boolean running = true;
+
     private final Lobby lobby;
     private final BombManager bombManager; // Gestionnaire de bombes côté serveur
     private boolean mapChanged = false;
@@ -29,6 +34,9 @@ public class Thread_Jeu extends Thread {
         this.bombManager = new BombManager();
     }
 
+    /**
+     * Execute le code du jeu côté serveur
+     */
     @Override
     public void run() {
         long lastTime = System.nanoTime();
@@ -39,13 +47,19 @@ public class Thread_Jeu extends Thread {
             double deltaTime = (now - lastTime) / 1_000_000_000.0;
             lastTime = now;
 
-            bombManager.update(deltaTime, lobby.getLabyrinthe(), lobby.getJoueurs());
+            //Securité pour fin de game
+            List<Joueur> joueurs = lobby.getJoueurs();
+            if (joueurs == null || joueurs.isEmpty()) {
+                stopGame();
+                break;
+            }
+            bombManager.update(deltaTime, lobby.getLabyrinthe(), joueurs);
             checkBonuses();
 
-            // 2. Broadcast des positions des joueurs
+            // Broadcast des positions des joueurs
             JoueurMisAJourDTO updateDTO = new JoueurMisAJourDTO();
             List<MinimDTO> positions = new ArrayList<>();
-            for (Joueur j : lobby.getJoueurs()) {
+            for (Joueur j : joueurs) {
                 MinimDTO m = new MinimDTO(
                     j.getId(),
                     (int)(j.getX() * 100),
@@ -53,7 +67,8 @@ public class Thread_Jeu extends Thread {
                     j.getPv(),
                     j.getNb_bombes(),
                     j.getExplosionRange(),
-                    j.getSpeed_multiplier()
+                    j.getSpeed_multiplier(),
+                        j.getDirection().ordinal()
                 );
 
                 positions.add(m);
@@ -92,6 +107,9 @@ public class Thread_Jeu extends Thread {
         }
     }
 
+    /**
+     * Arrête le jeu
+     */
     public void stopGame() {
         this.running = false;
     }

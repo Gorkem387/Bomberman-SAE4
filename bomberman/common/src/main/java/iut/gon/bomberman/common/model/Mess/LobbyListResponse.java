@@ -10,6 +10,7 @@ public class LobbyListResponse implements Message {
         this.lobbies = lobbies;
     }
 
+    // Getter
     @Override
     public MessageType getType() {
         return MessageType.LOBBY_LIST_RESPONSE;
@@ -18,7 +19,6 @@ public class LobbyListResponse implements Message {
     public List<LobbyDTO> getLobbies() {
         return lobbies;
     }
-
     public static class LobbyDTO implements Serializable {
         public final int id;
         public final String name;

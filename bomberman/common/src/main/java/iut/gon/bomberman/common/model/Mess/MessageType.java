@@ -1,5 +1,8 @@
 package iut.gon.bomberman.common.model.Mess;
 
+/**
+ * Représente les différents types de message pouvant être envoyé entre le client et le serveur
+ */
 public enum MessageType {
     CREATE_LOBBY_REQUEST,
     CREATE_LOBBY_RESPONSE,

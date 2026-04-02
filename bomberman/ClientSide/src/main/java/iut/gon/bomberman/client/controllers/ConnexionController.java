@@ -21,14 +21,25 @@ public class ConnexionController {
     @FXML
     private Button boutonConnexion;
 
+    /**
+     * Méthode appelée automatiquement par JavaFX au chargement de la vue
+     */
     @FXML
     public void initialize() {
+        //Reset les listeners si jamais returnToMenu() n'a pas été appelé (juste pour etre safe)
+        NetworkManager.getInstance().clearListeners();
+
         // Action lors du clic sur le bouton de connexion
         boutonConnexion.setOnAction(event -> handleConnexion());
 
         // Permettre de valider avec la touche Entrée dans le champ pseudo
         pseudo.setOnAction(event -> handleConnexion());
     }
+
+    /**
+     * Algoritme qui permet de gérer la connexion du joueur, d'ajouter le nom du joueur,
+     * établir la connexion HTTP au serveur et mettre à jour la liste des lobby.
+     */
 
     @FXML
     public void handleConnexion() {
@@ -63,6 +74,10 @@ public class ConnexionController {
         }
     }
 
+    /**
+     * Fonction permettant de passer de la page de connexion à la page d'attente des lobby.
+     */
+
     private void switchToLobbyList() {
         try {
             // On utilise la méthode de navigation de votre MainApp
@@ -72,6 +87,12 @@ public class ConnexionController {
             showAlert("Erreur", "Impossible de charger la vue des salons.");
         }
     }
+
+    /**
+     * Algorithme permettant d'afficher une alerte en cas d'erreur de connexion.
+     * @param title
+     * @param content
+     */
 
     private void showAlert(String title, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR);

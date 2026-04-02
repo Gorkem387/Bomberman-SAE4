@@ -16,6 +16,7 @@ public class MinimEDTO {
         this.y = y;
     }
 
+    // Getter
     public int getId() {
         return id;
     }

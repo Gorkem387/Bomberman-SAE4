@@ -9,7 +9,7 @@ public class JoinLobbyRequest implements Message {
         this.lobbyId = lobbyId;
         this.playerName = playerName;
     }
-
+    // Getter
     @Override
     public MessageType getType() {
         return MessageType.JOIN_LOBBY_REQUEST;
