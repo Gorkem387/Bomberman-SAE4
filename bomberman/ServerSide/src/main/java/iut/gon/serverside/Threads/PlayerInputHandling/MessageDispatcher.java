@@ -25,6 +25,7 @@ public class MessageDispatcher {
         handlers.put(MessageType.LOBBY_DETAILS_REQUEST, new LobbyDetailsHandler());
         handlers.put(MessageType.START_GAME_REQUEST, new StartGameHandler());
         handlers.put(MessageType.PLACE_BOMB_REQUEST, new PlaceBombHandler()); // Ajout du handler de bombe
+        handlers.put(MessageType.LEAVE_LOBBY_REQUEST, new LeaveLobbyHandler());
     }
 
     /**

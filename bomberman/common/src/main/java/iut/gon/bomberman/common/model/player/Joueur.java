@@ -326,4 +326,15 @@ public class Joueur {
         this.pv--;
         this.lastDamageTime = System.currentTimeMillis();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Joueur)) return false;
+        return this.id == ((Joueur) o).id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
+    }
 }
