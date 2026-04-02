@@ -10,13 +10,14 @@ import java.util.List;
 import iut.gon.bomberman.common.model.Mess.Message;
 
 public class JoueurMisAJourDTO implements IDTO, Message {
+    private static final long serialVersionUID = 1L;
+    public List<MinimDTO> positionsAll;
 
     public static final int TYPE = 2;
 
     public int id;
     public int x;
     public int y;
-    public List<MinimDTO> positionsAll = null;
 
     public JoueurMisAJourDTO() {
         this.positionsAll = new ArrayList<>();

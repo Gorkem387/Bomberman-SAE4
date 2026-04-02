@@ -22,7 +22,10 @@ public class JoinLobbyHandler implements MessageHandler<JoinLobbyRequest> {
             client.setLobbyId(lobby.getId());
 
             // Mettre à jour le nom du joueur côté serveur
-            if (client.getJoueur() != null) {
+            if (client.getJoueur() == null) {
+                Joueur j = new Joueur(Math.abs(client.hashCode()), message.getPlayerName());
+                client.setJoueur(j);
+            } else {
                 client.getJoueur().setNom(message.getPlayerName());
                 // On lui donne un ID unique temporaire (positif)
                 client.getJoueur().setId(Math.abs(client.hashCode()));

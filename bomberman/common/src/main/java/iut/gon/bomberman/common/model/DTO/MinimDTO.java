@@ -8,6 +8,7 @@ import java.io.IOException;
 
 public class MinimDTO implements IDTO {
 
+    private static final long serialVersionUID = 1L;
     private int id;
     private int x;
     private int y;
@@ -15,8 +16,9 @@ public class MinimDTO implements IDTO {
     private int nb_bombes;
     private int range;
     private float speed;
+    private int directionOrdinal;
 
-    public MinimDTO(int id, int x, int y, int pv, int nb_bombes, int range, float speed) {
+    public MinimDTO(int id, int x, int y, int pv, int nb_bombes, int range, float speed, int dir) {
         this.id = id;
         this.x = x;
         this.y = y;
@@ -24,10 +26,11 @@ public class MinimDTO implements IDTO {
         this.nb_bombes = nb_bombes;
         this.range = range;
         this.speed = speed;
+        this.directionOrdinal = dir;
     }
 
     public MinimDTO(int id, int x, int y) {
-        this(id, x, y, 3, 1, 2, 1.0f); // legacy fallback
+        this(id, x, y, 3, 1, 2, 1.0f,0); // legacy fallback
     }
 
     public int getId() {
@@ -46,6 +49,7 @@ public class MinimDTO implements IDTO {
     public int getNb_bombes() { return nb_bombes; }
     public int getRange() { return range; }
     public float getSpeed() { return speed; }
+    public int getDirectionOrdinal() { return directionOrdinal; }
 
     public void setId(int id) {
         this.id = id;
@@ -67,6 +71,7 @@ public class MinimDTO implements IDTO {
         out.writeInt(nb_bombes);
         out.writeInt(range);
         out.writeFloat(speed);
+        out.writeInt(directionOrdinal);
     }
 
     public static MinimDTO read(DataInputStream in) throws IOException {
@@ -76,6 +81,7 @@ public class MinimDTO implements IDTO {
             dto.nb_bombes = in.readInt();
             dto.range = in.readInt();
             dto.speed = in.readFloat();
+            dto.directionOrdinal = in.readInt();
         } catch(Exception e) {
             // legacy catch
         }
