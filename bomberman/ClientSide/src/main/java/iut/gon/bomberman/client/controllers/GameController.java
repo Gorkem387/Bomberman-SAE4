@@ -362,10 +362,10 @@ public class GameController {
         renderer.drawBombs(gc, bombManager.getBombs());
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
 
-        renderer.drawPlayer(gc, joueur, isVictory);
+        renderer.drawPlayer(gc, joueur, isVictory, true);
 
         for (Ai bot : listBots){
-            renderer.drawPlayer(gc, bot.getPlayer());
+            renderer.drawPlayer(gc, bot.getPlayer(), false, false);
         }
 
         drawStatsBar(gc, joueur.getNb_bombes(), joueur.getPv(), joueur.getExplosionRange(), joueur.getSpeed_multiplier());

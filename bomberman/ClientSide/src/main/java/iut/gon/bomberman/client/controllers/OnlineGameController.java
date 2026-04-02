@@ -147,29 +147,33 @@ public class OnlineGameController {
                         if (pos.getId() == localPlayer.getId()) {
                             // Mise à jour du joueur local
                             if (localPlayer.isAlive()) {
-                                double prevX = localPlayer.getX();
-                                double prevY = localPlayer.getY();
                                 localPlayer.setX(pos.getX() / 100.0);
                                 localPlayer.setY(pos.getY() / 100.0);
                                 localPlayer.setPv(pos.getPv());
                                 localPlayer.setNb_bombes(pos.getNb_bombes());
                                 localPlayer.setExplosionRange(pos.getRange());
                                 localPlayer.setSpeed_multiplier(pos.getSpeed());
-                                localPlayer.setDirection(inferDirection(localPlayer.getX() - prevX, localPlayer.getY() - prevY));
+                                
+                                if (pos.getDirectionOrdinal() >= 0 && pos.getDirectionOrdinal() < Direction.values().length) {
+                                    localPlayer.setDirection(Direction.values()[pos.getDirectionOrdinal()]);
+                                }
+
                                 if (localPlayer.getPv() <= 0) localPlayer.setAlive(false);
                             }
                         } else {
                             Joueur remote = remotePlayers.computeIfAbsent(pos.getId(), id -> new Joueur(id, "Player_" + id));
                             if (remote.isAlive()) {
-                                double prevX = remote.getX();
-                                double prevY = remote.getY();
                                 remote.setX(pos.getX() / 100.0);
                                 remote.setY(pos.getY() / 100.0);
                                 remote.setPv(pos.getPv());
                                 remote.setNb_bombes(pos.getNb_bombes());
                                 remote.setExplosionRange(pos.getRange());
                                 remote.setSpeed_multiplier(pos.getSpeed());
-                                remote.setDirection(inferDirection(remote.getX() - prevX, remote.getY() - prevY));
+
+                                if (pos.getDirectionOrdinal() >= 0 && pos.getDirectionOrdinal() < Direction.values().length) {
+                                    remote.setDirection(Direction.values()[pos.getDirectionOrdinal()]);
+                                }
+
                                 if (remote.getPv() <= 0) remote.setAlive(false);
                             }
                         }
@@ -341,15 +345,15 @@ public class OnlineGameController {
         renderer.drawExplosions(gc, bombManager.getExplosionCells());
 
         // Dessine Le joueur local seulement si l'ID est prêt
-        if (localPlayer.getId() != -1 && localPlayer.isAlive()) {
-            renderer.drawPlayer(gc, localPlayer, isVictory);
+        if (localPlayer.getId() != -1) {
+            renderer.drawPlayer(gc, localPlayer, isVictory, true);
         }
 
         // Dessine les autres joueurs
         for (Joueur remote : remotePlayers.values()) {
             // Dessine pas le remote s'il a le même ID que nous
-            if (remote.getId() != localPlayer.getId() && remote.isAlive()) {
-                renderer.drawPlayer(gc, remote, false);
+            if (remote.getId() != localPlayer.getId()) {
+                renderer.drawPlayer(gc, remote, false, false);
             }
         }
 
@@ -492,12 +496,5 @@ public class OnlineGameController {
                 remote.setAlive(true);
             }
         }
-    }
-
-    private Direction inferDirection(double dx, double dy) {
-        double threshold = 0.0001;
-        if (Math.abs(dx) < threshold && Math.abs(dy) < threshold) return Direction.IDLE;
-        if (Math.abs(dx) >= Math.abs(dy)) return dx > 0 ? Direction.RIGHT : Direction.LEFT;
-        return dy > 0 ? Direction.DOWN : Direction.UP;
     }
 }
