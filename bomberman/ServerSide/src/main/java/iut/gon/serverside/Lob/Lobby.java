@@ -101,8 +101,26 @@ public class Lobby {
     }
 
     public void broadcastUpdate() {
-        // Envoyer LobbyDetailsResponse à tout le monde
-        // (Implémenté via LobbyDetailsHandler)
+        List<LobbyDetailsResponse.PlayerDTO> players = joueursInvites.stream()
+                .map(j -> new LobbyDetailsResponse.PlayerDTO(
+                        j.getId(),
+                        j.getNom(),
+                        j.getEtat() == EtatJoueur.PRET,
+                        j.equals(proprietaire)))
+                .collect(Collectors.toList());
+
+        // Construire le DTO du propriétaire séparément
+        LobbyDetailsResponse.PlayerDTO ownerDTO = proprietaire != null
+                ? new LobbyDetailsResponse.PlayerDTO(
+                proprietaire.getId(),
+                proprietaire.getNom(),
+                proprietaire.getEtat() == EtatJoueur.PRET,
+                true)
+                : null;
+
+        LobbyDetailsResponse response = new LobbyDetailsResponse(
+                id, nomLobby, nbJMax, ownerDTO, players);
+        broadcast(response);
     }
 
     public void broadcast(Message message) {
@@ -231,6 +249,7 @@ public class Lobby {
 
     /**
      * Modifie l'état du joueur s'il est prêt à rejoindre la partie
+     *
      * @param client
      * @param isReady
      */
@@ -262,7 +281,7 @@ public class Lobby {
     }
 
     public void setThread(Thread_Jeu threadJeu) {
-        this.thread = threadJeu;
-    }
+    this.thread = threadJeu;
+}
 
 }

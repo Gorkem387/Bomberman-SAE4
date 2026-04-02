@@ -156,6 +156,9 @@ public class LobbyController implements Initializable {
     public void handleLeaveLobby() {
         try {
             cleanup();
+            NetworkManager.getInstance().send(
+                    new LeaveLobbyRequest(currentLobbyId)
+            );
             NetworkManager.getInstance().setCurrentLobbyId(-1);
             MainApp.setRoot("fxml/AttenteLobby");
         } catch (IOException ex) {
