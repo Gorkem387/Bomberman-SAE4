@@ -51,3 +51,7 @@ build/
 **/.project
 **/.classpath
 **/.settings
+
+# Logs
+bomberman/logs.txt
+*.txt
